@@ -1,0 +1,14 @@
+Initialized Project: 
+
+curtis@NetApp-MacBook-Pro operator-svm % operator-sdk init --domain netapp.com --repo github.com/NetApp-Learning-Services/gateway
+
+Created API and Controller:
+
+curtis@NetApp-MacBook-Pro operator-svm % operator-sdk create api --group gateway --version v1alpha1 --kind StorageVirtualMachine --resource --controller
+
+Updated storagevirtualmachine_types.go
+
+Execute to update zz_generated.deepcopy.go:  make generate 
+
+Execute to create the CRDs:  make manifests
+

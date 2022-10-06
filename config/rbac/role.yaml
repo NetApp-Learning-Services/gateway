@@ -1,0 +1,33 @@
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  creationTimestamp: null
+  name: manager-role
+rules:
+- apiGroups:
+  - gateway.netapp.com
+  resources:
+  - storagevirtualmachines
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - gateway.netapp.com
+  resources:
+  - storagevirtualmachines/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - gateway.netapp.com
+  resources:
+  - storagevirtualmachines/status
+  verbs:
+  - get
+  - patch
+  - update

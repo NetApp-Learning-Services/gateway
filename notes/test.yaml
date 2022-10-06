@@ -1,0 +1,114 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: ontap-cluster-admin
+  namespace: astragateway
+type: kubernetes.io/basic-auth
+stringData:
+  username: admin
+  password: Netapp1!
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: ontap-testVs-admin
+  namespace: astragateway
+type: kubernetes.io/basic-auth
+stringData:
+  username: vsadmin
+  password: Netapp1!
+---
+# POST "/api/svm/svms" '{"name":"testVs", "ip_interfaces": [{"name":"lif1", "ip":{"address":"10.10.10.7", "netmask": "255.255.255.0"}, 
+# "location":{"broadcast_domain":{"name":"bd1"}, "home_node":{"name":"node1"}}, "service_policy": "default-management"}]}'
+# Once created:
+# POST "/api/security/accounts" '{"owner":{"uuid":"f16f0935-5281-11e8-b94d-005056b46485"},"name":"vsadmin",
+# "applications":[{"application":"ssh","authentication_methods":["password"],"second_authentication_method":"none"},
+# {"application":"ontapi","authentication_methods":["password"],"second_authentication_method":"none"}],
+# "role":"vsadmin","password":"Netapp1!"}'
+apiVersion: astragateway.netapp.io/v1alpha1
+kind: svm
+metadata:
+  name: cluster-svm
+  namespace: astragateway
+spec:
+  svmName: testVs
+  clusterManagement: 192.168.0.101
+  clusterCredentials:
+    name: ontap-cluster-admin
+    namespace:  astragateway
+  management:
+    name: lif1
+    ip: 101.10.10.7
+    netmask: 255.255.255.0
+    broadcastDomain: bd1
+    homeNode: node1
+  vsadminCredentials:
+    name: ontap-testVs-admin
+    namespace:  astragateway 
+  uuid: "f16f0935-5281-11e8-b94d-005056b46485"   # this should not be in the CR (ignored if provided by user)
+---
+# PATCH "/api/svm/svms/f16f0935-5281-11e8-b94d-005056b46485" '{"aggregates":{"name":["aggr1","aggr2","aggr3"]}}'
+apiVersion: astragateway.netapp.io/v1
+kind: svmAggregate
+metadata:
+  name: cluster-svm-aggr
+  namespace: astragateway
+spec:
+  svmName: testVs # looks up UUID from SVM name
+  aggregates:
+  - name: aggr1
+  - name: aggr2
+  - name: aggr3
+  credentials:
+    name: ontap-cluster-admin #or ontap-testVs-vsadmin
+---
+# PATCH "/api/svm/svms/f16f0935-5281-11e8-b94d-005056b46485" '{"nfs":{"allowed":"true", "enabled":true, "protocol.v3_enabled":true, 
+# "protocol.v4_enabled":true, "protocol.v41_enabled":true}}'
+apiVersion: astragateway.netapp.io/v1alpha1
+kind: svmNFS
+metadata:
+  name: cluster-svm-nfs
+  namespace: astragateway
+spec:
+  svmName: testVs # looks up UUID from SVM name
+  allowed: true
+  enabled: true
+  v3protocol:
+    enabled: true
+  v4protocol:
+    enabled: true
+  v41protocol:
+    enabled: true
+  exportPolicy:
+  - name: myrules
+    rules:
+    - protocol: nfs
+      match: 0.0.0.0/0
+      ro_rule: any
+      rw_rule: any
+      superuser: true
+      index: 0
+  credentials:
+    name: ontap-cluster-admin #or ontap-testVs-vsadmin
+---
+# PATCH "/api/protocols/nfs/export-policies" '{"name":"myrules","svm":{"name":"testVs", "uuid":"f16f0935-5281-11e8-b94d-005056b46485"}, "rules":
+# ["rw_rule":["any"],"ro_rule":["any"],"superuser":["any"],"clients":[{"match":"0.0.0.0/0"}]]}'
+apiVersion: astragateway.netapp.io/v1alpha1
+kind: svmNFSExportPolicies
+metadata:
+  name: cluster-svm-nfs
+  namespace: astragateway
+spec:
+  svmName: testVs 
+  # svmUuid: "f16f0935-5281-11e8-b94d-005056b46485"
+  exportPolicy:
+    name: myrules
+    rules:
+    - protocol: nfs
+      match: 0.0.0.0/0
+      ro_rule: any
+      rw_rule: any
+      superuser: any
+  credentials:
+    name: ontap-cluster-admin #or ontap-testVs-vsadmin
+

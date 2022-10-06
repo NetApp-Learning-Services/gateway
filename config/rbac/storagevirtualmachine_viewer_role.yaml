@@ -1,0 +1,20 @@
+# permissions for end users to view storagevirtualmachines.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: storagevirtualmachine-viewer-role
+rules:
+- apiGroups:
+  - gateway.netapp.com
+  resources:
+  - storagevirtualmachines
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - gateway.netapp.com
+  resources:
+  - storagevirtualmachines/status
+  verbs:
+  - get

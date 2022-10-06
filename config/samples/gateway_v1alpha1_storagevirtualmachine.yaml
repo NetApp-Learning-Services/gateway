@@ -1,0 +1,19 @@
+apiVersion: gateway.netapp.com/v1alpha1
+kind: StorageVirtualMachine
+metadata:
+  name: storagevirtualmachine-sample
+  namespace: astragateway
+spec:
+  svmName: testVs
+  management:
+    name: lif1
+    ip: 101.10.10.7
+    netmask: 255.255.255.0
+    broadcastDomain: bd1
+    homeNode: node1
+  vsadminCredentials:
+    name: ontap-testVs-admin
+    namespace:  astragateway 
+  clusterCredentials:
+    name: ontap-cluster-admin
+    namespace:  astragateway
