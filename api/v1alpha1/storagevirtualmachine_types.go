@@ -32,10 +32,10 @@ type StorageVirtualMachineSpec struct {
 	/// +kubebuilder:validation:Format:=hostname
 	SvmName string `json:"svmName"`
 
-	// Provides required Cluster management LIF
+	// Provides required Cluster management LIF URL
 	// +kubebuilder:validation:Required
-	// +kubebuilder:validation:Pattern:=ip
-	ClusterManagementLIF string `json:"clusterManagement"`
+	// +kubebuilder:validation:Pattern="(http|ftp|https)://([a-zA-Z0-9~!@#$%^&*()_=+/?.:;',-]*)?"
+	ClusterManagementLIF string `json:"clusterUrl"`
 
 	// Stores SVM's uuid after it is created
 	SvmUuid string `json:"uuid,omitempty"`

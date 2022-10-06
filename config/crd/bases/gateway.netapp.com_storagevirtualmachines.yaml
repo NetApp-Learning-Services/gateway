@@ -51,9 +51,9 @@ spec:
                 required:
                 - name
                 type: object
-              clusterManagement:
-                description: Provides required Cluster management LIF
-                pattern: ip
+              clusterUrl:
+                description: Provides required Cluster management LIF URL
+                pattern: (http|ftp|https)://([a-zA-Z0-9~!@#$%^&*()_=+/?.:;',-]*)?
                 type: string
               management:
                 description: Provides optional SVM managment LIF
@@ -107,7 +107,7 @@ spec:
                 type: object
             required:
             - clusterCredentials
-            - clusterManagement
+            - clusterUrl
             - svmName
             type: object
           status:

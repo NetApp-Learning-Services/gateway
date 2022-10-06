@@ -32,7 +32,7 @@ metadata:
   namespace: astragateway
 spec:
   svmName: testVs
-  clusterManagement: 192.168.0.101
+  clusterUrl: https://192.168.0.101
   clusterCredentials:
     name: ontap-cluster-admin
     namespace:  astragateway
