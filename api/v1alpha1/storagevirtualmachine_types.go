@@ -35,7 +35,7 @@ type StorageVirtualMachineSpec struct {
 	// Provides required Cluster management LIF URL
 	// +kubebuilder:validation:Required
 	// +kubebuilder:validation:Pattern="(http|ftp|https)://([a-zA-Z0-9~!@#$%^&*()_=+/?.:;',-]*)?"
-	ClusterManagementLIF string `json:"clusterUrl"`
+	ClusterManagementUrl string `json:"clusterUrl"`
 
 	// Stores SVM's uuid after it is created
 	SvmUuid string `json:"uuid,omitempty"`
@@ -56,15 +56,21 @@ type StorageVirtualMachineSpec struct {
 // StorageVirtualMachineStatus defines the observed state of StorageVirtualMachine
 type StorageVirtualMachineStatus struct {
 
-	// LastUpdate records the last time an update was executed
-	LastUpdate metav1.Time `json:"lastUpdate,omitempty"`
+	// // LastUpdate records the last time an update was executed
+	// LastUpdate metav1.Time `json:"lastUpdate,omitempty"`
 
-	// State shows the reconcile run
-	// +kubebuilder:validation:Enum=Provisioning;Provisioned;Failed;Unknown;Deleting
-	OperationState OperationState `json:"state,omitempty"`
+	// // State shows the reconcile run
+	// // +kubebuilder:validation:Enum=Provisioning;Provisioned;Failed;Unknown;Deleting
+	// OperationState OperationState `json:"state,omitempty"`
 
-	// Message provides related status update
-	Message string `json:"message"`
+	// // Message provides related status update
+	// Message string `json:"message"`
+
+	// +patchMergeKey=type
+	// +patchStrategy=merge
+	// +listType=map
+	// +listMapKey=type
+	Conditions []metav1.Condition `json:"conditions"`
 }
 
 // +kubebuilder:object:root=true
@@ -90,4 +96,12 @@ type StorageVirtualMachineList struct {
 
 func init() {
 	SchemeBuilder.Register(&StorageVirtualMachine{}, &StorageVirtualMachineList{})
+}
+
+func (svm *StorageVirtualMachine) GetConditions() []metav1.Condition {
+	return svm.Status.Conditions
+}
+
+func (svm *StorageVirtualMachine) SetConditions(conditions []metav1.Condition) {
+	svm.Status.Conditions = conditions
 }

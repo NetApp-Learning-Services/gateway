@@ -4,10 +4,12 @@ package ontap
 
 import (
 	"bytes"
+	"context"
 	"crypto/tls"
 	"encoding/json"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"net/http/httputil"
@@ -166,3 +168,57 @@ func (c *Client) NewRequest(method string, apiPath string, parameters []string, 
 	return
 }
 
+func (c *Client) Do(req *http.Request, v interface{}) (resp *RestResponse, err error) {
+	ctx, cncl := context.WithTimeout(context.Background(), c.ResponseTimeout)
+	defer cncl()
+	resp, err = checkResp(c.client.Do(req.WithContext(ctx)))
+	if err != nil {
+		return
+	}
+	var b []byte
+	b, err = ioutil.ReadAll(resp.HttpResponse.Body)
+	if err != nil {
+		return
+	}
+	resp.HttpResponse.Body = ioutil.NopCloser(bytes.NewBuffer(b))
+	if c.options.Debug {
+		log.Printf("[DEBUG] response JSON:\n%v\n\n", string(b))
+	}
+	if v != nil {
+		defer resp.HttpResponse.Body.Close()
+		err = json.NewDecoder(resp.HttpResponse.Body).Decode(v)
+	}
+	return
+}
+
+func checkResp(resp *http.Response, err error) (*RestResponse, error) {
+	if err != nil {
+		return &RestResponse{HttpResponse: resp}, err
+	}
+	switch resp.StatusCode {
+	case 200, 201, 202, 204, 205, 206:
+		return &RestResponse{HttpResponse: resp}, err
+	default:
+		restResp, httpErr := newHTTPError(resp)
+		return restResp, httpErr
+	}
+}
+
+func newHTTPError(resp *http.Response) (restResp *RestResponse, err error) {
+	errResponse := ErrorResponse{}
+	if err = json.NewDecoder(resp.Body).Decode(&errResponse); err == nil {
+		defer resp.Body.Close()
+		if len(errResponse.Error.Target) > 0 {
+			err = fmt.Errorf("Error: HTTP code=%d, HTTP status=\"%s\", REST code=\"%s\", REST message=\"%s\", REST target=\"%s\"", resp.StatusCode, http.StatusText(resp.StatusCode), errResponse.Error.Code, errResponse.Error.Message, errResponse.Error.Target)
+		} else {
+			err = fmt.Errorf("Error: HTTP code=%d, HTTP status=\"%s\", REST code=\"%s\", REST message=\"%s\"", resp.StatusCode, http.StatusText(resp.StatusCode), errResponse.Error.Code, errResponse.Error.Message)
+		}
+	} else {
+		err = fmt.Errorf("Error: HTTP code=%d, HTTP status=\"%s\"", resp.StatusCode, http.StatusText(resp.StatusCode))
+	}
+	restResp = &RestResponse{
+		ErrorResponse: errResponse,
+		HttpResponse:  resp,
+	}
+	return
+}

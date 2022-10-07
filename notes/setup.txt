@@ -1,10 +1,10 @@
 Initialized Project: 
 
-curtis@NetApp-MacBook-Pro operator-svm % operator-sdk init --domain netapp.com --repo github.com/NetApp-Learning-Services/gateway
+curtis@NetApp-MacBook-Pro gateway % operator-sdk init --domain netapp.com --repo github.com/NetApp-Learning-Services/gateway
 
 Created API and Controller:
 
-curtis@NetApp-MacBook-Pro operator-svm % operator-sdk create api --group gateway --version v1alpha1 --kind StorageVirtualMachine --resource --controller
+curtis@NetApp-MacBook-Pro gateway % operator-sdk create api --group gateway --version v1alpha1 --kind StorageVirtualMachine --resource --controller
 
 Updated storagevirtualmachine_types.go
 
