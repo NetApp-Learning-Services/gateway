@@ -4,9 +4,8 @@ import (
 	"context"
 	"encoding/json"
 
-	"gateway/ontap"
-
 	gatewayv1alpha1 "github.com/NetApp-Learning-Services/gateway/api/v1alpha1"
+	"github.com/NetApp-Learning-Services/gateway/ontap"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/log"
