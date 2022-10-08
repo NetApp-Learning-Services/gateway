@@ -1,4 +1,4 @@
-module github.com/NetApp-Learning-Services/gateway
+module gateway
 
 go 1.18
 

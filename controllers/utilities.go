@@ -5,7 +5,8 @@ import (
 	"fmt"
 	"time"
 
-	gatewayv1alpha1 "github.com/NetApp-Learning-Services/gateway/api/v1alpha1"
+	gatewayv1alpha1 "gateway/api/v1alpha1"
+
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/log"

@@ -4,8 +4,9 @@ import (
 	"context"
 	"strings"
 
-	gatewayv1alpha1 "github.com/NetApp-Learning-Services/gateway/api/v1alpha1"
-	"github.com/NetApp-Learning-Services/gateway/ontap"
+	gatewayv1alpha1 "gateway/api/v1alpha1"
+	"gateway/ontap"
+
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"sigs.k8s.io/controller-runtime/pkg/log"

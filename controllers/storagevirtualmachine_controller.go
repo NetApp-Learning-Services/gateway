@@ -29,8 +29,8 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/log"
 
-	gatewayv1alpha1 "github.com/NetApp-Learning-Services/gateway/api/v1alpha1"
-	"github.com/NetApp-Learning-Services/gateway/ontap"
+	gatewayv1alpha1 "gateway/api/v1alpha1"
+	"gateway/ontap"
 )
 
 // StorageVirtualMachineReconciler reconciles a StorageVirtualMachine object

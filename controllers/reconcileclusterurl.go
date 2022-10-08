@@ -4,7 +4,8 @@ import (
 	"context"
 	"net/url"
 
-	gatewayv1alpha1 "github.com/NetApp-Learning-Services/gateway/api/v1alpha1"
+	gatewayv1alpha1 "gateway/api/v1alpha1"
+
 	"k8s.io/apimachinery/pkg/api/errors"
 	"sigs.k8s.io/controller-runtime/pkg/log"
 )

@@ -31,8 +31,8 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/healthz"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
-	gatewayv1alpha1 "github.com/NetApp-Learning-Services/gateway/api/v1alpha1"
-	"github.com/NetApp-Learning-Services/gateway/controllers"
+	gatewayv1alpha1 "gateway/api/v1alpha1"
+	"gateway/controllers"
 	//+kubebuilder:scaffold:imports
 )
 

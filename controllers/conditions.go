@@ -3,7 +3,7 @@ package controllers
 import (
 	"context"
 
-	gatewayv1alpha1 "github.com/NetApp-Learning-Services/gateway/api/v1alpha1"
+	gatewayv1alpha1 "gateway/api/v1alpha1"
 )
 
 const CONDITION_STATUS_TRUE = "True"

@@ -3,7 +3,7 @@ package controllers
 import (
 	"context"
 
-	gatewayv1alpha1 "github.com/NetApp-Learning-Services/gateway/api/v1alpha1"
+	gatewayv1alpha1 "gateway/api/v1alpha1"
 )
 
 func (r *StorageVirtualMachineReconciler) reconcileSvmUpdate(ctx context.Context, svmCR *gatewayv1alpha1.StorageVirtualMachine) {
