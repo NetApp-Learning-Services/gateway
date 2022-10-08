@@ -42,7 +42,7 @@ type StorageVirtualMachineSpec struct {
 
 	// Provides optional SVM managment LIF
 	// +kubebuilder:validation:Optional
-	ManagementLIF ManagementLIF `json:"management,omitempty"`
+	ManagementLIF *ManagementLIF `json:"management,omitempty"`
 
 	// Provides required ONTAP cluster administrator credentials
 	// +kubebuilder:validation:Required

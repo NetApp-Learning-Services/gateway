@@ -18,7 +18,6 @@ package controllers
 
 import (
 	"context"
-	"strings"
 	"time"
 
 	corev1 "k8s.io/api/core/v1"
@@ -56,7 +55,7 @@ type StorageVirtualMachineReconciler struct {
 func (r *StorageVirtualMachineReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 
 	// Create log from the context
-	log := log.FromContext(ctx)
+	log := log.FromContext(ctx).WithValues("Request.Namespace", req.Namespace, "Request.Name", req.Name)
 	log.Info("Reconcile started")
 
 	// TODO: Check out this: https://github.com/kubernetes-sigs/kubebuilder/issues/618
@@ -79,39 +78,60 @@ func (r *StorageVirtualMachineReconciler) Reconcile(ctx context.Context, req ctr
 		return ctrl.Result{}, err
 	}
 
-	// Look up secret
-	secret, err := r.reconcileSecret(ctx, svmCR)
+	// Get cluster management url
+	clusterUrl, err := r.reconcileClusterUrl(ctx, svmCR)
 	if err != nil {
-		return ctrl.Result{}, err
+		return ctrl.Result{}, nil // not a valid cluster Url - stop reconcile
 	}
 
-	log.Info("Secret username: " + string(secret.Data["username"]))
-	log.Info("Secret password: " + string(secret.Data["password"]))
+	log.Info("Using cluster management URL: " + clusterUrl.String())
 
-	// Setup ontap client
+	// Look up adminSecret
+	adminSecret, err := r.reconcileSecret(ctx, svmCR)
+	if err != nil {
+		return ctrl.Result{}, nil // not a valid secret - stop reconcile
+	}
+
+	log.Info("Secret username: " + string(adminSecret.Data["username"]))
+	log.Info("Secret password: " + string(adminSecret.Data["password"]))
+
+	//create ONTAP client
 	oc := ontap.NewClient(
-		strings.TrimSpace(svmCR.Spec.ClusterManagementUrl),
+		clusterUrl.String(),
 		&ontap.ClientOptions{
-			BasicAuthUser:     string(secret.Data["username"]),
-			BasicAuthPassword: string(secret.Data["password"]),
+			BasicAuthUser:     string(adminSecret.Data["username"]),
+			BasicAuthPassword: string(adminSecret.Data["password"]),
 			SSLVerify:         false,
 			Debug:             true,
 			Timeout:           60 * time.Second,
 		},
 	)
 
+	//define variable whether to create svm or update it - default to false
+	create := false
 
-	// TODO: Check to see if SVM exists by the uuid in CR
-	if strings.TrimSpace(svmCR.Spec.SvmUuid) != "" {
-		// SvmUuid has a value
-		// Check to see if SVM exists
-		
+	// Check to see if svmCR has uuid and then check if svm can be looked up on that uuid
+	svm, err := r.reconcileSvmCheck(ctx, svmCR, oc)
+	if err != nil && errors.IsNotFound(err) {
+		create = true
+	} else {
+		// some other error
+		return ctrl.Result{}, err // got another error - re-reconcile
 	}
 
-	// TODO: If SVM exists, then check to see if svmName needs to be updated
-	// TODO: If SVM exists, then check to see if managment LIF needs to be created or updated
-	// TODO: If SVM exists, then check to see if vsadmin needs to be created/updated
-	// TODO: If SVM !exists, then create SVM and update CR with new uuid
+	if create == false {
+		log.Info("SVM returned: ", "svm", svm)
+		// reconcile SVM update
+
+	} else {
+		// reconcile SVM creation
+		log.Info("Reconciling SVM creation")
+		_, err = r.reconcileSvmCreation(ctx, svmCR, oc)
+		if err != nil {
+			log.Error(err, "Error during reconciling SVM creation")
+			return ctrl.Result{}, err //got another error - re-reconcile
+		}
+	}
 
 	return ctrl.Result{}, nil
 }

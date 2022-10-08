@@ -19,8 +19,8 @@ import (
 )
 
 const (
-	libraryVersion = "1.0.0"
-	userAgent      = "go-ontap-rest/" + libraryVersion
+	libraryVersion = "1.0.0" //special key
+	userAgent      = "astra.gateway/" + libraryVersion  //special key
 )
 
 type Client struct {

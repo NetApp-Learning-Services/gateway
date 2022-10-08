@@ -101,7 +101,7 @@ type FcInterfaceSvm struct {
 	Resource
 	DataProtocol string `json:"data_protocol,omitempty"`
 	Location     struct {
-		port FcPortReference `json:"port,omitempty"`
+		Port FcPortReference `json:"port,omitempty"`
 	} `json:"location,omitempty"`
 }
 
@@ -194,4 +194,23 @@ func (c *Client) SvmGet(href string, parameters []string) (*Svm, *RestResponse, 
 		return nil, nil, err
 	}
 	return &r, res, nil
+}
+
+func (c *Client) SvmPost(json []byte, parameters []string) (svms Svm, res *RestResponse, err error) {
+	var req *http.Request
+	path := "/api/svm/svms"
+	reqParameters := parameters
+
+	r := SvmResponse{}
+	req, err = c.NewRequest("POST", path, reqParameters, json)
+	if err != nil {
+		return
+	}
+	res, err = c.Do(req, &r)
+	if err != nil {
+		return r.Svms[0], nil, err
+	}
+
+	return r.Svms[0], res, nil
+
 }
