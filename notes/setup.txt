@@ -37,3 +37,4 @@ setup kubectl config on kubwor2-1
 
 install the CRD on kubwor2-1:  kubectl create -f config/crd/bases/gateway.netapp.com_storagevirtualmachines.yaml
 
+to update source on kubwor2-1:  git pull origin (instead gateway directory)
