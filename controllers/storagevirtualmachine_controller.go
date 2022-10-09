@@ -41,6 +41,9 @@ type StorageVirtualMachineReconciler struct {
 //+kubebuilder:rbac:groups=gateway.netapp.com,resources=storagevirtualmachines/status,verbs=get;update;patch
 //+kubebuilder:rbac:groups=gateway.netapp.com,resources=storagevirtualmachines/finalizers,verbs=update
 
+// ADDED to support access to secrets
+// +kubebuilder:rbac:groups=core,resources=secrets,verbs=get;list;watch
+
 // Reconcile is part of the main kubernetes reconciliation loop which aims to
 // move the current state of the cluster closer to the desired state.
 

@@ -79,3 +79,5 @@ Also need imagePullSecret:
 kubectl create secret docker-registry reg-cred-secret --namespace gateway-system --docker-server="docker-registry:30001" --docker-username=admin --docker-password=Netapp1! --dry-run=client -o yaml
 kubectl create secret docker-registry reg-cred-secret --namespace gateway-system --docker-server="docker-registry:30001" --docker-username=admin --docker-password=Netapp1! 
 
+To create a test CR:
+kubectl -n gateway-system create -f notes/testCR.yaml
