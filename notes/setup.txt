@@ -43,7 +43,7 @@ To build in docker:  make docker-build IMG=docker-registry:30001/astra/gateway:v
 To list docker images:  docker images
 To delete docker image:  docker image rm [image_id]
 To login to private registry:  docker login -u admin -p Netapp1! https://docker-registry:30001
-To push to private registry:  docker push docker push docker-registry:30001/astra/gateway:v0.1
+To push to private registry:  docker push docker-registry:30001/astra/gateway:v0.1
 To view private registry: curl -ik --user admin:Netapp1! https://docker-registry:30001/v2/_catalog
 
 To build in go: go main.go
@@ -51,6 +51,14 @@ To build in go: go main.go
 To override existing files in git and pull again:
 git fetch --all
 git reset --hard origin/master
+
+To run local on a particular worker node:
+install operator-sdk
+git clone
+git pull origin
+build docker image
+push docker image to private registry
+within cloned directory, make deploy
 
 To deploy operator create the following:
 namespace/gateway-system 
