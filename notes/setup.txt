@@ -68,4 +68,6 @@ service/gateway-controller-manager-metrics-service
 deployment.apps/gateway-controller-manager  
 
 Also need imagePullSecret:
-kubectl create secret docker-registry reg-cred-secre --namespace gateway-system --docker-server="docker-registry:30001" --docker-username=admin --docker-password=Netapp1! --dry-run=client -o yaml
+kubectl create secret docker-registry reg-cred-secret --namespace gateway-system --docker-server="docker-registry:30001" --docker-username=admin --docker-password=Netapp1! --dry-run=client -o yaml
+kubectl create secret docker-registry reg-cred-secret --namespace gateway-system --docker-server="docker-registry:30001" --docker-username=admin --docker-password=Netapp1! 
+
