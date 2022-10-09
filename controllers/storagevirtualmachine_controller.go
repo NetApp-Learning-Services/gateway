@@ -20,8 +20,6 @@ import (
 	"context"
 	"time"
 
-	corev1 "k8s.io/api/core/v1"
-
 	"k8s.io/apimachinery/pkg/api/errors"
 
 	"k8s.io/apimachinery/pkg/runtime"
@@ -140,6 +138,6 @@ func (r *StorageVirtualMachineReconciler) Reconcile(ctx context.Context, req ctr
 func (r *StorageVirtualMachineReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&gatewayv1alpha1.StorageVirtualMachine{}).
-		Owns(&corev1.Secret{}).
+		// Owns(&corev1.Secret{}).
 		Complete(r)
 }
