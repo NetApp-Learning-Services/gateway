@@ -42,3 +42,7 @@ To update source on kubwor2-1:  git pull origin (instead gateway directory)
 To build in docker:  make docker-build docker-push IMG=docker-registry:30001/gateway:v0.1
 
 To build in go: go main.go
+
+To override existing files in git and pull again:
+git fetch --all
+git reset --hard origin/master
