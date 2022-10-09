@@ -66,3 +66,6 @@ clusterrolebinding.rbac.authorization.k8s.io/gateway-proxy-rolebinding
 configmap/gateway-manager-config  
 service/gateway-controller-manager-metrics-service  
 deployment.apps/gateway-controller-manager  
+
+Also need imagePullSecret:
+kubectl create secret docker-registry reg-cred-secre --namespace gateway-system --docker-server="docker-registry:30001" --docker-username=admin --docker-password=Netapp1! --dry-run=client -o yaml
