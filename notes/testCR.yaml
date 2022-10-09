@@ -28,8 +28,8 @@ spec:
   clusterUrl: https://192.168.0.102
   management:
     name: lif1
-    ip: 192.168.0.30
-    netmask: 255.255.255.0
+    ip: "192.168.0.30"
+    netmask: "255.255.255.0"
     broadcastDomain: Default
     homeNode: Cluster2-01
   vsadminCredentials:
