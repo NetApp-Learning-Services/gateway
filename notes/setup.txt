@@ -51,3 +51,18 @@ To build in go: go main.go
 To override existing files in git and pull again:
 git fetch --all
 git reset --hard origin/master
+
+To deploy operator create the following:
+namespace/gateway-system 
+customresourcedefinition.apiextensions.k8s.io/storagevirtualmachines.gateway.netapp.com 
+serviceaccount/gateway-controller-manager  
+role.rbac.authorization.k8s.io/gateway-leader-election-role  
+clusterrole.rbac.authorization.k8s.io/gateway-manager-role  
+clusterrole.rbac.authorization.k8s.io/gateway-metrics-reader  
+clusterrole.rbac.authorization.k8s.io/gateway-proxy-role  
+rolebinding.rbac.authorization.k8s.io/gateway-leader-election-rolebinding  
+clusterrolebinding.rbac.authorization.k8s.io/gateway-manager-rolebinding  
+clusterrolebinding.rbac.authorization.k8s.io/gateway-proxy-rolebinding  
+configmap/gateway-manager-config  
+service/gateway-controller-manager-metrics-service  
+deployment.apps/gateway-controller-manager  
