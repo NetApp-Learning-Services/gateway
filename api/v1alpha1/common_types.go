@@ -37,7 +37,7 @@ type ManagementLIF struct {
 	// Provides Management LIF broadcast domain
 	// +kubebuilder:validation:Required
 	// +kubebuilder:validation:Format:=string
-	BroacastDomain string `json:"broacastDomain"`
+	BroacastDomain string `json:"broadcastDomain"`
 
 	// Provides Management LIF home node
 	// +kubebuilder:validation:Required

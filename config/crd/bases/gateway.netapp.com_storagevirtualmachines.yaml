@@ -58,7 +58,7 @@ spec:
               management:
                 description: Provides optional SVM managment LIF
                 properties:
-                  broacastDomain:
+                  broadcastDomain:
                     description: Provides Management LIF broadcast domain
                     format: string
                     type: string
@@ -78,7 +78,7 @@ spec:
                     description: Provides Management LIF netmask
                     type: string
                 required:
-                - broacastDomain
+                - broadcastDomain
                 - homeNode
                 - ip
                 - name

@@ -11,7 +11,7 @@ stringData:
 apiVersion: v1
 kind: Secret
 metadata:
-  name: ontap-testVs-admin
+  name: ontap-test-vsadmin
   namespace: gateway-system
 type: kubernetes.io/basic-auth
 stringData:
@@ -33,7 +33,7 @@ spec:
     broadcastDomain: Default
     homeNode: Cluster2-01
   vsadminCredentials:
-    name: ontap-testVs-admin
+    name: ontap-test-vsadmin
     namespace:   gateway-system 
   clusterCredentials:
     name: ontap-cluster-admin
