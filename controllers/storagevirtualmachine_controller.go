@@ -121,7 +121,7 @@ func (r *StorageVirtualMachineReconciler) Reconcile(ctx context.Context, req ctr
 	}
 
 	if create == false {
-		log.Info("SVM returned: ", "svm", svm)
+		log.Info("create == false: ", svm)
 		// reconcile SVM update
 
 	} else {
