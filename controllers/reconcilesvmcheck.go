@@ -19,6 +19,7 @@ func (r *StorageVirtualMachineReconciler) reconcileSvmCheck(ctx context.Context,
 
 	// Check to see if SVM exists by the uuid in CR
 	uuid := strings.TrimSpace(svmCR.Spec.SvmUuid)
+	log.Info("svm uuid retrieved from CR: " + uuid)
 	if uuid != "" {
 		// SvmUuid has a value
 		// Check to see if SVM exists
@@ -29,7 +30,7 @@ func (r *StorageVirtualMachineReconciler) reconcileSvmCheck(ctx context.Context,
 			log.Error(err, "Invalid SVM UUID in custom resource")
 			return nil, err
 		}
-		log.Info("svm value: ", svm)
+		log.Info("reconcileSvmCheck", "svm retrieved: ", svm)
 		return svm, err
 	}
 

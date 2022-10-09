@@ -45,6 +45,7 @@ To delete docker image:  docker image rm [image_id]
 To login to private registry:  docker login -u admin -p Netapp1! https://docker-registry:30001
 To push to private registry:  docker push docker-registry:30001/astra/gateway:v0.1
 To view private registry: curl -ik --user admin:Netapp1! https://docker-registry:30001/v2/_catalog
+A quick way to build and push:  make docker-build docker-push IMG=docker-registry:30001/astra/gateway:v0.1
 
 To build in go: go main.go
 

@@ -38,7 +38,7 @@ func (r *StorageVirtualMachineReconciler) reconcileSvmCreation(ctx context.Conte
 		locpayload["service_policy"] = "default-management" // special word
 		payload["location"] = locpayload
 	}
-	log.Info("SVM creation payload", payload)
+	log.Info("SVM creation payload", "payload:", payload)
 
 	jsonPayload, err := json.Marshal(payload)
 	if err != nil {
