@@ -82,3 +82,6 @@ kubectl create secret docker-registry reg-cred-secret --namespace gateway-system
 
 To create a test CR:
 kubectl -n gateway-system create -f notes/testCR.yaml
+
+Wrote bash script test.sh to reset and test the application:
+bash test.sh
