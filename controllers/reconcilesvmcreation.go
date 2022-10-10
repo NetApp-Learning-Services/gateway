@@ -45,14 +45,14 @@ func (r *StorageVirtualMachineReconciler) reconcileSvmCreation(ctx context.Conte
 		//error creating the json body
 		return ctrl.Result{}, err
 	}
-	var parameters []string
-	log.Info("SVM creation attempt")
-	svm, _, _ := oc.SvmPost(jsonPayload, parameters)
 
-	log.Info("SVM new uuid: " + svm.Uuid)
+	log.Info("SVM creation attempt")
+	res, _ := oc.CreateStorageVM(jsonPayload)
+
+	log.Info("SVM new uuid: " + res.Uuid)
 	//patch the new uuid on the custom resource
 	patch := client.MergeFrom(svmCR.DeepCopy())
-	svmCR.Spec.SvmUuid = svm.Uuid
+	svmCR.Spec.SvmUuid = res.Uuid
 	err = r.Patch(ctx, svmCR, patch)
 	if err != nil {
 		return ctrl.Result{}, err

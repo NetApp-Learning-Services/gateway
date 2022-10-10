@@ -13,27 +13,26 @@ import (
 )
 
 func (r *StorageVirtualMachineReconciler) reconcileSvmCheck(ctx context.Context,
-	svmCR *gatewayv1alpha1.StorageVirtualMachine, oc *ontap.Client) (*ontap.Svm, error) {
+	svmCR *gatewayv1alpha1.StorageVirtualMachine, oc *ontap.Client) (ontap.Svm, error) {
 	log := log.FromContext(ctx)
 	log.Info("reconcileSvmCheck started")
 
 	// Check to see if SVM exists by the uuid in CR
 	uuid := strings.TrimSpace(svmCR.Spec.SvmUuid)
 	log.Info("svm uuid retrieved from CR: " + uuid)
+	var svm ontap.Svm
 	if uuid != "" {
-		// SvmUuid has a value
+		// SvmUuid has a value in the custom resource
 		// Check to see if SVM exists
-		path := "/api/svm/svms/" + uuid
-		parameters := []string{""} //[]string{"fields=ip_interfaces"}
-		svm, _, err := oc.SvmGet(path, parameters)
+		svm, err := oc.GetStorageVMByUUID(uuid)
 		if err != nil {
 			log.Error(err, "Invalid SVM UUID in custom resource")
-			return nil, err
+			return svm, err
 		}
 		log.Info("reconcileSvmCheck", "svm retrieved: ", svm)
 		return svm, err
 	}
 
-	return nil, errors.NewNotFound(schema.GroupResource{Group: "gatewayv1alpha1", Resource: "StorageVirtualMachine"}, "svm")
+	return svm, errors.NewNotFound(schema.GroupResource{Group: "gatewayv1alpha1", Resource: "StorageVirtualMachine"}, "svm")
 
 }

@@ -18,7 +18,6 @@ package controllers
 
 import (
 	"context"
-	"time"
 
 	"k8s.io/apimachinery/pkg/api/errors"
 
@@ -97,16 +96,17 @@ func (r *StorageVirtualMachineReconciler) Reconcile(ctx context.Context, req ctr
 	log.Info("Secret password: " + string(adminSecret.Data["password"]))
 
 	//create ONTAP client
-	oc := ontap.NewClient(
+	oc, err := ontap.NewClient(
+		string(adminSecret.Data["username"]),
+		string(adminSecret.Data["password"]),
 		clusterUrl.String(),
-		&ontap.ClientOptions{
-			BasicAuthUser:     string(adminSecret.Data["username"]),
-			BasicAuthPassword: string(adminSecret.Data["password"]),
-			SSLVerify:         false,
-			Debug:             true,
-			Timeout:           60 * time.Second,
-		},
-	)
+		true,
+		false)
+
+	if err != nil {
+		log.Error(err, "Error creating ontap client")
+		return ctrl.Result{}, err //got another error - re-reconcile
+	}
 
 	//define variable whether to create svm or update it - default to false
 	create := false

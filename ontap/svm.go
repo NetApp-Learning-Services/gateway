@@ -1,9 +1,10 @@
-// From https://github.com/igor-feoktistov/go-ontap-rest/blob/5dabffb0f239c17ba55292e5aea5fea9014dfd1f/ontap/svm.go
-
 package ontap
 
 import (
-	"net/http"
+	"encoding/json"
+	"fmt"
+	"strings"
+	"time"
 )
 
 type AdDomain struct {
@@ -110,6 +111,11 @@ type NetworkRouteForSvmSvm struct {
 	Destination IpInfo `json:"destination,omitempty"`
 }
 
+type SnapMirror struct {
+	IsProtected           bool `json:"is_protected"`
+	ProtectedVolumesCount int  `json:"protected_volumes_count"`
+}
+
 type S3Service struct {
 	Resource
 	Certificate    Resource `json:"certificate,omitempty"`
@@ -120,97 +126,162 @@ type S3Service struct {
 	Enabled        bool     `json:"enabled"`
 }
 
-type Svm struct {
-	Resource
-	Aggregates          []Resource              `json:"aggregates,omitempty"`
-	AggregatesDelegated bool                    `json:"aggregates_delegated"`
-	Certificate         Resource                `json:"certificate,omitempty"`
-	Cifs                Cifs                    `json:"cifs,omitempty"`
-	Comment             string                  `json:"comment,omitempty"`
-	Dns                 Dns                     `json:"dns,omitempty"`
-	Fcp                 Fcp                     `json:"fcp,omitempty"`
-	FcInterfaces        []FcInterfaceSvm        `json:"fc_interfaces,omitempty"`
-	IpInterfaces        []IpInterfaceSvm        `json:"ip_interfaces,omitempty"`
-	IpSpace             Resource                `json:"ipspace,omitempty"`
-	Iscsi               Iscsi                   `json:"iscsi,omitempty"`
-	Language            string                  `json:"language,omitempty"`
-	Ldap                Ldap                    `json:"ldap,omitempty"`
-	Nfs                 Nfs                     `json:"nfs,omitempty"`
-	Nis                 Nis                     `json:"nis,omitempty"`
-	NsSwitch            NsSwitch                `json:"nsswitch,omitempty"`
-	Nvme                Nvme                    `json:"nvme,omitempty"`
-	Routes              []NetworkRouteForSvmSvm `json:"routes,omitempty"`
-	S3                  S3Service               `json:"s3,omitempty"`
-	SnapMirror          struct {
-		IsProtected           bool `json:"is_protected"`
-		ProtectedVolumesCount int  `json:"protected_volumes_count"`
-	} `json:"snapmirror"`
-	SnapshotPolicy         Resource `json:"snapshot_policy,omitempty"`
-	State                  string   `json:"state,omitempty"`
-	Subtype                string   `json:"subtype,omitempty"`
-	VolumeEfficiencyPolicy Resource `json:"volume_efficiency_policy,omitempty"`
-}
+// type SvmResponse struct {
+// 	Records []struct {
+// 		Name  string `json:"name"`
+// 		UUID  string `json:"uuid"`
+// 		Links struct {
+// 			Self struct {
+// 				Href string `json:"href"`
+// 			} `json:"self"`
+// 		} `json:"_links"`
+// 	} `json:"records"`
+// 	NumRecords int `json:"num_records"`
+// 	Links      struct {
+// 		Self struct {
+// 			Href string `json:"href"`
+// 		} `json:"self"`
+// 		Next struct {
+// 			Href string `json:"href,omitempty"`
+// 		} `json:"next,omitempty"`
+// 	} `json:"_links"`
+// }
 
 type SvmResponse struct {
 	BaseResponse
-	Svms []Svm `json:"records,omitempty"`
+	Records []Svm `json:"records,omitempty"`
 }
 
-func (c *Client) SvmGetIter(parameters []string) (svms []Svm, res *RestResponse, err error) {
-	var req *http.Request
-	path := "/api/svm/svms"
-	reqParameters := parameters
-	for {
-		r := SvmResponse{}
-		req, err = c.NewRequest("GET", path, reqParameters, nil)
-		if err != nil {
-			return
-		}
-		res, err = c.Do(req, &r)
-		if err != nil {
-			return
-		}
-		for _, svm := range r.Svms {
-			svms = append(svms, svm)
-		}
-		if r.IsPaginate() {
-			path = r.GetNextRef()
-			reqParameters = []string{}
-		} else {
-			break
-		}
-	}
-	return
+type Svm struct {
+	Resource
+	UUID                   string     `json:"uuid"`
+	Name                   string     `json:"name"`
+	Subtype                string     `json:"subtype"`
+	Language               string     `json:"language"`
+	Aggregates             []Resource `json:"aggregates"`
+	State                  string     `json:"state"`
+	Comment                string     `json:"comment"`
+	Ipspace                Resource   `json:"ipspace"`
+	Dns                    Dns        `json:"dns,omitempty"`
+	Nsswitch               NsSwitch   `json:"nsswitch"`
+	Nis                    Nis        `json:"nis"`
+	Ldap                   Ldap       `json:"ldap"`
+	Nfs                    Nfs        `json:"nfs"`
+	Cifs                   Cifs       `json:"cifs"`
+	Iscsi                  Iscsi      `json:"iscsi"`
+	Fcp                    Fcp        `json:"fcp"`
+	Nvme                   Nvme       `json:"nvme"`
+	SnapMirror             SnapMirror `json:"snapmirror"`
+	SnapshotPolicy         Resource   `json:"snapshot_policy,omitempty"`
+	VolumeEfficiencyPolicy Resource   `json:"volume_efficiency_policy,omitempty"`
 }
 
-func (c *Client) SvmGet(href string, parameters []string) (*Svm, *RestResponse, error) {
-	r := Svm{}
-	req, err := c.NewRequest("GET", href, parameters, nil)
+// Return svm uuid from name
+func (c *Client) GetStorageVmUUIDByName(name string) (uuid string, err error) {
+	uri := "/api/svm/svms?name=" + name
+	data, err := c.clientGet(uri)
 	if err != nil {
-		return nil, nil, err
+		return "", err
 	}
-	res, err := c.Do(req, &r)
-	if err != nil {
-		return nil, nil, err
+
+	var result map[string]interface{}
+	json.Unmarshal(data, &result)
+
+	records := result["records"].([]interface{})
+	for _, v := range records {
+		rec := v.(map[string]interface{})
+		if rec["name"] == name {
+			return rec["uuid"].(string), nil
+		}
+
 	}
-	return &r, res, nil
+
+	//return "", fmt.Errorf("0 - Storage VM with name %s not found", name)
+	return "", &apiError{0, "0 - Storage VM with name " + name + "%s not found"}
 }
 
-func (c *Client) SvmPost(json []byte, parameters []string) (svms Svm, res *RestResponse, err error) {
-	var req *http.Request
-	path := "/api/svm/svms"
-	reqParameters := parameters
+// Return a SVM by UUID
+func (c *Client) GetStorageVMByUUID(uuid string) (svm Svm, err error) {
+	uri := "/api/svm/svms/" + uuid
 
-	r := SvmResponse{}
-	req, err = c.NewRequest("POST", path, reqParameters, json)
+	data, err := c.clientGet(uri)
 	if err != nil {
-		return
-	}
-	res, err = c.Do(req, &r)
-	if err != nil {
-		return r.Svms[0], nil, err
+		return svm, &apiError{1, err.Error()}
 	}
 
-	return r.Svms[0], res, nil
+	var resp Svm
+	err = json.Unmarshal(data, &resp)
+	if err != nil {
+		return svm, &apiError{2, err.Error()}
+	}
 
+	return svm, nil
+}
+
+// Create SVM
+func (c *Client) CreateStorageVM(jsonPayload []byte) (res Resource, err error) {
+	uri := "/api/svm/svms"
+	var result Resource
+	data, err := c.clientPost(uri, jsonPayload)
+	if err != nil {
+		//fmt.Println("Error: " + err.Error())
+		return result, &apiError{1, err.Error()}
+	}
+
+	json.Unmarshal(data, &result)
+
+	// job := result["job"].(map[string]interface{})
+	// link := job["_links"].(map[string]interface{})
+	// href := link["self"].(map[string]interface{})
+	// url := href["href"].(string)
+
+	// createJob, err := c.GetJob(url)
+
+	// for createJob.State == "running" {
+	// 	time.Sleep(time.Second)
+	// 	createJob, err = c.GetJob(url)
+	// }
+
+	// if createJob.State == "failure" {
+	// 	return &apiError{int64(createJob.Code), createJob.Message}
+	// 	//return fmt.Errorf("%d - %s", createJob.Code, createJob.Message)
+	// }
+
+	return result, nil
+}
+
+func (c *Client) DeleteStorageVM(uuid string) (err error) {
+	uri := "/api/svm/svms/" + uuid
+
+	data, err := c.clientDelete(uri)
+	if err != nil {
+		if strings.Contains(err.Error(), "Error-4") {
+			return &apiError{4, fmt.Sprintf("SVM with UUID \"%s\" not found", uuid)}
+		}
+		return &apiError{1, err.Error()}
+	}
+
+	var result map[string]interface{}
+	err = json.Unmarshal(data, &result)
+	if err != nil {
+		return &apiError{2, err.Error()}
+	}
+
+	job := result["job"].(map[string]interface{})
+	link := job["_links"].(map[string]interface{})
+	href := link["self"].(map[string]interface{})
+	url := href["href"].(string)
+
+	deleteJob, err := c.GetJob(url)
+
+	for deleteJob.State == "running" {
+		time.Sleep(time.Second)
+		deleteJob, err = c.GetJob(url)
+	}
+
+	if deleteJob.State == "failure" {
+		return &apiError{int64(deleteJob.Code), deleteJob.Message}
+	}
+
+	return nil
 }
