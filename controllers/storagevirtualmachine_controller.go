@@ -78,13 +78,13 @@ func (r *StorageVirtualMachineReconciler) Reconcile(ctx context.Context, req ctr
 		return ctrl.Result{}, err
 	}
 
-	// Get cluster management url
-	clusterUrl, err := r.reconcileClusterUrl(ctx, svmCR)
+	// Get cluster management host
+	clusterHost, err := r.reconcileClusterHost(ctx, svmCR)
 	if err != nil {
 		return ctrl.Result{}, nil // not a valid cluster Url - stop reconcile
 	}
 
-	log.Info("Using cluster management URL: " + clusterUrl.String())
+	log.Info("Using cluster management URL: " + clusterHost.String())
 
 	// Look up adminSecret
 	adminSecret, err := r.reconcileSecret(ctx, svmCR)
@@ -99,7 +99,7 @@ func (r *StorageVirtualMachineReconciler) Reconcile(ctx context.Context, req ctr
 	oc, err := ontap.NewClient(
 		string(adminSecret.Data["username"]),
 		string(adminSecret.Data["password"]),
-		clusterUrl.String(),
+		clusterHost.String(),
 		true,
 		false)
 
