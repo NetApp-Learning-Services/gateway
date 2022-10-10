@@ -12,12 +12,10 @@ import (
 	"time"
 )
 
-const (
-	libraryVersion = "0.1"                             //special key
-	userAgent      = "astra.gateway/" + libraryVersion //special key
-	defaultTimeout = 3                                 // special key
-	contentType    = "application/hal+json"            //special key
-)
+const libraryVersion = "0.1"                        //special key
+const userAgent = "astra.gateway/" + libraryVersion //special key
+const defaultTimeout = 3                            // special key
+const contentType = "application/hal+json"          //special key
 
 type Client struct {
 	UserName    string
@@ -50,9 +48,9 @@ func NewClient(user, password, host string, debug, ssl bool) (client *Client, er
 		Host:        host,
 		Debug:       debug,
 		TrustSSL:    ssl,
-		TimeOut:     client.TimeOut,
-		UserAgent:   client.UserAgent,
-		ContentType: client.ContentType,
+		TimeOut:     defaultTimeout,
+		UserAgent:   userAgent,
+		ContentType: contentType,
 	}, error
 }
 
