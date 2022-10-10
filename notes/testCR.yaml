@@ -25,7 +25,7 @@ metadata:
   namespace:  gateway-system
 spec:
   svmName: testVs
-  clusterUrl: 192.168.0.102
+  clusterHost: 192.168.0.102
   management:
     name: lif1
     ip: 192.168.0.30
