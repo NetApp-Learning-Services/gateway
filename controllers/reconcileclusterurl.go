@@ -15,7 +15,7 @@ func (r *StorageVirtualMachineReconciler) reconcileClusterUrl(ctx context.Contex
 	log := log.FromContext(ctx)
 
 	// Get cluster management url
-	u := svmCR.Spec.ClusterManagementUrl
+	u := svmCR.Spec.ClusterManagementHost
 	var clusterUrl *url.URL
 	if u == "" {
 		err := errors.NewBadRequest("No Cluster Management LIF provided")
