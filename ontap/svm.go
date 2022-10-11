@@ -244,10 +244,9 @@ func (c *Client) CreateStorageVM(jsonPayload []byte) (uuid string, err error) {
 	}
 
 	if createJob.State == "success" {
-		m := createJob.Message
-		//pair := strings.Split(createJob.Message, " ")
-		//m := pair[1]
-		//r = strings.Trim(m, uri)
+		pair := strings.Split(createJob.Description, " ")
+		m := pair[1]
+		r = strings.Trim(m, uri)
 		return m, nil
 	}
 
