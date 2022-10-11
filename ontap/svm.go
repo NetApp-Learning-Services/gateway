@@ -72,25 +72,10 @@ type NsSwitch struct {
 	Passwd   []string `json:"passwd,omitempty"`
 }
 
-type Ip struct {
-	Address string `json:"address,omitempty"`
-	Netmask string `json:"netmask,omitempty"`
-}
-
 type IpInfo struct {
 	Address string `json:"address,omitempty"`
 	Netmask string `json:"netmask,omitempty"`
 	Family  string `json:"family,omitempty"`
-}
-
-type IpInterfaceSvm struct {
-	Resource
-	Location struct {
-		HomeNode        Resource `json:"home_node,omitempty"`
-		BroadcastDomain Resource `json:"broadcast_domain,omitempty"`
-	} `json:"location,omitempty"`
-	Ip       Ip       `json:"ip,omitempty"`
-	Services []string `json:"services,omitempty"`
 }
 
 type FcPortReference struct {
@@ -130,6 +115,13 @@ type SelfLink struct {
 	Self struct {
 		Href string `json:"href"`
 	} `json:"self"`
+}
+
+type SVMCreationPayload struct {
+	Name         string        `json:"name,omitempty"`
+	Comment      string        `json:"comment,omitempty"`
+	State        string        `json:"state,omitempty"`
+	IpInterfaces []IpInterface `json:"ip_interfaces,omitempty"`
 }
 
 type SVMCreationResponse struct {

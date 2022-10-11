@@ -19,28 +19,24 @@ func (r *StorageVirtualMachineReconciler) reconcileSvmCreation(ctx context.Conte
 	log := log.FromContext(ctx)
 	log.Info("reconcileSvmCreation started")
 
-	var payload map[string]interface{}
-	payload = make(map[string]interface{})
-	payload["name"] = svmCR.Spec.SvmName
-	payload["comment"] = "Created by Astra Gateway"
+	var payload ontap.SVMCreationPayload
+	payload.Name = svmCR.Spec.SvmName
+	payload.Comment = "Created by Astra Gateway"
 	if svmCR.Spec.ManagementLIF != nil {
-		var ifpayload map[string]interface{}
-		ifpayload = make(map[string]interface{})
+		var ifpayload ontap.IpInterface
+		ifpayload.Name = svmCR.Spec.ManagementLIF.Name
+		ifpayload.Ip.Address = svmCR.Spec.ManagementLIF.IPAddress
+		ifpayload.Ip.Netmask = svmCR.Spec.ManagementLIF.Netmask
+		ifpayload.ServicePolicy = "default-management" // special word
 
-		ifpayload["name"] = svmCR.Spec.ManagementLIF.Name
-		ifpayload["ip"] = svmCR.Spec.ManagementLIF.IPAddress
-		ifpayload["netmask"] = svmCR.Spec.ManagementLIF.Netmask
-		payload["ip_interfaces"] = ifpayload
-
-		var locpayload map[string]interface{}
-		locpayload = make(map[string]interface{})
-		locpayload["broadcast_domain"] = svmCR.Spec.ManagementLIF.BroacastDomain
-		locpayload["home_node"] = svmCR.Spec.ManagementLIF.HomeNode
-		locpayload["service_policy"] = "default-management" // special word
-		payload["location"] = locpayload
+		var locpayload ontap.Location
+		locpayload.BroadcastDomain.Name = svmCR.Spec.ManagementLIF.BroacastDomain
+		locpayload.HomeNode.Name = svmCR.Spec.ManagementLIF.HomeNode
+		ifpayload.Location = locpayload
+		payload.IpInterfaces = append(payload.IpInterfaces, ifpayload)
 	}
 	//log.Info("SVM creation payload", "payload:", payload)
-	log.Info("SVM creation payload: " + fmt.Sprintf("%v", payload))
+	log.Info("SVM creation payload: " + fmt.Sprintf("%#v\n", payload))
 
 	jsonPayload, err := json.Marshal(payload)
 	if err != nil {
