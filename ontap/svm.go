@@ -124,13 +124,6 @@ type SVMCreationPayload struct {
 	IpInterfaces []IpInterface `json:"ip_interfaces,omitempty"`
 }
 
-type SVMCreationResponse struct {
-	Job struct {
-		Selflink SelfLink `json:"_links"`
-		Uuid     string   `json:"uuid"`
-	} `json:"job"`
-}
-
 // type SvmResponse struct {
 // 	Records []struct {
 // 		Name  string `json:"name"`
@@ -233,7 +226,7 @@ func (c *Client) CreateStorageVM(jsonPayload []byte) (err error) {
 		return &apiError{1, err.Error()}
 	}
 
-	var result SVMCreationResponse
+	var result JobResponse
 	json.Unmarshal(data, &result)
 
 	url := result.Job.Selflink.Self.Href

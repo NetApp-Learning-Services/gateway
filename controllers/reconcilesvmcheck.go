@@ -34,7 +34,7 @@ func (r *StorageVirtualMachineReconciler) reconcileSvmCheck(ctx context.Context,
 			log.Error(err, "SVM UUID in the custom resource is invalid")
 			return svm, err
 		}
-		log.Info("SVM UUID iin the custom resource is valid", "svm retrieved: ", svm)
+		log.Info("SVM UUID in the custom resource is valid", "svm retrieved: ", svm)
 		return svm, err
 	}
 

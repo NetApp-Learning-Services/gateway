@@ -61,3 +61,10 @@ type BroadcastDomain struct {
 type HomeNode struct {
 	Name string `json:"name,omitempty"`
 }
+
+type JobResponse struct {
+	Job struct {
+		Selflink SelfLink `json:"_links"`
+		Uuid     string   `json:"uuid"`
+	} `json:"job"`
+}

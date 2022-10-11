@@ -75,6 +75,12 @@ func (c *Client) clientGet(uri string) (data []byte, err error) {
 		return nil, err
 	}
 
+	if c.Debug {
+		log.Printf("[DEBUG] response type: GET")
+		log.Printf("[DEBUG] response url: " + url)
+		log.Printf("[DEBUG] response body: " + fmt.Sprintf("%v", response))
+	}
+
 	return response, nil
 }
 
@@ -98,6 +104,12 @@ func (c *Client) clientPost(uri string, json []byte) (data []byte, err error) {
 	response, err := c.doRequest(req)
 	if err != nil {
 		return nil, err
+	}
+
+	if c.Debug {
+		log.Printf("[DEBUG] response type: POST")
+		log.Printf("[DEBUG] response url: " + url)
+		log.Printf("[DEBUG] response body: " + fmt.Sprintf("%v", response))
 	}
 
 	return response, nil
@@ -125,6 +137,12 @@ func (c *Client) clientPatch(uri string, json []byte) (data []byte, err error) {
 		return nil, err
 	}
 
+	if c.Debug {
+		log.Printf("[DEBUG] response type: PATCH")
+		log.Printf("[DEBUG] response url: " + url)
+		log.Printf("[DEBUG] response body: " + fmt.Sprintf("%v", response))
+	}
+
 	return response, nil
 }
 
@@ -145,6 +163,12 @@ func (c *Client) clientDelete(uri string) (data []byte, err error) {
 	response, err := c.doRequest(req)
 	if err != nil {
 		return nil, err
+	}
+
+	if c.Debug {
+		log.Printf("[DEBUG] response type: DELETE")
+		log.Printf("[DEBUG] response url: " + url)
+		log.Printf("[DEBUG] response body: " + fmt.Sprintf("%v", response))
 	}
 
 	return response, nil
