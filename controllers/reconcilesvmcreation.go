@@ -50,7 +50,7 @@ func (r *StorageVirtualMachineReconciler) reconcileSvmCreation(ctx context.Conte
 	if err != nil {
 		log.Info("uuid received was: " + uuid)
 		log.Error(err, "Error occurred when creating SVM")
-		return ctrl.Result{}, nil // TODO: This needs to be err not nil
+		return ctrl.Result{}, err
 	}
 
 	// log.Info("Looking up UUID for the new SVM")
