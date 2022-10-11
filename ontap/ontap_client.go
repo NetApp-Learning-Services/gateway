@@ -40,14 +40,14 @@ func (e *apiError) ErrorCode() int64 {
 	return e.errorCode
 }
 
-func NewClient(user, password, host string, debug, ssl bool) (client *Client, error error) {
+func NewClient(user, password, host string, debug, trustSsl bool) (client *Client, error error) {
 
 	return &Client{
 		UserName:    user,
 		Password:    password,
 		Host:        host,
 		Debug:       debug,
-		TrustSSL:    ssl,
+		TrustSSL:    trustSsl,
 		TimeOut:     defaultTimeout,
 		UserAgent:   userAgent,
 		ContentType: contentType,

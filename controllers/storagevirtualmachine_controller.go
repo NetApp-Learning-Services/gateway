@@ -102,7 +102,7 @@ func (r *StorageVirtualMachineReconciler) Reconcile(ctx context.Context, req ctr
 		string(adminSecret.Data["password"]),
 		host,
 		true,
-		false)
+		true)
 
 	if err != nil {
 		log.Error(err, "Error creating ontap client")
