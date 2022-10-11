@@ -30,7 +30,7 @@ func (r *StorageVirtualMachineReconciler) reconcileSvmCreation(ctx context.Conte
 		ifpayload["name"] = svmCR.Spec.ManagementLIF.Name
 		ifpayload["ip"] = svmCR.Spec.ManagementLIF.IPAddress
 		ifpayload["netmask"] = svmCR.Spec.ManagementLIF.Netmask
-		payload["ip_interface"] = ifpayload
+		payload["ip_interfaces"] = ifpayload
 
 		var locpayload map[string]interface{}
 		locpayload = make(map[string]interface{})
