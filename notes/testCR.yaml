@@ -24,7 +24,7 @@ metadata:
   name: storagevirtualmachine-sample
   namespace:  gateway-system
 spec:
-  svmName: testVs
+  svmName: testVs2
   clusterHost: 192.168.0.102
   management:
     name: lif1
