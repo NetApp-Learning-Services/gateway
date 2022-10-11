@@ -217,13 +217,13 @@ func (c *Client) GetStorageVMByUUID(uuid string) (svm Svm, err error) {
 }
 
 // Create SVM
-func (c *Client) CreateStorageVM(jsonPayload []byte) (err error) {
+func (c *Client) CreateStorageVM(jsonPayload []byte) (uuid string, err error) {
 	uri := "/api/svm/svms"
-
+	r := ""
 	data, err := c.clientPost(uri, jsonPayload)
 	if err != nil {
 		//fmt.Println("Error: " + err.Error())
-		return &apiError{1, err.Error()}
+		return r, &apiError{1, err.Error()}
 	}
 
 	var result JobResponse
@@ -234,16 +234,21 @@ func (c *Client) CreateStorageVM(jsonPayload []byte) (err error) {
 	createJob, err := c.GetJob(url)
 
 	for createJob.State == "running" {
-		time.Sleep(time.Second)
+		time.Sleep(time.Second * 2)
 		createJob, err = c.GetJob(url)
 	}
 
 	if createJob.State == "failure" {
-		return &apiError{int64(createJob.Code), createJob.Message}
+		return r, &apiError{int64(createJob.Code), createJob.Message}
 		//return fmt.Errorf("%d - %s", createJob.Code, createJob.Message)
 	}
 
-	return nil
+	if createJob.State == "success" {
+		pair := strings.Split(createJob.Message, " ")
+		r = strings.Trim(pair[1], url)
+	}
+
+	return r, nil
 }
 
 func (c *Client) DeleteStorageVM(uuid string) (err error) {
