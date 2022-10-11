@@ -40,14 +40,33 @@ func appendCondition(ctx context.Context, reconcilerClient client.Client, object
 		err := reconcilerClient.Status().Update(ctx, object)
 		if err != nil {
 			errMessage := "Custom resource status update failed"
-			log.Info(errMessage)
+			log.Error(err, errMessage)
 			return fmt.Errorf(errMessage)
 		}
 
 	} else {
-		errMessage := "Status cannot be set, resource doesn't support conditions"
+		errMessage := "Status cannot be set, custom resource doesn't support conditions"
 		log.Info(errMessage)
 		return fmt.Errorf(errMessage)
+	}
+	return nil
+}
+
+func (reconciler *StorageVirtualMachineReconciler) deleteCondition(ctx context.Context, svmCR *gatewayv1alpha1.StorageVirtualMachine,
+	typeName string, reason string) error {
+
+	log := log.FromContext(ctx)
+	var newConditions = make([]metav1.Condition, 0)
+	for _, condition := range svmCR.Status.Conditions {
+		if condition.Type != typeName && condition.Reason != reason {
+			newConditions = append(newConditions, condition)
+		}
+	}
+	svmCR.Status.Conditions = newConditions
+
+	err := reconciler.Client.Status().Update(ctx, svmCR)
+	if err != nil {
+		log.Error(err, "Deleting the condition in the custom resource failed")
 	}
 	return nil
 }

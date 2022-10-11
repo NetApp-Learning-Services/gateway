@@ -46,9 +46,16 @@ func (r *StorageVirtualMachineReconciler) reconcileSvmCreation(ctx context.Conte
 	}
 
 	log.Info("SVM creation attempt")
-	uuid, err := oc.CreateStorageVM(jsonPayload)
+	err = oc.CreateStorageVM(jsonPayload)
 	if err != nil {
-		log.Error(err, "Error occurred when creating vm with this response: "+uuid)
+		log.Error(err, "Error occurred when creating SVM")
+		return ctrl.Result{}, err
+	}
+
+	log.Info("Lookin up UUID for the new SVM")
+	uuid, err := oc.GetStorageVmUUIDByName(svmCR.Spec.SvmName)
+	if err != nil {
+		log.Error(err, "Error occurred when creating SVM")
 		return ctrl.Result{}, err
 	}
 

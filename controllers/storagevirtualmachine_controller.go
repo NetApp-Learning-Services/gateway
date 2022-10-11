@@ -132,7 +132,15 @@ func (r *StorageVirtualMachineReconciler) Reconcile(ctx context.Context, req ctr
 		_, err = r.reconcileSvmCreation(ctx, svmCR, oc)
 		if err != nil {
 			log.Error(err, "Error during reconciling SVM creation")
+			_ = r.setConditionSVMCreation(ctx, svmCR, CONDITION_STATUS_FALSE)
 			return ctrl.Result{}, err //got another error - re-reconcile
+		} else {
+			//Set condition for SVM create
+			err = r.setConditionSVMCreation(ctx, svmCR, CONDITION_STATUS_TRUE)
+			if err != nil {
+				return ctrl.Result{}, nil //even though condition not create, don't reconcile again
+			}
+
 		}
 	}
 

@@ -224,21 +224,19 @@ func (c *Client) GetStorageVMByUUID(uuid string) (svm Svm, err error) {
 }
 
 // Create SVM
-func (c *Client) CreateStorageVM(jsonPayload []byte) (uuid string, err error) {
+func (c *Client) CreateStorageVM(jsonPayload []byte) (err error) {
 	uri := "/api/svm/svms"
 
 	data, err := c.clientPost(uri, jsonPayload)
 	if err != nil {
 		//fmt.Println("Error: " + err.Error())
-		return "", &apiError{1, err.Error()}
+		return &apiError{1, err.Error()}
 	}
 
 	var result SVMCreationResponse
 	json.Unmarshal(data, &result)
 
-	url := result.Job.Selflink.Self.Href //is this right?
-
-	uuidReceived := result.Job.Uuid
+	url := result.Job.Selflink.Self.Href
 
 	createJob, err := c.GetJob(url)
 
@@ -248,11 +246,11 @@ func (c *Client) CreateStorageVM(jsonPayload []byte) (uuid string, err error) {
 	}
 
 	if createJob.State == "failure" {
-		return url, &apiError{int64(createJob.Code), createJob.Message} //change url back to ""
+		return &apiError{int64(createJob.Code), createJob.Message}
 		//return fmt.Errorf("%d - %s", createJob.Code, createJob.Message)
 	}
 
-	return uuidReceived, nil
+	return nil
 }
 
 func (c *Client) DeleteStorageVM(uuid string) (err error) {
