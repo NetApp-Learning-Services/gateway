@@ -126,6 +126,19 @@ type S3Service struct {
 	Enabled        bool     `json:"enabled"`
 }
 
+type SelfLink struct {
+	Self struct {
+		Href string `json:"href"`
+	} `json:"self"`
+}
+
+type SVMCreationResponse struct {
+	Job struct {
+		Selflink SelfLink `json:"_links"`
+		Uuid     string   `json:"uuid"`
+	} `json:"job"`
+}
+
 // type SvmResponse struct {
 // 	Records []struct {
 // 		Name  string `json:"name"`
@@ -219,35 +232,35 @@ func (c *Client) GetStorageVMByUUID(uuid string) (svm Svm, err error) {
 }
 
 // Create SVM
-func (c *Client) CreateStorageVM(jsonPayload []byte) (res Resource, err error) {
+func (c *Client) CreateStorageVM(jsonPayload []byte) (uuid string, err error) {
 	uri := "/api/svm/svms"
-	var result Resource
+
 	data, err := c.clientPost(uri, jsonPayload)
 	if err != nil {
 		//fmt.Println("Error: " + err.Error())
-		return result, &apiError{1, err.Error()}
+		return "", &apiError{1, err.Error()}
 	}
 
+	var result SVMCreationResponse
 	json.Unmarshal(data, &result)
 
-	// job := result["job"].(map[string]interface{})
-	// link := job["_links"].(map[string]interface{})
-	// href := link["self"].(map[string]interface{})
-	// url := href["href"].(string)
+	url := result.Job.Selflink.Self.Href //is this right?
 
-	// createJob, err := c.GetJob(url)
+	uuidReceived := result.Job.Uuid
 
-	// for createJob.State == "running" {
-	// 	time.Sleep(time.Second)
-	// 	createJob, err = c.GetJob(url)
-	// }
+	createJob, err := c.GetJob(url)
 
-	// if createJob.State == "failure" {
-	// 	return &apiError{int64(createJob.Code), createJob.Message}
-	// 	//return fmt.Errorf("%d - %s", createJob.Code, createJob.Message)
-	// }
+	for createJob.State == "running" {
+		time.Sleep(time.Second)
+		createJob, err = c.GetJob(url)
+	}
 
-	return result, nil
+	if createJob.State == "failure" {
+		return url, &apiError{int64(createJob.Code), createJob.Message} //change url back to ""
+		//return fmt.Errorf("%d - %s", createJob.Code, createJob.Message)
+	}
+
+	return uuidReceived, nil
 }
 
 func (c *Client) DeleteStorageVM(uuid string) (err error) {

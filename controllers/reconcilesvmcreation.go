@@ -3,6 +3,7 @@ package controllers
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 
 	gatewayv1alpha1 "gateway/api/v1alpha1"
 	"gateway/ontap"
@@ -38,23 +39,30 @@ func (r *StorageVirtualMachineReconciler) reconcileSvmCreation(ctx context.Conte
 		locpayload["service_policy"] = "default-management" // special word
 		payload["location"] = locpayload
 	}
-	log.Info("SVM creation payload", "payload:", payload)
+	//log.Info("SVM creation payload", "payload:", payload)
+	log.Info("SVM creation payload: " + fmt.Sprintf("%v", payload))
 
 	jsonPayload, err := json.Marshal(payload)
 	if err != nil {
 		//error creating the json body
+		log.Error(err, "Error creating the json payload")
 		return ctrl.Result{}, err
 	}
 
 	log.Info("SVM creation attempt")
-	res, _ := oc.CreateStorageVM(jsonPayload)
+	uuid, err := oc.CreateStorageVM(jsonPayload)
+	if err != nil {
+		log.Error(err, "Error occurred when creating vm with this response: "+uuid)
+		return ctrl.Result{}, err
+	}
 
-	log.Info("SVM new uuid: " + res.Uuid)
+	log.Info("SVM new uuid: " + uuid)
 	//patch the new uuid on the custom resource
 	patch := client.MergeFrom(svmCR.DeepCopy())
-	svmCR.Spec.SvmUuid = res.Uuid
+	svmCR.Spec.SvmUuid = uuid
 	err = r.Patch(ctx, svmCR, patch)
 	if err != nil {
+		log.Error(err, "Error patching the new uuid in the custom resource")
 		return ctrl.Result{}, err
 	}
 

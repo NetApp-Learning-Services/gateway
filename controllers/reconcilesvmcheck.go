@@ -19,17 +19,22 @@ func (r *StorageVirtualMachineReconciler) reconcileSvmCheck(ctx context.Context,
 
 	// Check to see if SVM exists by the uuid in CR
 	uuid := strings.TrimSpace(svmCR.Spec.SvmUuid)
-	log.Info("svm uuid retrieved from CR: " + uuid)
+	if uuid == "" {
+		log.Info("SVM uuid retrieved from the custom resource is empty, need to create the SVM")
+	} else {
+		log.Info("SVM uuid retrieved from the custom resource: " + uuid + ", attempt to get the SVM")
+	}
+
 	var svm ontap.Svm
 	if uuid != "" {
 		// SvmUuid has a value in the custom resource
 		// Check to see if SVM exists
 		svm, err := oc.GetStorageVMByUUID(uuid)
 		if err != nil {
-			log.Error(err, "Invalid SVM UUID in custom resource")
+			log.Error(err, "SVM UUID in the custom resource is invalid")
 			return svm, err
 		}
-		log.Info("reconcileSvmCheck", "svm retrieved: ", svm)
+		log.Info("SVM UUID iin the custom resource is valid", "svm retrieved: ", svm)
 		return svm, err
 	}
 

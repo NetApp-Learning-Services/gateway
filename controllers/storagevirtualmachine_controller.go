@@ -93,8 +93,8 @@ func (r *StorageVirtualMachineReconciler) Reconcile(ctx context.Context, req ctr
 		return ctrl.Result{}, nil // not a valid secret - stop reconcile
 	}
 
-	log.Info("Secret username: " + string(adminSecret.Data["username"]))
-	log.Info("Secret password: " + string(adminSecret.Data["password"]))
+	log.Info("Cluster admin username: " + string(adminSecret.Data["username"]))
+	log.Info("Cluster admin password: " + string(adminSecret.Data["password"]))
 
 	//create ONTAP client
 	oc, err := ontap.NewClient(
