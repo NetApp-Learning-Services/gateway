@@ -46,21 +46,19 @@ func (r *StorageVirtualMachineReconciler) reconcileSvmCreation(ctx context.Conte
 	}
 
 	log.Info("SVM creation attempt")
-	q, err := oc.CreateStorageVM(jsonPayload)
+	uuid, err := oc.CreateStorageVM(jsonPayload)
 	if err != nil {
-		log.Info("uuid received was: " + q)
+		log.Info("uuid received was: " + uuid)
 		log.Error(err, "Error occurred when creating SVM")
 		return ctrl.Result{}, err
 	}
 
-	log.Info("q: " + q)
-
-	log.Info("Looking up UUID for the new SVM")
-	uuid, err := oc.GetStorageVmUUIDByName(svmCR.Spec.SvmName)
-	if err != nil {
-		log.Error(err, "Error occurred when creating SVM")
-		return ctrl.Result{}, err
-	}
+	// log.Info("Looking up UUID for the new SVM")
+	// uuid, err := oc.GetStorageVmUUIDByName(svmCR.Spec.SvmName)
+	// if err != nil {
+	// 	log.Error(err, "Error occurred when creating SVM")
+	// 	return ctrl.Result{}, err
+	// }
 
 	log.Info("SVM new uuid: " + uuid)
 	//patch the new uuid on the custom resource
