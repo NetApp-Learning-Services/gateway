@@ -247,7 +247,7 @@ func (c *Client) CreateStorageVM(jsonPayload []byte) (uuid string, err error) {
 		pair := strings.Split(createJob.Description, " ")
 		m := pair[1]
 		r = strings.Trim(m, uri)
-		return m, nil
+		return r, nil
 	}
 
 	return r, nil
