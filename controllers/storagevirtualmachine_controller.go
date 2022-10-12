@@ -98,19 +98,22 @@ func (r *StorageVirtualMachineReconciler) Reconcile(ctx context.Context, req ctr
 	oc, err := ontap.NewClient(
 		string(adminSecret.Data["username"]),
 		string(adminSecret.Data["password"]),
-		host,
-		true,
-		true)
-
+		host, true, true)
 	if err != nil {
 		log.Error(err, "Error creating ontap client")
 		return ctrl.Result{}, err //got another error - re-reconcile
 	}
 
-	_, err = r.tryDeletions(ctx, svmCR, oc)
-	if err != nil {
-		log.Error(err, "Error during svmCR deletion")
-		return ctrl.Result{}, err //got another error - re-reconcile
+	// Check to see if deleting custom resource and handle the deletion
+	isSMVMarkedToBeDeleted := svmCR.GetDeletionTimestamp() != nil
+	if isSMVMarkedToBeDeleted {
+		_, err = r.tryDeletions(ctx, svmCR, oc)
+		if err != nil {
+			log.Error(err, "Error during svmCR deletion")
+			return ctrl.Result{}, err //got another error - re-reconcile
+		} else {
+			return ctrl.Result{}, nil //stop reconcile
+		}
 	}
 
 	//define variable whether to create svm or update it - default to false
