@@ -84,7 +84,6 @@ func (r *StorageVirtualMachineReconciler) Reconcile(ctx context.Context, req ctr
 	// 	return ctrl.Result{}, nil // not a valid cluster Url - stop reconcile
 	// }
 	host := svmCR.Spec.ClusterManagementHost
-
 	log.Info("Using cluster management host: " + host)
 
 	// Look up adminSecret
@@ -92,9 +91,8 @@ func (r *StorageVirtualMachineReconciler) Reconcile(ctx context.Context, req ctr
 	if err != nil {
 		return ctrl.Result{}, nil // not a valid secret - stop reconcile
 	}
-
-	log.Info("Cluster admin username: " + string(adminSecret.Data["username"]))
-	log.Info("Cluster admin password: " + string(adminSecret.Data["password"]))
+	//log.Info("Cluster admin username: " + string(adminSecret.Data["username"]))
+	//log.Info("Cluster admin password: " + string(adminSecret.Data["password"]))
 
 	//create ONTAP client
 	oc, err := ontap.NewClient(
@@ -106,6 +104,12 @@ func (r *StorageVirtualMachineReconciler) Reconcile(ctx context.Context, req ctr
 
 	if err != nil {
 		log.Error(err, "Error creating ontap client")
+		return ctrl.Result{}, err //got another error - re-reconcile
+	}
+
+	_, err = r.tryDeletions(ctx, svmCR, oc)
+	if err != nil {
+		log.Error(err, "Error during svmCR deletion")
 		return ctrl.Result{}, err //got another error - re-reconcile
 	}
 
@@ -141,10 +145,16 @@ func (r *StorageVirtualMachineReconciler) Reconcile(ctx context.Context, req ctr
 				return ctrl.Result{}, nil //even though condition not create, don't reconcile again
 			}
 
+			// Set finalizer
+			_, err = r.addFinalizer(ctx, svmCR)
+			if err != nil {
+				return ctrl.Result{}, err //got another error - re-reconcile
+			}
+
 		}
 	}
 
-	return ctrl.Result{}, nil
+	return ctrl.Result{}, nil //no error - end reconcile
 }
 
 // SetupWithManager sets up the controller with the Manager.
