@@ -6,8 +6,6 @@ import (
 	"context"
 	"strings"
 
-	gatewayv1alpha1 "gateway/api/v1alpha1"
-
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/types"
@@ -15,12 +13,12 @@ import (
 )
 
 func (r *StorageVirtualMachineReconciler) reconcileSecret(ctx context.Context,
-	svmCR *gatewayv1alpha1.StorageVirtualMachine) (*corev1.Secret, error) {
+	name string, namespace string) (*corev1.Secret, error) {
 	log := log.FromContext(ctx)
 	secret := &corev1.Secret{}
 	err := r.Get(ctx, types.NamespacedName{
-		Name:      svmCR.Spec.ClusterCredentialSecret.Name,
-		Namespace: svmCR.Spec.ClusterCredentialSecret.Namespace,
+		Name:      name,
+		Namespace: namespace,
 	}, secret)
 	if err != nil && errors.IsNotFound(err) {
 		log.Error(err, "Secret does not exist")

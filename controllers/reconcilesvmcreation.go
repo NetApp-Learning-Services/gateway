@@ -43,7 +43,7 @@ func (r *StorageVirtualMachineReconciler) reconcileSvmCreation(ctx context.Conte
 	jsonPayload, err := json.Marshal(payload)
 	if err != nil {
 		//error creating the json body
-		log.Error(err, "Error creating the json payload")
+		log.Error(err, "Error creating the json payload for SVM creation")
 		return ctrl.Result{}, err
 	}
 
@@ -70,6 +70,20 @@ func (r *StorageVirtualMachineReconciler) reconcileSvmCreation(ctx context.Conte
 	if err != nil {
 		log.Error(err, "Error patching the new uuid in the custom resource")
 		return ctrl.Result{}, err
+	}
+
+	//Check to see if need to create vsadmin
+	if svmCR.Spec.VsadminCredentialSecret.Name != "" {
+		// Look up vsadmin secret
+		vsAdminSecret, err := r.reconcileSecret(ctx,
+			svmCR.Spec.VsadminCredentialSecret.Name,
+			svmCR.Spec.VsadminCredentialSecret.Namespace)
+		if err != nil {
+			// return ctrl.Result{}, nil // not a valid secret - ignore
+		} else {
+			r.reconcileSecurityAccount(ctx, svmCR, oc, vsAdminSecret)
+		}
+
 	}
 
 	return ctrl.Result{}, nil

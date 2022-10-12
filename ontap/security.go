@@ -29,10 +29,6 @@ type Owner struct {
 	Name string `json:"name,omitempty"`
 }
 
-type Applications struct {
-	Values []Application `json:"applications,omitempty"`
-}
-
 type Application struct {
 	AppType          App         `json:"application,omitempty"`
 	AuthMethods      AuthMethods `json:"authentication_methods,omitempty"`
@@ -43,12 +39,12 @@ type AuthMethods struct {
 	Method []AuthMethodOption
 }
 
-type SecurityAccountRequest struct {
-	Owner        Owner        `json:"owner,omitempty"`
-	Name         string       `json:"name,omitempty"`
-	Applications Applications `json:"applications,omitempty"`
-	Role         UserRole     `json:"role,omitempty"`
-	Password     string       `json:"password,omitempty"`
+type SecurityAccountPayload struct {
+	Owner        Owner         `json:"owner,omitempty"`
+	Name         string        `json:"name,omitempty"`
+	Applications []Application `json:"applications,omitempty"`
+	Role         UserRole      `json:"role,omitempty"`
+	Password     string        `json:"password,omitempty"`
 }
 
 // Create SVM
