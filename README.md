@@ -51,10 +51,11 @@ git clone https://github.com/NetApp-Learning-Services/gateway/
 Copy kubeconfig from the master node if needed
 ```
 
-7. Chnage directory into the repo location on the worker node and run the bash script
+7. Change directory into the repo location on the worker node and run the bash script
 	
 ```sh
-bash gateway\test.sh
+cd gateway
+bash test.sh
 ```
 
 ## Contributing
