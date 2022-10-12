@@ -1,48 +1,64 @@
-# gateway
-// TODO(user): Add simple overview of use/purpose
+# Project Astra Gateway 
+A simple operator that creates, configures, and deletes ONTAP resources for Kubernetes
 
 ## Description
-// TODO(user): An in-depth paragraph about your project and overview of use
+This operator uses Operator-SDK to scaffold a controller that used to managed Storage Virtual Machines (SVMs) resources in an ONTAP cluster.   It currently creates an SVM, the SVM management LIF when a custom resource (CR) is created and uses a finalizer (called gateway.netapp.com) to delete the SVM when the CR is deleted.  
 
 ## Getting Started
-You’ll need a Kubernetes cluster to run against. You can use [KIND](https://sigs.k8s.io/kind) to get a local cluster for testing, or run against a remote cluster.
-**Note:** Your controller will automatically use the current context in your kubeconfig file (i.e. whatever cluster `kubectl cluster-info` shows).
+To get started, launch the Using Astra Control with Kuberentes Lab-on-Demand image.  
 
 ### Running on the cluster
-1. Install Instances of Custom Resources:
+1. Setup Kubernetes
 
 ```sh
-kubectl apply -f config/samples/
+Launch the Using Astra Control with Kuberentes Lab-on-Demand image.  
 ```
 
-2. Build and push your image to the location specified by `IMG`:
+2. Setup a private docker registry
 	
 ```sh
-make docker-build docker-push IMG=<some-registry>/gateway:tag
+Install the private registry and configure all the nodes to use the have access to it.
 ```
 	
-3. Deploy the controller to the cluster with the image specified by `IMG`:
+3. Install Opeartor-SDK on one of the worker nodes
 
 ```sh
-make deploy IMG=<some-registry>/gateway:tag
+export ARCH=$(case $(uname -m) in x86_64) echo -n amd64 ;; aarch64) echo -n arm64 ;; *) echo -n $(uname -m) ;; esac)
+export OS=$(uname | awk '{print tolower($0)}')
+export OPERATOR_SDK_DL_URL=https://github.com/operator-framework/operator-sdk/releases/download/v1.23.0
+curl -LO ${OPERATOR_SDK_DL_URL}/operator-sdk_${OS}_${ARCH}
+chmod +x operator-sdk_${OS}_${ARCH} && sudo mv operator-sdk_${OS}_${ARCH} /usr/local/bin/operator-sdk
 ```
 
-### Uninstall CRDs
-To delete the CRDs from the cluster:
-
+4. Install Go on the worker node
+	
 ```sh
-make uninstall
+rm -rf /usr/local/go && tar -C /usr/local -xzf go1.19.2.linux-amd64.tar.gz
+export PATH=$PATH:/usr/local/go/bin
+wget https://dl.google.com/go/go1.19.2.linux-amd64.tar.gz
+sudo tar -C /usr/local/ -xzf go1.19.2.linux-amd64.tar.gz
 ```
 
-### Undeploy controller
-UnDeploy the controller to the cluster:
-
+5. Clone the repo on the worker node
+	
 ```sh
-make undeploy
+git clone https://github.com/NetApp-Learning-Services/gateway/
+```
+
+6. Setup kubeconfig on the worker node
+	
+```sh
+Copy kubeconfig from the master node if needed
+```
+
+7. Chnage directory into the repo location on the worker node and run the bash script
+	
+```sh
+bash gateway\test.sh
 ```
 
 ## Contributing
-// TODO(user): Add detailed information on how you would like others to contribute to this project
+Written by Curtis Burchett
 
 ### How it works
 This project aims to follow the Kubernetes [Operator pattern](https://kubernetes.io/docs/concepts/extend-kubernetes/operator/)
@@ -50,45 +66,9 @@ This project aims to follow the Kubernetes [Operator pattern](https://kubernetes
 It uses [Controllers](https://kubernetes.io/docs/concepts/architecture/controller/) 
 which provides a reconcile function responsible for synchronizing resources untile the desired state is reached on the cluster 
 
-### Test It Out
-1. Install the CRDs into the cluster:
-
-```sh
-make install
-```
-
-2. Run your controller (this will run in the foreground, so switch to a new terminal if you want to leave it running):
-
-```sh
-make run
-```
-
-**NOTE:** You can also run this in one step by running: `make install run`
-
-### Modifying the API definitions
-If you are editing the API definitions, generate the manifests such as CRs or CRDs using:
-
-```sh
-make manifests
-```
-
-**NOTE:** Run `make --help` for more information on all potential `make` targets
-
-More information can be found via the [Kubebuilder Documentation](https://book.kubebuilder.io/introduction.html)
-
 ## License
 
 Copyright 2022.
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
+Creative Commons Legal Code, CC0 1.0 Universal
 
