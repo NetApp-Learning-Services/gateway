@@ -112,6 +112,7 @@ func (r *StorageVirtualMachineReconciler) Reconcile(ctx context.Context, req ctr
 			log.Error(err, "Error during svmCR deletion")
 			return ctrl.Result{}, err //got another error - re-reconcile
 		} else {
+			log.Info("SVM deleted, removed finalizer, cleaning up custom resource")
 			return ctrl.Result{}, nil //stop reconcile
 		}
 	}
