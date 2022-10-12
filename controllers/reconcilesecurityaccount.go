@@ -65,7 +65,7 @@ func (r *StorageVirtualMachineReconciler) reconcileSecurityAccount(ctx context.C
 		if svmCR.Spec.SvmUuid == "" {
 			return ctrl.Result{}, errors.NewBadRequest("No SVM uuid during security account patch")
 		}
-		err = oc.PatchSecurityAccount(jsonPayload, payload.Name, svmCR.Spec.SvmUuid)
+		err = oc.PatchSecurityAccount(jsonPayload, svmCR.Spec.SvmUuid, payload.Name)
 		if err != nil {
 			log.Error(err, "Error occurred when patching security account")
 			return ctrl.Result{}, err
