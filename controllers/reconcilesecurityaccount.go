@@ -24,13 +24,12 @@ func (r *StorageVirtualMachineReconciler) reconcileSecurityAccount(ctx context.C
 	var payload ontap.SecurityAccountPayload
 	payload.Name = string(credentials.Data["username"])
 	payload.Owner.Uuid = svmCR.Spec.SvmUuid
-	m := ontap.AuthMethods{}
-	m.Method = append(m.Method, ontap.Password)
+
 	ap := ontap.Application{
 		AppType:          ontap.Ssh,
-		AuthMethods:      m,
 		SecondAuthMethod: "none", //special word
 	}
+	ap.AuthMethods = append(ap.AuthMethods, ontap.Password)
 	payload.Applications = append(payload.Applications, ap)
 	payload.Role = ontap.Vsadmin
 	payload.Password = string(credentials.Data["password"])

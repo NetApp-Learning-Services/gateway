@@ -30,13 +30,9 @@ type Owner struct {
 }
 
 type Application struct {
-	AppType          App         `json:"application,omitempty"`
-	AuthMethods      AuthMethods `json:"authentication_methods,omitempty"`
-	SecondAuthMethod string      `json:"second_authentication_methods,omitempty"`
-}
-
-type AuthMethods struct {
-	Method []AuthMethodOption
+	AppType          App                `json:"application,omitempty"`
+	AuthMethods      []AuthMethodOption `json:"authentication_methods,omitempty"`
+	SecondAuthMethod string             `json:"second_authentication_methods,omitempty"`
 }
 
 type SecurityAccountPayload struct {
