@@ -65,10 +65,10 @@ func (r *StorageVirtualMachineReconciler) Reconcile(ctx context.Context, req ctr
 	svmCR := &gatewayv1alpha1.StorageVirtualMachine{}
 	err := r.Get(ctx, req.NamespacedName, svmCR)
 	if err != nil && errors.IsNotFound(err) {
-		log.Info("StorageVirtualMachine custom resource not found. Ignoring since object must be deleted.")
+		log.Info("StorageVirtualMachine custom resource not found, ignoring since object must be deleted")
 		return ctrl.Result{}, nil
 	} else if err != nil {
-		log.Error(err, "Failed to get StorageVirtualMachine custom resource. Re-running reconile.")
+		log.Error(err, "Failed to get StorageVirtualMachine custom resource, re-running reconcile")
 		return ctrl.Result{}, err
 	}
 
