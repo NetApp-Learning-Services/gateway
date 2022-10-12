@@ -1,3 +1,5 @@
+//From:  https://github.com/nheidloff/operator-sample-go/blob/1be830ea555c6401d85c3677ddcfd2ecf83fd601/operator-application/utilities/conditions.go
+
 package controllers
 
 import (

@@ -1,3 +1,5 @@
+// From: https://github.com/nheidloff/operator-sample-go/blob/bc4571d4d7431b60676919379ad3c3a2abcfd175/operator-application/controllers/application/deletions.go
+
 package controllers
 
 import (

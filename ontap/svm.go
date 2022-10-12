@@ -1,3 +1,7 @@
+// From:  https://github.com/igor-feoktistov/go-ontap-rest/blob/main/ontap/svm.go
+// From:  https://github.com/marstid/go-ontap-rest/blob/master/svm.go
+// From:  https://github.com/marstid/go-ontap-rest/blob/master/svm_type.go
+
 package ontap
 
 import (

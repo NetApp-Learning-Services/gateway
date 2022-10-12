@@ -1,3 +1,6 @@
+// From: https://github.com/marstid/go-ontap-rest/blob/05bcd8ec8c6d11a265a64d8f1187024400e0f1f5/ontap.go#L28
+// From: https://github.com/igor-feoktistov/go-ontap-rest/blob/main/ontap/client.go
+
 package ontap
 
 import (

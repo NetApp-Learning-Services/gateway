@@ -1,3 +1,5 @@
+// From:  https://github.com/nheidloff/operator-sample-go/blob/main/operator-application/controllers/application/secret.go
+
 package controllers
 
 import (
