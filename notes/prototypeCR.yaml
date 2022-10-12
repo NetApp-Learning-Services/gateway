@@ -45,7 +45,7 @@ spec:
   vsadminCredentials:
     name: ontap-testVs-admin
     namespace:  astragateway 
-  uuid: "f16f0935-5281-11e8-b94d-005056b46485"   # this should not be in the CR (ignored if provided by user)
+  uuid: f16f0935-5281-11e8-b94d-005056b46485   # this should not be in the CR (ignored if provided by user)
 ---
 # PATCH "/api/svm/svms/f16f0935-5281-11e8-b94d-005056b46485" '{"aggregates":{"name":["aggr1","aggr2","aggr3"]}}'
 apiVersion: astragateway.netapp.io/v1
