@@ -17,9 +17,9 @@ const (
 	Amqp             App              = "amqp"
 	Console          App              = "console"
 	ServiceProcessor App              = "service_processor"
-	Http             App              = "HTTP"
-	Ontapi           App              = "ONTAPI"
-	Ssh              App              = "SSH"
+	Http             App              = "http"
+	Ontapi           App              = "ontapi"
+	Ssh              App              = "ssh"
 	Vsadmin          UserRole         = "vsadmin"
 	Admin            UserRole         = "admin"
 )
@@ -41,12 +41,34 @@ type SecurityAccountPayload struct {
 	Applications []Application `json:"applications,omitempty"`
 	Role         UserRole      `json:"role,omitempty"`
 	Password     string        `json:"password,omitempty"`
+	Comment      string        `json:"comment,omitempty"`
+	Locked       bool          `json:"locked,omitempty"`
 }
 
-// Create SVM
+// Create securtiy account
 func (c *Client) CreateSecurityAccount(jsonPayload []byte) (err error) {
 	uri := "/api/security/accounts"
 	data, err := c.clientPost(uri, jsonPayload)
+	if err != nil {
+		//fmt.Println("Error: " + err.Error())
+		return &apiError{1, err.Error()}
+	}
+
+	var result map[string]interface{}
+	err = json.Unmarshal(data, &result)
+	if err != nil {
+		return &apiError{2, err.Error()}
+	} else {
+		fmt.Println(fmt.Sprintf("result: %v", result))
+	}
+
+	return nil
+}
+
+// Patch securtiy account
+func (c *Client) PatchSecurityAccount(jsonPayload []byte, uuid string, name string) (err error) {
+	uri := "/api/security/accounts/" + uuid + "/" + name
+	data, err := c.clientPatch(uri, jsonPayload)
 	if err != nil {
 		//fmt.Println("Error: " + err.Error())
 		return &apiError{1, err.Error()}
