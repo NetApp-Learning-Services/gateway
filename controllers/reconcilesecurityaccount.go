@@ -25,7 +25,6 @@ func (r *StorageVirtualMachineReconciler) reconcileSecurityAccount(ctx context.C
 	if string(credentials.Data["username"]) == "vsadmin" {
 		log.Info("vsadmin credentials - need to patch")
 		var payload ontap.SecurityAccountPayload
-		payload.Name = string(credentials.Data["username"])
 
 		ssh := ontap.Application{
 			AppType:          ontap.Ssh,
