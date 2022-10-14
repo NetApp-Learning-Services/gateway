@@ -22,7 +22,9 @@ func (r *StorageVirtualMachineReconciler) reconcileSecurityAccount(ctx context.C
 	log := log.FromContext(ctx)
 	log.Info("reconcileSecurityAccount started")
 
-	if string(credentials.Data["username"]) == "vsadmin" {
+	userNameToModify := string(credentials.Data["username"])
+
+	if userNameToModify == "vsadmin" {
 		log.Info("vsadmin credentials - need to patch")
 		var payload ontap.SecurityAccountPayload
 
@@ -63,7 +65,7 @@ func (r *StorageVirtualMachineReconciler) reconcileSecurityAccount(ctx context.C
 		if svmCR.Spec.SvmUuid == "" {
 			return ctrl.Result{}, errors.NewBadRequest("No SVM uuid during security account patch")
 		}
-		err = oc.PatchSecurityAccount(jsonPayload, svmCR.Spec.SvmUuid, payload.Name)
+		err = oc.PatchSecurityAccount(jsonPayload, svmCR.Spec.SvmUuid, userNameToModify)
 		if err != nil {
 			log.Error(err, "Error occurred when patching security account")
 			return ctrl.Result{}, err
@@ -72,7 +74,7 @@ func (r *StorageVirtualMachineReconciler) reconcileSecurityAccount(ctx context.C
 	} else {
 		log.Info("not vsadmin credentials - try to create")
 		var payload ontap.SecurityAccountPayload
-		payload.Name = string(credentials.Data["username"])
+		payload.Name = userNameToModify
 		payload.Owner.Uuid = svmCR.Spec.SvmUuid
 
 		ssh := ontap.Application{
