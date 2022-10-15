@@ -248,10 +248,8 @@ func (c *Client) CreateStorageVM(jsonPayload []byte) (uuid string, err error) {
 	}
 
 	if createJob.State == "success" {
-		pair := strings.Split(createJob.Description, " ")
-		m := pair[1]
-		r = strings.TrimLeft(m, uri+"/")
-		return r, nil
+		uuid, err = ParseUUID(createJob.Description, " ")
+		return uuid, err
 	}
 
 	return r, nil
@@ -291,4 +289,18 @@ func (c *Client) DeleteStorageVM(uuid string) (err error) {
 	}
 
 	return nil
+}
+
+func ParseUUID(input string, char string) (string, error) {
+	if len(input) == 0 {
+		return "", &apiError{5, fmt.Sprintf("UUID length is zero")}
+	}
+
+	//doesn't work with /auuid
+	//split := strings.Split(input, " ")
+	//return strings.Trim(split[1], trim), nil
+
+	idx := strings.LastIndex(input, char)
+	return input[idx+1:], nil //return the string starting at the last instance of char + 1 (not returning char)
+
 }
