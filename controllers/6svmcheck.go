@@ -40,7 +40,7 @@ func (r *StorageVirtualMachineReconciler) reconcileSvmCheck(ctx context.Context,
 		}
 		log.Info("SVM UUID in the custom resource is valid", "svm retrieved: ", svm)
 		_ = r.setConditionSVMFound(ctx, svmCR, CONDITION_STATUS_TRUE)
-		return svm, err
+		return svm, nil
 	}
 
 }
