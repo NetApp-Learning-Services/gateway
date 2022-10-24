@@ -249,7 +249,7 @@ func (c *Client) CreateStorageVM(jsonPayload []byte) (uuid string, err error) {
 	}
 
 	if createJob.State == "success" {
-		uuid, err = ParseUUID(createJob.Description, " ")
+		uuid, err = ParseUUID(createJob.Description, "/")
 		return uuid, err
 	}
 
