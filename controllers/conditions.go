@@ -42,9 +42,9 @@ const CONDITION_MESSAGE_HOST_FOUND_FALSE = "A valid host was not found"
 func (reconciler *StorageVirtualMachineReconciler) setConditionHostFound(ctx context.Context,
 	svmCR *gatewayv1alpha1.StorageVirtualMachine, status metav1.ConditionStatus) error {
 
-	if reconciler.containsCondition(ctx, svmCR, CONDITION_REASON_HOST_FOUND) {
-		reconciler.deleteCondition(ctx, svmCR, CONDITION_TYPE_HOST_FOUND, CONDITION_REASON_HOST_FOUND)
-	}
+	// if reconciler.containsCondition(ctx, svmCR, CONDITION_REASON_HOST_FOUND) {
+	// 	reconciler.deleteCondition(ctx, svmCR, CONDITION_TYPE_HOST_FOUND, CONDITION_REASON_HOST_FOUND)
+	// }
 
 	if status == CONDITION_STATUS_TRUE {
 		return appendCondition(ctx, reconciler.Client, svmCR, CONDITION_TYPE_HOST_FOUND, status,
