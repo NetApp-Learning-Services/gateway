@@ -46,7 +46,7 @@ type SecurityAccountPayload struct {
 	Role         UserRole      `json:"role,omitempty"`
 	Password     string        `json:"password,omitempty"`
 	Comment      string        `json:"comment,omitempty"`
-	Locked       bool          `json:"locked,omitempty"`
+	Locked       *bool         `json:"locked,omitempty"`
 }
 
 type SecurityResponse struct {

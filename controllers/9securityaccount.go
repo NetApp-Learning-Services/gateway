@@ -65,7 +65,8 @@ func (r *StorageVirtualMachineReconciler) reconcileSecurityAccount(ctx context.C
 
 		//payload.Role = ontap.Vsadmin
 		payload.Password = string(credentials.Data["password"])
-		payload.Locked = false // always unlock
+		var a bool = false
+		payload.Locked = &a // always unlock
 
 		log.Info("Security account payload: " + fmt.Sprintf("%#v\n", payload))
 
