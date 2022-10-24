@@ -1,17 +1,6 @@
 /*
 Copyright 2022.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
+Created by Curtis Burchett
 */
 
 package controllers
@@ -27,7 +16,11 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/log"
 
 	gatewayv1alpha1 "gateway/api/v1alpha1"
-	"gateway/ontap"
+)
+
+const (
+	trustSSL = true
+	debugOn  = true
 )
 
 // StorageVirtualMachineReconciler reconciles a StorageVirtualMachine object
@@ -60,56 +53,49 @@ func (r *StorageVirtualMachineReconciler) Reconcile(ctx context.Context, req ctr
 
 	// TODO: Check out this: https://github.com/kubernetes-sigs/kubebuilder/issues/618
 
+	// STEP 1
 	// Check for existing of CR object -
 	// if doesn't exist or error retrieving, log error and exit reconcile
-	svmCR := &gatewayv1alpha1.StorageVirtualMachine{}
-	err := r.Get(ctx, req.NamespacedName, svmCR)
+	// if discovered, write condition and move on
+	svmCR, err := r.reconcileDiscoverObject(ctx, req, log)
 	if err != nil && errors.IsNotFound(err) {
-		log.Info("StorageVirtualMachine custom resource not found, ignoring since object must be deleted")
 		return ctrl.Result{}, nil
 	} else if err != nil {
-		log.Error(err, "Failed to get StorageVirtualMachine custom resource, re-running reconcile")
-		return ctrl.Result{}, err
+		return ctrl.Result{}, err //re-reconcile
 	}
 
-	//Set condition for CR found
-	err = r.setConditionResourceFound(ctx, svmCR)
-	if err != nil {
-		return ctrl.Result{}, err
-	}
-
+	// STEP 2
 	// Get cluster management host
-	//host, err := r.reconcileClusterHost(ctx, svmCR)
-	// if err != nil {
-	// 	return ctrl.Result{}, nil // not a valid cluster Url - stop reconcile
-	// }
-	host := svmCR.Spec.ClusterManagementHost
-	log.Info("Using cluster management host: " + host)
+	host, err := r.reconcileClusterHost(ctx, svmCR, log)
+	if err != nil {
+		return ctrl.Result{}, nil // not a valid cluster Url - stop reconcile
+	}
 
+	// STEP 3
 	// Look up cluster admin secret
 	adminSecret, err := r.reconcileSecret(ctx,
 		svmCR.Spec.ClusterCredentialSecret.Name,
-		svmCR.Spec.ClusterCredentialSecret.Namespace)
+		svmCR.Spec.ClusterCredentialSecret.Namespace, log)
 	if err != nil {
+		err = r.setConditionClusterSecretLookup(ctx, svmCR, CONDITION_STATUS_FALSE)
 		return ctrl.Result{}, nil // not a valid secret - stop reconcile
-	}
-	//log.Info("Cluster admin username: " + string(adminSecret.Data["username"]))
-	//log.Info("Cluster admin password: " + string(adminSecret.Data["password"]))
+	} else {
+		err = r.setConditionClusterSecretLookup(ctx, svmCR, CONDITION_STATUS_TRUE)
 
+	}
+
+	// STEP 4
 	//create ONTAP client
-	oc, err := ontap.NewClient(
-		string(adminSecret.Data["username"]),
-		string(adminSecret.Data["password"]),
-		host, true, true)
+	oc, err := r.reconcileGetClient(ctx, svmCR, adminSecret, host, debugOn, trustSSL, log)
 	if err != nil {
-		log.Error(err, "Error creating ontap client")
 		return ctrl.Result{}, err //got another error - re-reconcile
 	}
 
+	// STEP 5
 	// Check to see if deleting custom resource and handle the deletion
 	isSMVMarkedToBeDeleted := svmCR.GetDeletionTimestamp() != nil
 	if isSMVMarkedToBeDeleted {
-		_, err = r.tryDeletions(ctx, svmCR, oc)
+		_, err = r.tryDeletions(ctx, svmCR, oc, log)
 		if err != nil {
 			log.Error(err, "Error during svmCR deletion")
 			return ctrl.Result{}, err //got another error - re-reconcile
@@ -119,11 +105,10 @@ func (r *StorageVirtualMachineReconciler) Reconcile(ctx context.Context, req ctr
 		}
 	}
 
-	//define variable whether to create svm or update it - default to false
-	create := false
-
+	// STEP 6
 	// Check to see if svmCR has uuid and then check if svm can be looked up on that uuid
-	svm, err := r.reconcileSvmCheck(ctx, svmCR, oc)
+	create := false // Define variable whether to create svm or update it - default to false
+	svmRetrieved, err := r.reconcileSvmCheck(ctx, svmCR, oc, log)
 	if err != nil && errors.IsNotFound(err) {
 		create = true
 	} else {
@@ -131,33 +116,42 @@ func (r *StorageVirtualMachineReconciler) Reconcile(ctx context.Context, req ctr
 		return ctrl.Result{}, err // got another error - re-reconcile
 	}
 
+	// Check whether we need to update or create an SVM
 	if create == false {
-		log.Info("Reconciling SVM update")
-		log.Info("create == false: ", svm)
+		// STEP 7
 		// reconcile SVM update
-
-	} else {
-		// reconcile SVM creation
-		log.Info("Reconciling SVM creation")
-		_, err = r.reconcileSvmCreation(ctx, svmCR, oc)
+		log.Info("Reconciling SVM update")
+		_, err = r.reconcileSvmUpdate(ctx, svmCR, svmRetrieved, oc, log)
 		if err != nil {
-			log.Error(err, "Error during reconciling SVM creation")
-			_ = r.setConditionSVMCreation(ctx, svmCR, CONDITION_STATUS_FALSE)
-			return ctrl.Result{}, err //got another error - re-reconcile
-		} else {
-			//Set condition for SVM create
-			err = r.setConditionSVMCreation(ctx, svmCR, CONDITION_STATUS_TRUE)
-			if err != nil {
-				return ctrl.Result{}, nil //even though condition not create, don't reconcile again
-			}
-
-			// Set finalizer
-			_, err = r.addFinalizer(ctx, svmCR)
-			if err != nil {
-				return ctrl.Result{}, err //got another error - re-reconcile
-			}
 
 		}
+
+	} else {
+		// STEP 8
+		// reconcile SVM creation
+		log.Info("Reconciling SVM creation")
+		_, err = r.reconcileSvmCreation(ctx, svmCR, oc, log)
+		if err != nil {
+			log.Error(err, "Error during reconciling SVM creation")
+			return ctrl.Result{}, err //got another error - re-reconcile
+		}
+	}
+
+	// STEP 9
+	//Check to see if need to create vsadmin
+	if svmCR.Spec.VsadminCredentialSecret.Name != "" {
+		// Look up vsadmin secret
+		vsAdminSecret, err := r.reconcileSecret(ctx,
+			svmCR.Spec.VsadminCredentialSecret.Name,
+			svmCR.Spec.VsadminCredentialSecret.Namespace, log)
+		if err != nil {
+			// return ctrl.Result{}, nil // not a valid secret - ignore
+			r.setConditionVsadminSecretLookup(ctx, svmCR, CONDITION_STATUS_FALSE)
+		} else {
+			r.setConditionVsadminSecretLookup(ctx, svmCR, CONDITION_STATUS_TRUE)
+			r.reconcileSecurityAccount(ctx, svmCR, oc, vsAdminSecret, log)
+		}
+
 	}
 
 	return ctrl.Result{}, nil //no error - end reconcile

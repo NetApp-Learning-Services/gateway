@@ -6,15 +6,15 @@ import (
 	"context"
 	"strings"
 
+	"github.com/go-logr/logr"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/types"
-	"sigs.k8s.io/controller-runtime/pkg/log"
 )
 
 func (r *StorageVirtualMachineReconciler) reconcileSecret(ctx context.Context,
-	name string, namespace string) (*corev1.Secret, error) {
-	log := log.FromContext(ctx)
+	name string, namespace string, log logr.Logger) (*corev1.Secret, error) {
+
 	secret := &corev1.Secret{}
 	err := r.Get(ctx, types.NamespacedName{
 		Name:      name,
@@ -29,6 +29,7 @@ func (r *StorageVirtualMachineReconciler) reconcileSecret(ctx context.Context,
 	}
 
 	if strings.TrimSpace(string(secret.Data["username"])) == "" {
+
 		log.Error(errors.NewBadRequest("Missing username"), secret.Name+"has no username")
 		return nil, nil
 	}
@@ -37,6 +38,9 @@ func (r *StorageVirtualMachineReconciler) reconcileSecret(ctx context.Context,
 		log.Error(errors.NewBadRequest("Missing password"), secret.Name+"has no password")
 		return nil, nil
 	}
+
+	//log.Info("username: " + string(secret.Data["username"]))
+	//log.Info("password: " + string(secret.Data["password"]))
 
 	return secret, nil
 }

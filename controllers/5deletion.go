@@ -8,13 +8,14 @@ import (
 	gatewayv1alpha1 "gateway/api/v1alpha1"
 	"gateway/ontap"
 
+	"github.com/go-logr/logr"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 )
 
 const finalizer = "gateway.netapp.com" //special word
 
-func (reconciler *StorageVirtualMachineReconciler) finalizeSVM(ctx context.Context,
+func (r *StorageVirtualMachineReconciler) finalizeSVM(ctx context.Context,
 	svmCR *gatewayv1alpha1.StorageVirtualMachine, oc *ontap.Client) error {
 
 	err := oc.DeleteStorageVM(svmCR.Spec.SvmUuid)
@@ -24,10 +25,10 @@ func (reconciler *StorageVirtualMachineReconciler) finalizeSVM(ctx context.Conte
 	return nil
 }
 
-func (reconciler *StorageVirtualMachineReconciler) addFinalizer(ctx context.Context, svmCR *gatewayv1alpha1.StorageVirtualMachine) (ctrl.Result, error) {
+func (r *StorageVirtualMachineReconciler) addFinalizer(ctx context.Context, svmCR *gatewayv1alpha1.StorageVirtualMachine) (ctrl.Result, error) {
 	if !controllerutil.ContainsFinalizer(svmCR, finalizer) {
 		controllerutil.AddFinalizer(svmCR, finalizer)
-		err := reconciler.Update(ctx, svmCR)
+		err := r.Update(ctx, svmCR)
 		if err != nil {
 			return ctrl.Result{}, err
 		}
@@ -35,22 +36,26 @@ func (reconciler *StorageVirtualMachineReconciler) addFinalizer(ctx context.Cont
 	return ctrl.Result{}, nil
 }
 
-func (reconciler *StorageVirtualMachineReconciler) tryDeletions(ctx context.Context,
-	svmCR *gatewayv1alpha1.StorageVirtualMachine, oc *ontap.Client) (ctrl.Result, error) {
+func (r *StorageVirtualMachineReconciler) tryDeletions(ctx context.Context,
+	svmCR *gatewayv1alpha1.StorageVirtualMachine, oc *ontap.Client, log logr.Logger) (ctrl.Result, error) {
 	isSMVMarkedToBeDeleted := svmCR.GetDeletionTimestamp() != nil
 	if isSMVMarkedToBeDeleted {
 		if controllerutil.ContainsFinalizer(svmCR, finalizer) {
-			if err := reconciler.finalizeSVM(ctx, svmCR, oc); err != nil {
+			if err := r.finalizeSVM(ctx, svmCR, oc); err != nil {
+				_ = r.setConditionSVMDeleted(ctx, svmCR, CONDITION_STATUS_FALSE)
 				return ctrl.Result{}, err
 			}
 
 			controllerutil.RemoveFinalizer(svmCR, finalizer)
-			err := reconciler.Update(ctx, svmCR)
+			err := r.Update(ctx, svmCR)
 			if err != nil {
+				_ = r.setConditionSVMDeleted(ctx, svmCR, CONDITION_STATUS_UNKNOWN)
 				return ctrl.Result{}, err
 			}
 		}
+		_ = r.setConditionSVMDeleted(ctx, svmCR, CONDITION_STATUS_TRUE)
 		return ctrl.Result{}, nil
 	}
+	// Not deleting
 	return ctrl.Result{}, nil
 }

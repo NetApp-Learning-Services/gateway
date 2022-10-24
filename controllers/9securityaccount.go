@@ -10,47 +10,62 @@ import (
 	gatewayv1alpha1 "gateway/api/v1alpha1"
 	"gateway/ontap"
 
+	"github.com/go-logr/logr"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	ctrl "sigs.k8s.io/controller-runtime"
-	"sigs.k8s.io/controller-runtime/pkg/log"
+)
+
+const (
+	secondAuthMethod = "none" // Special word
 )
 
 func (r *StorageVirtualMachineReconciler) reconcileSecurityAccount(ctx context.Context,
-	svmCR *gatewayv1alpha1.StorageVirtualMachine, oc *ontap.Client, credentials *corev1.Secret) (ctrl.Result, error) {
+	svmCR *gatewayv1alpha1.StorageVirtualMachine, oc *ontap.Client, credentials *corev1.Secret, log logr.Logger) (ctrl.Result, error) {
 
-	log := log.FromContext(ctx)
 	log.Info("reconcileSecurityAccount started")
 
 	userNameToModify := string(credentials.Data["username"])
 
-	if userNameToModify == "vsadmin" {
-		log.Info("vsadmin credentials - need to patch")
+	// Check to see if we have a uuid
+	if svmCR.Spec.SvmUuid == "" {
+		return ctrl.Result{}, errors.NewBadRequest("No SVM uuid during security account update")
+	}
+
+	// Check to see if username exists
+	user, err := oc.GetSecurityAccount(svmCR.Spec.SvmUuid, userNameToModify)
+	if err != nil {
+
+	}
+
+	if user.Name != "" {
+		// User already created - need to patch
+		log.Info("credentials " + userNameToModify + " - need to patch")
 		var payload ontap.SecurityAccountPayload
 
 		ssh := ontap.Application{
 			AppType:          ontap.Ssh,
-			SecondAuthMethod: "none", //special word
+			SecondAuthMethod: secondAuthMethod,
 		}
 		ssh.AuthMethods = append(ssh.AuthMethods, ontap.Password)
 		payload.Applications = append(payload.Applications, ssh)
 		ontapi := ontap.Application{
-			AppType:          ontap.Ssh,
-			SecondAuthMethod: "none", //special word
+			AppType:          ontap.Ontapi,
+			SecondAuthMethod: secondAuthMethod,
 		}
 		ontapi.AuthMethods = append(ontapi.AuthMethods, ontap.Password)
 		payload.Applications = append(payload.Applications, ontapi)
 
 		http := ontap.Application{
-			AppType:          ontap.Ssh,
-			SecondAuthMethod: "none", //special word
+			AppType:          ontap.Http,
+			SecondAuthMethod: secondAuthMethod,
 		}
 		http.AuthMethods = append(http.AuthMethods, ontap.Password)
 		payload.Applications = append(payload.Applications, http)
 
-		payload.Role = ontap.Vsadmin
+		//payload.Role = ontap.Vsadmin
 		payload.Password = string(credentials.Data["password"])
-		payload.Locked = false
+		payload.Locked = false // always unlock
 
 		log.Info("Security account payload: " + fmt.Sprintf("%#v\n", payload))
 
@@ -62,37 +77,33 @@ func (r *StorageVirtualMachineReconciler) reconcileSecurityAccount(ctx context.C
 		}
 
 		log.Info("Security account patch attempt")
-		if svmCR.Spec.SvmUuid == "" {
-			return ctrl.Result{}, errors.NewBadRequest("No SVM uuid during security account patch")
-		}
 		err = oc.PatchSecurityAccount(jsonPayload, svmCR.Spec.SvmUuid, userNameToModify)
 		if err != nil {
 			log.Error(err, "Error occurred when patching security account")
 			return ctrl.Result{}, err
 		}
-
 	} else {
-		log.Info("not vsadmin credentials - try to create")
+		log.Info("User not found - try to create")
 		var payload ontap.SecurityAccountPayload
 		payload.Name = userNameToModify
 		payload.Owner.Uuid = svmCR.Spec.SvmUuid
 
 		ssh := ontap.Application{
 			AppType:          ontap.Ssh,
-			SecondAuthMethod: "none", //special word
+			SecondAuthMethod: secondAuthMethod,
 		}
 		ssh.AuthMethods = append(ssh.AuthMethods, ontap.Password)
 		payload.Applications = append(payload.Applications, ssh)
 		ontapi := ontap.Application{
-			AppType:          ontap.Ssh,
-			SecondAuthMethod: "none", //special word
+			AppType:          ontap.Ontapi,
+			SecondAuthMethod: secondAuthMethod,
 		}
 		ontapi.AuthMethods = append(ontapi.AuthMethods, ontap.Password)
 		payload.Applications = append(payload.Applications, ontapi)
 
 		http := ontap.Application{
-			AppType:          ontap.Ssh,
-			SecondAuthMethod: "none", //special word
+			AppType:          ontap.Http,
+			SecondAuthMethod: secondAuthMethod,
 		}
 		http.AuthMethods = append(http.AuthMethods, ontap.Password)
 		payload.Applications = append(payload.Applications, http)

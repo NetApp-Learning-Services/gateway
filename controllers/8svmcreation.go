@@ -10,15 +10,14 @@ import (
 	gatewayv1alpha1 "gateway/api/v1alpha1"
 	"gateway/ontap"
 
+	"github.com/go-logr/logr"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
-	"sigs.k8s.io/controller-runtime/pkg/log"
 )
 
 func (r *StorageVirtualMachineReconciler) reconcileSvmCreation(ctx context.Context,
-	svmCR *gatewayv1alpha1.StorageVirtualMachine, oc *ontap.Client) (ctrl.Result, error) {
+	svmCR *gatewayv1alpha1.StorageVirtualMachine, oc *ontap.Client, log logr.Logger) (ctrl.Result, error) {
 
-	log := log.FromContext(ctx)
 	log.Info("reconcileSvmCreation started")
 
 	var payload ontap.SVMCreationPayload
@@ -44,14 +43,16 @@ func (r *StorageVirtualMachineReconciler) reconcileSvmCreation(ctx context.Conte
 	if err != nil {
 		//error creating the json body
 		log.Error(err, "Error creating the json payload for SVM creation")
+		_ = r.setConditionSVMCreation(ctx, svmCR, CONDITION_STATUS_FALSE)
 		return ctrl.Result{}, err
 	}
 
 	log.Info("SVM creation attempt")
 	uuid, err := oc.CreateStorageVM(jsonPayload)
 	if err != nil {
-		log.Info("uuid received was: " + uuid)
+		log.Info("Uuid received was: " + uuid)
 		log.Error(err, "Error occurred when creating SVM")
+		_ = r.setConditionSVMCreation(ctx, svmCR, CONDITION_STATUS_FALSE)
 		return ctrl.Result{}, err
 	}
 
@@ -69,21 +70,20 @@ func (r *StorageVirtualMachineReconciler) reconcileSvmCreation(ctx context.Conte
 	err = r.Patch(ctx, svmCR, patch)
 	if err != nil {
 		log.Error(err, "Error patching the new uuid in the custom resource")
+		_ = r.setConditionSVMCreation(ctx, svmCR, CONDITION_STATUS_FALSE)
 		return ctrl.Result{}, err
 	}
 
-	//Check to see if need to create vsadmin
-	if svmCR.Spec.VsadminCredentialSecret.Name != "" {
-		// Look up vsadmin secret
-		vsAdminSecret, err := r.reconcileSecret(ctx,
-			svmCR.Spec.VsadminCredentialSecret.Name,
-			svmCR.Spec.VsadminCredentialSecret.Namespace)
-		if err != nil {
-			// return ctrl.Result{}, nil // not a valid secret - ignore
-		} else {
-			r.reconcileSecurityAccount(ctx, svmCR, oc, vsAdminSecret)
-		}
+	//Set condition for SVM create
+	err = r.setConditionSVMCreation(ctx, svmCR, CONDITION_STATUS_TRUE)
+	if err != nil {
+		return ctrl.Result{}, nil //even though condition not create, don't reconcile again
+	}
 
+	// Set finalizer
+	_, err = r.addFinalizer(ctx, svmCR)
+	if err != nil {
+		return ctrl.Result{}, err //got another error - re-reconcile
 	}
 
 	return ctrl.Result{}, nil

@@ -156,26 +156,27 @@ type SvmResponse struct {
 
 type Svm struct {
 	Resource
-	UUID                   string     `json:"uuid"`
-	Name                   string     `json:"name"`
-	Subtype                string     `json:"subtype"`
-	Language               string     `json:"language"`
-	Aggregates             []Resource `json:"aggregates"`
-	State                  string     `json:"state"`
-	Comment                string     `json:"comment"`
-	Ipspace                Resource   `json:"ipspace"`
-	Dns                    Dns        `json:"dns,omitempty"`
-	Nsswitch               NsSwitch   `json:"nsswitch"`
-	Nis                    Nis        `json:"nis"`
-	Ldap                   Ldap       `json:"ldap"`
-	Nfs                    Nfs        `json:"nfs"`
-	Cifs                   Cifs       `json:"cifs"`
-	Iscsi                  Iscsi      `json:"iscsi"`
-	Fcp                    Fcp        `json:"fcp"`
-	Nvme                   Nvme       `json:"nvme"`
-	SnapMirror             SnapMirror `json:"snapmirror"`
-	SnapshotPolicy         Resource   `json:"snapshot_policy,omitempty"`
-	VolumeEfficiencyPolicy Resource   `json:"volume_efficiency_policy,omitempty"`
+	UUID                   string        `json:"uuid"`
+	Name                   string        `json:"name"`
+	Subtype                string        `json:"subtype"`
+	Language               string        `json:"language"`
+	Aggregates             []Resource    `json:"aggregates"`
+	State                  string        `json:"state"`
+	Comment                string        `json:"comment"`
+	Ipspace                Resource      `json:"ipspace"`
+	Dns                    Dns           `json:"dns,omitempty"`
+	Nsswitch               NsSwitch      `json:"nsswitch"`
+	Nis                    Nis           `json:"nis"`
+	Ldap                   Ldap          `json:"ldap"`
+	Nfs                    Nfs           `json:"nfs"`
+	Cifs                   Cifs          `json:"cifs"`
+	Iscsi                  Iscsi         `json:"iscsi"`
+	Fcp                    Fcp           `json:"fcp"`
+	Nvme                   Nvme          `json:"nvme"`
+	SnapMirror             SnapMirror    `json:"snapmirror"`
+	SnapshotPolicy         Resource      `json:"snapshot_policy,omitempty"`
+	VolumeEfficiencyPolicy Resource      `json:"volume_efficiency_policy,omitempty"`
+	IpInterfaces           []IpInterface `json:"ip_interfaces,omitempty"`
 }
 
 // Return svm uuid from name
@@ -217,7 +218,7 @@ func (c *Client) GetStorageVMByUUID(uuid string) (svm Svm, err error) {
 		return svm, &apiError{2, err.Error()}
 	}
 
-	return svm, nil
+	return svm, nil //should this return resp?
 }
 
 // Create SVM
@@ -253,6 +254,48 @@ func (c *Client) CreateStorageVM(jsonPayload []byte) (uuid string, err error) {
 	}
 
 	return r, nil
+}
+
+func (c *Client) PatchStorageVM(uuid string, jsonPayload []byte) (err error) {
+	uri := "/api/svm/svms/" + uuid
+
+	data, err := c.clientPatch(uri, jsonPayload)
+	if err != nil {
+		if strings.Contains(err.Error(), "Error-4") {
+			return &apiError{4, fmt.Sprintf("SVM with UUID \"%s\" not found", uuid)}
+		}
+		return &apiError{1, err.Error()}
+	}
+
+	var result map[string]interface{}
+	err = json.Unmarshal(data, &result)
+	if err != nil {
+		return &apiError{2, err.Error()}
+	}
+
+	job := result["job"].(map[string]interface{})
+	link := job["_links"].(map[string]interface{})
+	href := link["self"].(map[string]interface{})
+	url := href["href"].(string)
+
+	patchJob, err := c.GetJob(url)
+
+	for patchJob.State == "running" {
+		time.Sleep(time.Second)
+		patchJob, err = c.GetJob(url)
+	}
+
+	if patchJob.State == "failure" {
+		return &apiError{int64(patchJob.Code), patchJob.Message}
+	}
+
+	if patchJob.State == "success" {
+		//uuid, err = ParseUUID(patchJob.Description, " ")
+		//return uuid, err
+		return nil
+	}
+
+	return nil
 }
 
 func (c *Client) DeleteStorageVM(uuid string) (err error) {
