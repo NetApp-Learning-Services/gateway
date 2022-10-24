@@ -109,11 +109,14 @@ func (r *StorageVirtualMachineReconciler) Reconcile(ctx context.Context, req ctr
 	// Check to see if svmCR has uuid and then check if svm can be looked up on that uuid
 	create := false // Define variable whether to create svm or update it - default to false
 	svmRetrieved, err := r.reconcileSvmCheck(ctx, svmCR, oc, log)
-	if err != nil && errors.IsNotFound(err) {
-		create = true
-	} else {
-		// some other error
-		return ctrl.Result{}, err // got another error - re-reconcile
+	if err != nil {
+		if errors.IsNotFound(err) {
+			create = true
+		} else {
+			// some other error
+			log.Error(err, "Some other error while trying to retrieve SVM, other then SVM not created")
+			return ctrl.Result{}, err // got another error - re-reconcile
+		}
 	}
 
 	// Check whether we need to update or create an SVM
