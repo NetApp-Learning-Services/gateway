@@ -86,12 +86,15 @@ spec:
                 - name
                 - netmask
                 type: object
+              svmComment:
+                description: Stores SVM's uuid after it is created
+                type: string
               svmName:
                 description: Provides required SVM name / +kubebuilder:validation:Format:=hostname
                 maxLength: 253
                 minLength: 3
                 type: string
-              uuid:
+              svmUuid:
                 description: Stores SVM's uuid after it is created
                 type: string
               vsadminCredentials:
