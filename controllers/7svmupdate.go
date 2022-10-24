@@ -10,10 +10,11 @@ import (
 	gatewayv1alpha1 "gateway/api/v1alpha1"
 	"gateway/ontap"
 
+	"golang.org/x/exp/slices"
 	ctrl "sigs.k8s.io/controller-runtime"
 
 	"github.com/go-logr/logr"
-	"golang.org/x/exp/slices"
+
 	"k8s.io/apimachinery/pkg/api/errors"
 )
 
@@ -42,8 +43,8 @@ func (r *StorageVirtualMachineReconciler) reconcileSvmUpdate(ctx context.Context
 		ipIndex := slices.IndexFunc(svmRetrieved.IpInterfaces, func(i ontap.IpInterface) bool { return i.Ip.Address == svmCR.Spec.ManagementLIF.IPAddress })
 		nameIndex := slices.IndexFunc(svmRetrieved.IpInterfaces, func(i ontap.IpInterface) bool { return i.Name == svmCR.Spec.ManagementLIF.Name })
 
-		if ipIndex != nil {
-			if nameIndex != nil {
+		if ipIndex != -1 {
+			if nameIndex != -1 {
 				if ipIndex == nameIndex {
 					patchManagementLif.Name = svmCR.Spec.ManagementLIF.Name
 					patchManagementLif.Ip.Address = svmCR.Spec.ManagementLIF.IPAddress
@@ -87,7 +88,7 @@ func (r *StorageVirtualMachineReconciler) reconcileSvmUpdate(ctx context.Context
 
 		} else {
 			//IP not found
-			if nameIndex != nil {
+			if nameIndex != -1 {
 				// name found but not IP
 				// need to update IP of svmRetrieved.IpInterfaces[nameIndex]
 				patchManagementLif.Name = svmRetrieved.IpInterfaces[nameIndex].Name
