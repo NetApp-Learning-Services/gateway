@@ -13,7 +13,7 @@ func (r *StorageVirtualMachineReconciler) reconcileDiscoverObject(ctx context.Co
 	req ctrl.Request, log logr.Logger) (*gatewayv1alpha1.StorageVirtualMachine, error) {
 
 	svmCR := &gatewayv1alpha1.StorageVirtualMachine{}
-	log.Info("Start Discover Custom Resource")
+	log.Info("STEP 1: Discover Custom Resource")
 
 	err := r.Get(ctx, req.NamespacedName, svmCR)
 	if err != nil && errors.IsNotFound(err) {

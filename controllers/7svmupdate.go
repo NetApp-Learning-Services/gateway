@@ -21,7 +21,7 @@ import (
 func (r *StorageVirtualMachineReconciler) reconcileSvmUpdate(ctx context.Context, svmCR *gatewayv1alpha1.StorageVirtualMachine,
 	svmRetrieved ontap.Svm, oc *ontap.Client, log logr.Logger) (ctrl.Result, error) {
 
-	log.Info("reconcileSvmUpdate started")
+	log.Info("Step 7: Update SVM")
 
 	var patchSVM ontap.Svm
 

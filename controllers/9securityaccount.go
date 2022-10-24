@@ -23,7 +23,7 @@ const (
 func (r *StorageVirtualMachineReconciler) reconcileSecurityAccount(ctx context.Context,
 	svmCR *gatewayv1alpha1.StorageVirtualMachine, oc *ontap.Client, credentials *corev1.Secret, log logr.Logger) (ctrl.Result, error) {
 
-	log.Info("reconcileSecurityAccount started")
+	log.Info("Step 9: Verify SVM management account is update to date")
 
 	userNameToModify := string(credentials.Data["username"])
 

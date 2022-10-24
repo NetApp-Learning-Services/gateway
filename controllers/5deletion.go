@@ -38,6 +38,9 @@ func (r *StorageVirtualMachineReconciler) addFinalizer(ctx context.Context, svmC
 
 func (r *StorageVirtualMachineReconciler) tryDeletions(ctx context.Context,
 	svmCR *gatewayv1alpha1.StorageVirtualMachine, oc *ontap.Client, log logr.Logger) (ctrl.Result, error) {
+
+	log.Info("STEP 5: Delete SVM in ONTAP and in K8s")
+
 	isSMVMarkedToBeDeleted := svmCR.GetDeletionTimestamp() != nil
 	if isSMVMarkedToBeDeleted {
 		if controllerutil.ContainsFinalizer(svmCR, finalizer) {

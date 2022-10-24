@@ -18,7 +18,7 @@ import (
 func (r *StorageVirtualMachineReconciler) reconcileSvmCreation(ctx context.Context,
 	svmCR *gatewayv1alpha1.StorageVirtualMachine, oc *ontap.Client, log logr.Logger) (ctrl.Result, error) {
 
-	log.Info("reconcileSvmCreation started")
+	log.Info("Step 8: Create SVM")
 
 	var payload ontap.SVMCreationPayload
 	payload.Name = svmCR.Spec.SvmName
