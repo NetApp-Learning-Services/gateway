@@ -38,7 +38,10 @@ type StorageVirtualMachineSpec struct {
 	ClusterManagementHost string `json:"clusterHost"`
 
 	// Stores SVM's uuid after it is created
-	SvmUuid string `json:"uuid,omitempty"`
+	SvmUuid string `json:"svmUuid,omitempty"`
+
+	// Stores SVM's uuid after it is created
+	SvmComment string `json:"svmComment,omitempty"`
 
 	// Provides optional SVM managment LIF
 	// +kubebuilder:validation:Optional
