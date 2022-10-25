@@ -149,11 +149,15 @@ func (r *StorageVirtualMachineReconciler) Reconcile(ctx context.Context, req ctr
 			svmCR.Spec.VsadminCredentialSecret.Name,
 			svmCR.Spec.VsadminCredentialSecret.Namespace, log)
 		if err != nil {
-			// return ctrl.Result{}, nil // not a valid secret - ignore
+
 			r.setConditionVsadminSecretLookup(ctx, svmCR, CONDITION_STATUS_FALSE)
-		} else {
-			r.setConditionVsadminSecretLookup(ctx, svmCR, CONDITION_STATUS_TRUE)
-			r.reconcileSecurityAccount(ctx, svmCR, oc, vsAdminSecret, log)
+			return ctrl.Result{}, nil // not a valid secret - ignore
+		}
+
+		r.setConditionVsadminSecretLookup(ctx, svmCR, CONDITION_STATUS_TRUE)
+		_, err = r.reconcileSecurityAccount(ctx, svmCR, oc, vsAdminSecret, log)
+		if err != nil {
+			return ctrl.Result{}, nil // TODO:  Ignore errors for now
 		}
 
 	}

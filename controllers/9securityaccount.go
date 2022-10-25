@@ -81,7 +81,10 @@ func (r *StorageVirtualMachineReconciler) reconcileSecurityAccount(ctx context.C
 		err = oc.PatchSecurityAccount(jsonPayload, svmCR.Spec.SvmUuid, userNameToModify)
 		if err != nil {
 			log.Error(err, "Error occurred when patching security account")
+			_ = r.setConditionVsadminSecretUpdate(ctx, svmCR, CONDITION_STATUS_FALSE)
 			return ctrl.Result{}, err
+		} else {
+			_ = r.setConditionVsadminSecretUpdate(ctx, svmCR, CONDITION_STATUS_TRUE)
 		}
 	} else {
 		log.Info("User not found - try to create")
@@ -125,7 +128,10 @@ func (r *StorageVirtualMachineReconciler) reconcileSecurityAccount(ctx context.C
 		err = oc.CreateSecurityAccount(jsonPayload)
 		if err != nil {
 			log.Error(err, "Error occurred when creating security account")
+			_ = r.setConditionVsadminSecretUpdate(ctx, svmCR, CONDITION_STATUS_FALSE)
 			return ctrl.Result{}, err
+		} else {
+			_ = r.setConditionVsadminSecretUpdate(ctx, svmCR, CONDITION_STATUS_TRUE)
 		}
 	}
 

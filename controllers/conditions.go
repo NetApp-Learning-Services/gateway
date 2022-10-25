@@ -242,8 +242,8 @@ func (reconciler *StorageVirtualMachineReconciler) setConditionSVMCreation(ctx c
 // STEP 9
 // VSADMIN UPDATE
 // Note: Status of VSADMIN_SECRET_LOOKUP can only be true or false
-const CONDITION_TYPE_VSADMIN_SECRET_LOOKUP = "Step9ClusterAdminSecretLookup"
-const CONDITION_REASON_VSADMIN_SECRET_LOOKUP = "ClusterAdminSecretLookup"
+const CONDITION_TYPE_VSADMIN_SECRET_LOOKUP = "Step9-1VsAdminSecretLookup"
+const CONDITION_REASON_VSADMIN_SECRET_LOOKUP = "VsAdminSecretLookup"
 const CONDITION_MESSAGE_VSADMIN_SECRET_LOOKUP_TRUE = "SVM Admin credentials available"
 const CONDITION_MESSAGE_VSADMIN_SECRET_LOOKUP_FALSE = "SVM Admin credentials NOT available"
 
@@ -262,6 +262,31 @@ func (reconciler *StorageVirtualMachineReconciler) setConditionVsadminSecretLook
 	if status == CONDITION_STATUS_FALSE {
 		return appendCondition(ctx, reconciler.Client, svmCR, CONDITION_TYPE_VSADMIN_SECRET_LOOKUP, status,
 			CONDITION_REASON_VSADMIN_SECRET_LOOKUP, CONDITION_MESSAGE_VSADMIN_SECRET_LOOKUP_FALSE)
+	}
+	return nil
+}
+
+// Note: Status of VSADMIN_UPDATE can only be true or false
+const CONDITION_TYPE_VSADMIN_SECRET_UPDATE = "Step9-2VsAdminSecretUpdate"
+const CONDITION_REASON_VSADMIN_SECRET_UPDATE = "VsAdminSecretUpdate"
+const CONDITION_MESSAGE_VSADMIN_SECRET_UPDATE_TRUE = "SVM Admin credentials updated in ONTAP"
+const CONDITION_MESSAGE_VSADMIN_SECRET_UPDATE_FALSE = "SVM Admin credentials NOT updated in ONTAP"
+
+func (reconciler *StorageVirtualMachineReconciler) setConditionVsadminSecretUpdate(ctx context.Context,
+	svmCR *gatewayv1alpha1.StorageVirtualMachine, status metav1.ConditionStatus) error {
+
+	if reconciler.containsCondition(ctx, svmCR, CONDITION_REASON_VSADMIN_SECRET_UPDATE) {
+		reconciler.deleteCondition(ctx, svmCR, CONDITION_TYPE_VSADMIN_SECRET_UPDATE, CONDITION_REASON_VSADMIN_SECRET_UPDATE)
+	}
+
+	if status == CONDITION_STATUS_TRUE {
+		return appendCondition(ctx, reconciler.Client, svmCR, CONDITION_TYPE_VSADMIN_SECRET_UPDATE, status,
+			CONDITION_REASON_VSADMIN_SECRET_UPDATE, CONDITION_MESSAGE_VSADMIN_SECRET_UPDATE_TRUE)
+	}
+
+	if status == CONDITION_STATUS_FALSE {
+		return appendCondition(ctx, reconciler.Client, svmCR, CONDITION_TYPE_VSADMIN_SECRET_UPDATE, status,
+			CONDITION_REASON_VSADMIN_SECRET_UPDATE, CONDITION_MESSAGE_VSADMIN_SECRET_UPDATE_FALSE)
 	}
 	return nil
 }
