@@ -38,7 +38,7 @@ func (r *StorageVirtualMachineReconciler) reconcileSecurityAccount(ctx context.C
 		log.Error(err, "Error checking to see if username exists")
 	}
 
-	if user.Name != "" {
+	if user.Name != "" && user.Locked {
 		// User already created - need to patch
 		log.Info("credentials " + userNameToModify + " - need to patch")
 		var payload ontap.SecurityAccountPayload
