@@ -39,6 +39,15 @@ type Role struct {
 	Name string `json:"name,omitempty"`
 }
 
+type SecurityAccountPatchPayload struct {
+	Name         string        `json:"name,omitempty"`
+	Applications []Application `json:"applications,omitempty"`
+	Role         UserRole      `json:"role,omitempty"`
+	Password     string        `json:"password,omitempty"`
+	Comment      string        `json:"comment,omitempty"`
+	Locked       *bool         `json:"locked,omitempty"`
+}
+
 type SecurityAccountPayload struct {
 	Owner        Owner         `json:"owner,omitempty"`
 	Name         string        `json:"name,omitempty"`

@@ -44,7 +44,7 @@ func (r *StorageVirtualMachineReconciler) reconcileSecurityAccount(ctx context.C
 	if user.Name != "" && user.Locked {
 		// User already created - need to patch
 		log.Info("credentials " + userNameToModify + " - need to patch")
-		var payload ontap.SecurityAccountPayload
+		var payload ontap.SecurityAccountPatchPayload
 
 		ssh := ontap.Application{
 			AppType:          ontap.Ssh,
