@@ -146,7 +146,7 @@ func (c *Client) clientPatch(uri string, json []byte) (data []byte, err error) {
 		log.Printf("[DEBUG] response body: " + fmt.Sprintf("%v", string(response[:])))
 	}
 
-	return nil, nil //TODO: UNDO THIS
+	return response, nil
 }
 
 func (c *Client) clientDelete(uri string) (data []byte, err error) {
