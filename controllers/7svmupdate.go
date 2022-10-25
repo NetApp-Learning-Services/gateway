@@ -26,12 +26,14 @@ func (r *StorageVirtualMachineReconciler) reconcileSvmUpdate(ctx context.Context
 	var patchSVM ontap.SvmPatch
 
 	// interate over custom resoource svmCR and look for differences in retrieved SVM
-	if svmCR.Spec.SvmName != svmRetrieved.Name {
-		//update name
-		patchSVM.Name = svmCR.Spec.SvmName
-	}
+	// if svmCR.Spec.SvmName != svmRetrieved.Name {
+	// 	//update name
+	// 	patchSVM.Name = svmCR.Spec.SvmName
+	// }
+	// always set name
+	patchSVM.Name = svmCR.Spec.SvmName
 
-	if svmCR.Spec.SvmComment != svmRetrieved.Comment {
+	if svmCR.Spec.SvmComment != "" && svmCR.Spec.SvmComment != svmRetrieved.Comment {
 		//update comment
 		patchSVM.Comment = svmCR.Spec.SvmComment
 	}
@@ -42,6 +44,9 @@ func (r *StorageVirtualMachineReconciler) reconcileSvmUpdate(ctx context.Context
 
 		ipIndex := slices.IndexFunc(svmRetrieved.IpInterfaces, func(i ontap.IpInterface) bool { return i.Ip.Address == svmCR.Spec.ManagementLIF.IPAddress })
 		nameIndex := slices.IndexFunc(svmRetrieved.IpInterfaces, func(i ontap.IpInterface) bool { return i.Name == svmCR.Spec.ManagementLIF.Name })
+
+		log.Info("ipIndex: " + fmt.Sprintf("%v", ipIndex))
+		log.Info("nameIndex: " + fmt.Sprintf("%v", nameIndex))
 
 		if ipIndex != -1 {
 			if nameIndex != -1 {
@@ -106,6 +111,13 @@ func (r *StorageVirtualMachineReconciler) reconcileSvmUpdate(ctx context.Context
 					// need to update homenode
 					patchManagementLif.Location.HomeNode.Name = svmCR.Spec.ManagementLIF.HomeNode
 				}
+			} else {
+				// nothing defined in SVM create new
+				patchManagementLif.Name = svmCR.Spec.ManagementLIF.Name
+				patchManagementLif.Ip.Address = svmCR.Spec.ManagementLIF.IPAddress
+				patchManagementLif.Ip.Netmask = svmCR.Spec.ManagementLIF.Netmask
+				patchManagementLif.Location.BroadcastDomain.Name = svmCR.Spec.ManagementLIF.BroacastDomain
+				patchManagementLif.Location.HomeNode.Name = svmCR.Spec.ManagementLIF.HomeNode
 			}
 
 		}

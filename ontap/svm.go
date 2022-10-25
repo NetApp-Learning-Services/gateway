@@ -193,15 +193,6 @@ type SvmPatch struct {
 	Aggregates     []Resource    `json:"aggregates,omitempty"`
 	State          string        `json:"state,omitempty"`
 	Comment        string        `json:"comment,omitempty"`
-	Dns            Dns           `json:"dns,omitempty"`
-	Nsswitch       NsSwitch      `json:"nsswitch,omitempty"`
-	Nfs            Nfs           `json:"nfs,omitempty"`
-	Cifs           Cifs          `json:"cifs,omitempty"`
-	Iscsi          Iscsi         `json:"iscsi,omitempty"`
-	Fcp            Fcp           `json:"fcp,omitempty"`
-	Nvme           Nvme          `json:"nvme,omitempty"`
-	SnapMirror     SnapMirror    `json:"snapmirror,omitempty"`
-	SnapshotPolicy Resource      `json:"snapshot_policy,omitempty"`
 	IpInterfaces   []IpInterface `json:"ip_interfaces,omitempty"`
 }
 
