@@ -23,7 +23,7 @@ func (r *StorageVirtualMachineReconciler) reconcileSvmUpdate(ctx context.Context
 
 	log.Info("Step 7: Update SVM")
 
-	var patchSVM ontap.Svm
+	var patchSVM ontap.SvmPatch
 
 	// interate over custom resoource svmCR and look for differences in retrieved SVM
 	if svmCR.Spec.SvmName != svmRetrieved.Name {

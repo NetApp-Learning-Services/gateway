@@ -179,6 +179,32 @@ type Svm struct {
 	IpInterfaces           []IpInterface `json:"ip_interfaces,omitempty"`
 }
 
+// In 9.11.1:
+// Missing QOS
+// Mssing Certificate
+// Missing anti_ransomware_default_volume_state
+// Missing is space reporting logical
+// Missing is space enforcement logical
+// Missing max volumes
+type SvmPatch struct {
+	Resource
+	Name           string        `json:"name,omitempty"`
+	Language       string        `json:"language,omitempty"`
+	Aggregates     []Resource    `json:"aggregates,omitempty"`
+	State          string        `json:"state,omitempty"`
+	Comment        string        `json:"comment,omitempty"`
+	Dns            Dns           `json:"dns,omitempty"`
+	Nsswitch       NsSwitch      `json:"nsswitch,omitempty"`
+	Nfs            Nfs           `json:"nfs,omitempty"`
+	Cifs           Cifs          `json:"cifs,omitempty"`
+	Iscsi          Iscsi         `json:"iscsi,omitempty"`
+	Fcp            Fcp           `json:"fcp,omitempty"`
+	Nvme           Nvme          `json:"nvme,omitempty"`
+	SnapMirror     SnapMirror    `json:"snapmirror,omitempty"`
+	SnapshotPolicy Resource      `json:"snapshot_policy,omitempty"`
+	IpInterfaces   []IpInterface `json:"ip_interfaces,omitempty"`
+}
+
 // Return svm uuid from name
 func (c *Client) GetStorageVmUUIDByName(name string) (uuid string, err error) {
 	uri := "/api/svm/svms?name=" + name
