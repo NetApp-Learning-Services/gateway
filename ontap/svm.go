@@ -188,12 +188,12 @@ type Svm struct {
 // Missing max volumes
 type SvmPatch struct {
 	Resource
-	Name           string        `json:"name,omitempty"`
-	Language       string        `json:"language,omitempty"`
-	Aggregates     []Resource    `json:"aggregates,omitempty"`
-	State          string        `json:"state,omitempty"`
-	Comment        string        `json:"comment,omitempty"`
-	IpInterfaces   []IpInterface `json:"ip_interfaces,omitempty"`
+	Name         string        `json:"name,omitempty"`
+	Language     string        `json:"language,omitempty"`
+	Aggregates   []Resource    `json:"aggregates,omitempty"`
+	State        string        `json:"state,omitempty"`
+	Comment      string        `json:"comment,omitempty"`
+	IpInterfaces []IpInterface `json:"ip_interfaces,omitempty"`
 }
 
 // Return svm uuid from name
@@ -253,11 +253,11 @@ func (c *Client) CreateStorageVM(jsonPayload []byte) (uuid string, err error) {
 
 	url := result.Job.Selflink.Self.Href
 
-	createJob, err := c.GetJob(url)
+	createJob, _ := c.GetJob(url)
 
 	for createJob.State == "running" {
 		time.Sleep(time.Second * 2)
-		createJob, err = c.GetJob(url)
+		createJob, _ = c.GetJob(url)
 	}
 
 	if createJob.State == "failure" {
@@ -295,11 +295,11 @@ func (c *Client) PatchStorageVM(uuid string, jsonPayload []byte) (err error) {
 	href := link["self"].(map[string]interface{})
 	url := href["href"].(string)
 
-	patchJob, err := c.GetJob(url)
+	patchJob, _ := c.GetJob(url)
 
 	for patchJob.State == "running" {
 		time.Sleep(time.Second)
-		patchJob, err = c.GetJob(url)
+		patchJob, _ = c.GetJob(url)
 	}
 
 	if patchJob.State == "failure" {
@@ -337,11 +337,11 @@ func (c *Client) DeleteStorageVM(uuid string) (err error) {
 	href := link["self"].(map[string]interface{})
 	url := href["href"].(string)
 
-	deleteJob, err := c.GetJob(url)
+	deleteJob, _ := c.GetJob(url)
 
 	for deleteJob.State == "running" {
 		time.Sleep(time.Second)
-		deleteJob, err = c.GetJob(url)
+		deleteJob, _ = c.GetJob(url)
 	}
 
 	if deleteJob.State == "failure" {
@@ -353,7 +353,7 @@ func (c *Client) DeleteStorageVM(uuid string) (err error) {
 
 func ParseUUID(input string, char string) (string, error) {
 	if len(input) == 0 {
-		return "", &apiError{5, fmt.Sprintf("UUID length is zero")}
+		return "", &apiError{5, "UUID length is zero"}
 	}
 
 	//doesn't work with /auuid

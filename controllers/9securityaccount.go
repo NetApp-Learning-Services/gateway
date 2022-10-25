@@ -82,7 +82,7 @@ func (r *StorageVirtualMachineReconciler) reconcileSecurityAccount(ctx context.C
 		if err != nil {
 			log.Error(err, "Error occurred when patching security account")
 			_ = r.setConditionVsadminSecretUpdate(ctx, svmCR, CONDITION_STATUS_FALSE)
-			return ctrl.Result{}, err
+			return ctrl.Result{}, nil //TODO: CHANGE THIS
 		} else {
 			_ = r.setConditionVsadminSecretUpdate(ctx, svmCR, CONDITION_STATUS_TRUE)
 		}

@@ -8,7 +8,7 @@ import (
 	"crypto/tls"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"log"
 	"net/http"
 	"strings"
@@ -200,7 +200,7 @@ func (c *Client) doRequest(req *http.Request) ([]byte, error) {
 
 	defer resp.Body.Close()
 
-	body, err := ioutil.ReadAll(resp.Body)
+	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, err
 	}
@@ -211,7 +211,7 @@ func (c *Client) doRequest(req *http.Request) ([]byte, error) {
 			var jec ErrorResponse
 			json.Unmarshal(body, &jec)
 			if jec.Error.Code == "4" {
-				return nil, fmt.Errorf("Error-%s %s %s", jec.Error.Code, jec.Error.Target, jec.Error.Message)
+				return nil, fmt.Errorf("error-%s %s %s", jec.Error.Code, jec.Error.Target, jec.Error.Message)
 			}
 			fmt.Println(string(body))
 			return nil, fmt.Errorf("%s", jec.Error.Message)

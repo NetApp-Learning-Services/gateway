@@ -49,7 +49,7 @@ func (r *StorageVirtualMachineReconciler) Reconcile(ctx context.Context, req ctr
 
 	// Create log from the context
 	log := log.FromContext(ctx).WithValues("Request.Namespace", req.Namespace, "Request.Name", req.Name)
-	log.Info("Reconcile started")
+	log.Info("RECONCILE START")
 
 	// TODO: Check out this: https://github.com/kubernetes-sigs/kubebuilder/issues/618
 
@@ -161,7 +161,7 @@ func (r *StorageVirtualMachineReconciler) Reconcile(ctx context.Context, req ctr
 		}
 
 	}
-
+	log.Info("RECONCILE END")
 	return ctrl.Result{}, nil //no error - end reconcile
 }
 

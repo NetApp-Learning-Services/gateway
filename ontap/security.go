@@ -83,16 +83,17 @@ func (c *Client) CreateSecurityAccount(jsonPayload []byte) (err error) {
 	uri := "/api/security/accounts"
 	data, err := c.clientPost(uri, jsonPayload)
 	if err != nil {
-		//fmt.Println("Error: " + err.Error())
+		fmt.Println("Error 1: " + err.Error())
 		return &apiError{1, err.Error()}
 	}
 
 	var result map[string]interface{}
 	err = json.Unmarshal(data, &result)
 	if err != nil {
+		fmt.Println("Error 2: " + err.Error())
 		return &apiError{2, err.Error()}
 	} else {
-		fmt.Println(fmt.Sprintf("result: %v", result))
+		fmt.Printf("result: %v", result)
 	}
 
 	return nil
@@ -103,16 +104,17 @@ func (c *Client) PatchSecurityAccount(jsonPayload []byte, uuid string, name stri
 	uri := "/api/security/accounts/" + uuid + "/" + name
 	data, err := c.clientPatch(uri, jsonPayload)
 	if err != nil {
-		//fmt.Println("Error: " + err.Error())
+		fmt.Println("Error 1: " + err.Error())
 		return &apiError{1, err.Error()}
 	}
 
 	var result map[string]interface{}
 	err = json.Unmarshal(data, &result)
 	if err != nil {
+		fmt.Println("Error 2: " + err.Error())
 		return &apiError{2, err.Error()}
 	} else {
-		fmt.Println(fmt.Sprintf("result: %v", result))
+		fmt.Printf("result: %v", result)
 	}
 
 	return nil
