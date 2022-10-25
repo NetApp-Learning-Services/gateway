@@ -156,24 +156,24 @@ type SvmResponse struct {
 
 type Svm struct {
 	Resource
-	UUID                   string        `json:"uuid"`
-	Name                   string        `json:"name"`
-	Subtype                string        `json:"subtype"`
-	Language               string        `json:"language"`
-	Aggregates             []Resource    `json:"aggregates"`
-	State                  string        `json:"state"`
-	Comment                string        `json:"comment"`
-	Ipspace                Resource      `json:"ipspace"`
+	UUID                   string        `json:"uuid,omitempty"`
+	Name                   string        `json:"name,omitempty"`
+	Subtype                string        `json:"subtype,omitempty"`
+	Language               string        `json:"language,omitempty"`
+	Aggregates             []Resource    `json:"aggregates,omitempty"`
+	State                  string        `json:"state,omitempty"`
+	Comment                string        `json:"comment,omitempty"`
+	Ipspace                Resource      `json:"ipspace,omitempty"`
 	Dns                    Dns           `json:"dns,omitempty"`
-	Nsswitch               NsSwitch      `json:"nsswitch"`
-	Nis                    Nis           `json:"nis"`
-	Ldap                   Ldap          `json:"ldap"`
-	Nfs                    Nfs           `json:"nfs"`
-	Cifs                   Cifs          `json:"cifs"`
-	Iscsi                  Iscsi         `json:"iscsi"`
-	Fcp                    Fcp           `json:"fcp"`
-	Nvme                   Nvme          `json:"nvme"`
-	SnapMirror             SnapMirror    `json:"snapmirror"`
+	Nsswitch               NsSwitch      `json:"nsswitch,omitempty"`
+	Nis                    Nis           `json:"nis,omitempty"`
+	Ldap                   Ldap          `json:"ldap,omitempty"`
+	Nfs                    Nfs           `json:"nfs,omitempty"`
+	Cifs                   Cifs          `json:"cifs,omitempty"`
+	Iscsi                  Iscsi         `json:"iscsi,omitempty"`
+	Fcp                    Fcp           `json:"fcp,omitempty"`
+	Nvme                   Nvme          `json:"nvme,omitempty"`
+	SnapMirror             SnapMirror    `json:"snapmirror,omitempty"`
 	SnapshotPolicy         Resource      `json:"snapshot_policy,omitempty"`
 	VolumeEfficiencyPolicy Resource      `json:"volume_efficiency_policy,omitempty"`
 	IpInterfaces           []IpInterface `json:"ip_interfaces,omitempty"`
