@@ -123,12 +123,12 @@ func (r *StorageVirtualMachineReconciler) Reconcile(ctx context.Context, req ctr
 	if create == false {
 		// STEP 7
 		// reconcile SVM update
-		log.Info("Reconciling SVM update")
-		_, err = r.reconcileSvmUpdate(ctx, svmCR, svmRetrieved, oc, log)
-		if err != nil {
-			log.Error(err, "Error during reconciling SVM update")
-			return ctrl.Result{}, nil //TODO: REMOVE THIS
-		}
+		// log.Info("Reconciling SVM update")
+		// _, err = r.reconcileSvmUpdate(ctx, svmCR, svmRetrieved, oc, log)
+		// if err != nil {
+		// 	log.Error(err, "Error during reconciling SVM update")
+		// 	return ctrl.Result{}, nil //TODO: REMOVE THIS
+		// }
 
 	} else {
 		// STEP 8
