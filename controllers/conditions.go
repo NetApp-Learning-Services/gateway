@@ -66,48 +66,27 @@ func (reconciler *StorageVirtualMachineReconciler) setConditionHostFound(ctx con
 
 // STEP 3
 // Resolve Secret
-// Note: Status of SECRET_LOOKUP can only be true or false
-const CONDITION_TYPE_SECRET_LOOKUP = "Step3ClusterAdminSecretLookup"
-const CONDITION_REASON_SECRET_LOOKUP = "ClusterAdminSecretLookup"
+// Note: Status of CLUSTER_SECRET_LOOKUP can only be true or false
+const CONDITION_TYPE_CLUSTER_SECRET_LOOKUP = "Step3ClusterAdminSecretLookup"
+const CONDITION_REASON_CLUSTER_SECRET_LOOKUP = "ClusterAdminSecretLookup"
 const CONDITION_MESSAGE_CLUSTER_SECRET_LOOKUP_TRUE = "Cluster Admin credentials available"
 const CONDITION_MESSAGE_CLUSTER_SECRET_LOOKUP_FALSE = "Cluster Admin credentials NOT available"
-const CONDITION_MESSAGE_VSADMIN_SECRET_LOOKUP_TRUE = "SVM Admin credentials available"
-const CONDITION_MESSAGE_VSADMIN_SECRET_LOOKUP_FALSE = "SVM Admin credentials NOT available"
 
 func (reconciler *StorageVirtualMachineReconciler) setConditionClusterSecretLookup(ctx context.Context,
 	svmCR *gatewayv1alpha1.StorageVirtualMachine, status metav1.ConditionStatus) error {
 
-	if reconciler.containsCondition(ctx, svmCR, CONDITION_REASON_SECRET_LOOKUP) {
-		reconciler.deleteCondition(ctx, svmCR, CONDITION_TYPE_SECRET_LOOKUP, CONDITION_REASON_SECRET_LOOKUP)
+	if reconciler.containsCondition(ctx, svmCR, CONDITION_REASON_CLUSTER_SECRET_LOOKUP) {
+		reconciler.deleteCondition(ctx, svmCR, CONDITION_TYPE_CLUSTER_SECRET_LOOKUP, CONDITION_REASON_CLUSTER_SECRET_LOOKUP)
 	}
 
 	if status == CONDITION_STATUS_TRUE {
-		return appendCondition(ctx, reconciler.Client, svmCR, CONDITION_TYPE_SECRET_LOOKUP, status,
-			CONDITION_REASON_SECRET_LOOKUP, CONDITION_MESSAGE_CLUSTER_SECRET_LOOKUP_TRUE)
+		return appendCondition(ctx, reconciler.Client, svmCR, CONDITION_TYPE_CLUSTER_SECRET_LOOKUP, status,
+			CONDITION_REASON_CLUSTER_SECRET_LOOKUP, CONDITION_MESSAGE_CLUSTER_SECRET_LOOKUP_TRUE)
 	}
 
 	if status == CONDITION_STATUS_FALSE {
-		return appendCondition(ctx, reconciler.Client, svmCR, CONDITION_TYPE_SECRET_LOOKUP, status,
-			CONDITION_REASON_SECRET_LOOKUP, CONDITION_MESSAGE_CLUSTER_SECRET_LOOKUP_FALSE)
-	}
-	return nil
-}
-
-func (reconciler *StorageVirtualMachineReconciler) setConditionVsadminSecretLookup(ctx context.Context,
-	svmCR *gatewayv1alpha1.StorageVirtualMachine, status metav1.ConditionStatus) error {
-
-	if reconciler.containsCondition(ctx, svmCR, CONDITION_REASON_SECRET_LOOKUP) {
-		reconciler.deleteCondition(ctx, svmCR, CONDITION_TYPE_SECRET_LOOKUP, CONDITION_REASON_SECRET_LOOKUP)
-	}
-
-	if status == CONDITION_STATUS_TRUE {
-		return appendCondition(ctx, reconciler.Client, svmCR, CONDITION_TYPE_SECRET_LOOKUP, status,
-			CONDITION_REASON_SECRET_LOOKUP, CONDITION_MESSAGE_VSADMIN_SECRET_LOOKUP_TRUE)
-	}
-
-	if status == CONDITION_STATUS_FALSE {
-		return appendCondition(ctx, reconciler.Client, svmCR, CONDITION_TYPE_SECRET_LOOKUP, status,
-			CONDITION_REASON_SECRET_LOOKUP, CONDITION_MESSAGE_VSADMIN_SECRET_LOOKUP_FALSE)
+		return appendCondition(ctx, reconciler.Client, svmCR, CONDITION_TYPE_CLUSTER_SECRET_LOOKUP, status,
+			CONDITION_REASON_CLUSTER_SECRET_LOOKUP, CONDITION_MESSAGE_CLUSTER_SECRET_LOOKUP_FALSE)
 	}
 	return nil
 }
@@ -256,6 +235,33 @@ func (reconciler *StorageVirtualMachineReconciler) setConditionSVMCreation(ctx c
 	if status == CONDITION_STATUS_FALSE {
 		return appendCondition(ctx, reconciler.Client, svmCR, CONDITION_TYPE_SVM_CREATED, status,
 			CONDITION_REASON_SVM_CREATED, CONDITION_MESSAGE_SVM_CREATED_FALSE)
+	}
+	return nil
+}
+
+// STEP 9
+// VSADMIN UPDATE
+// Note: Status of VSADMIN_SECRET_LOOKUP can only be true or false
+const CONDITION_TYPE_VSADMIN_SECRET_LOOKUP = "Step9ClusterAdminSecretLookup"
+const CONDITION_REASON_VSADMIN_SECRET_LOOKUP = "ClusterAdminSecretLookup"
+const CONDITION_MESSAGE_VSADMIN_SECRET_LOOKUP_TRUE = "SVM Admin credentials available"
+const CONDITION_MESSAGE_VSADMIN_SECRET_LOOKUP_FALSE = "SVM Admin credentials NOT available"
+
+func (reconciler *StorageVirtualMachineReconciler) setConditionVsadminSecretLookup(ctx context.Context,
+	svmCR *gatewayv1alpha1.StorageVirtualMachine, status metav1.ConditionStatus) error {
+
+	if reconciler.containsCondition(ctx, svmCR, CONDITION_REASON_VSADMIN_SECRET_LOOKUP) {
+		reconciler.deleteCondition(ctx, svmCR, CONDITION_TYPE_VSADMIN_SECRET_LOOKUP, CONDITION_REASON_VSADMIN_SECRET_LOOKUP)
+	}
+
+	if status == CONDITION_STATUS_TRUE {
+		return appendCondition(ctx, reconciler.Client, svmCR, CONDITION_TYPE_VSADMIN_SECRET_LOOKUP, status,
+			CONDITION_REASON_VSADMIN_SECRET_LOOKUP, CONDITION_MESSAGE_VSADMIN_SECRET_LOOKUP_TRUE)
+	}
+
+	if status == CONDITION_STATUS_FALSE {
+		return appendCondition(ctx, reconciler.Client, svmCR, CONDITION_TYPE_VSADMIN_SECRET_LOOKUP, status,
+			CONDITION_REASON_VSADMIN_SECRET_LOOKUP, CONDITION_MESSAGE_VSADMIN_SECRET_LOOKUP_FALSE)
 	}
 	return nil
 }
