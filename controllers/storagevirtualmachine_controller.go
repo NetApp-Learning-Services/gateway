@@ -126,7 +126,8 @@ func (r *StorageVirtualMachineReconciler) Reconcile(ctx context.Context, req ctr
 		log.Info("Reconciling SVM update")
 		_, err = r.reconcileSvmUpdate(ctx, svmCR, svmRetrieved, oc, log)
 		if err != nil {
-
+			log.Error(err, "Error during reconciling SVM update")
+			return ctrl.Result{}, nil //TODO: REMOVE THIS
 		}
 
 	} else {
@@ -142,20 +143,20 @@ func (r *StorageVirtualMachineReconciler) Reconcile(ctx context.Context, req ctr
 
 	// STEP 9
 	//Check to see if need to create vsadmin
-	// if svmCR.Spec.VsadminCredentialSecret.Name != "" {
-	// 	// Look up vsadmin secret
-	// 	vsAdminSecret, err := r.reconcileSecret(ctx,
-	// 		svmCR.Spec.VsadminCredentialSecret.Name,
-	// 		svmCR.Spec.VsadminCredentialSecret.Namespace, log)
-	// 	if err != nil {
-	// 		// return ctrl.Result{}, nil // not a valid secret - ignore
-	// 		r.setConditionVsadminSecretLookup(ctx, svmCR, CONDITION_STATUS_FALSE)
-	// 	} else {
-	// 		r.setConditionVsadminSecretLookup(ctx, svmCR, CONDITION_STATUS_TRUE)
-	// 		r.reconcileSecurityAccount(ctx, svmCR, oc, vsAdminSecret, log)
-	// 	}
+	if svmCR.Spec.VsadminCredentialSecret.Name != "" {
+		// Look up vsadmin secret
+		vsAdminSecret, err := r.reconcileSecret(ctx,
+			svmCR.Spec.VsadminCredentialSecret.Name,
+			svmCR.Spec.VsadminCredentialSecret.Namespace, log)
+		if err != nil {
+			// return ctrl.Result{}, nil // not a valid secret - ignore
+			r.setConditionVsadminSecretLookup(ctx, svmCR, CONDITION_STATUS_FALSE)
+		} else {
+			r.setConditionVsadminSecretLookup(ctx, svmCR, CONDITION_STATUS_TRUE)
+			r.reconcileSecurityAccount(ctx, svmCR, oc, vsAdminSecret, log)
+		}
 
-	// }
+	}
 
 	return ctrl.Result{}, nil //no error - end reconcile
 }
