@@ -38,6 +38,9 @@ func (r *StorageVirtualMachineReconciler) reconcileSecurityAccount(ctx context.C
 		log.Error(err, "Error checking to see if username exists")
 	}
 
+	log.Info("User: " + user.Name)
+	log.Info("Locked: " + fmt.Sprintf("%v/n", user.Locked))
+
 	if user.Name != "" && user.Locked {
 		// User already created - need to patch
 		log.Info("credentials " + userNameToModify + " - need to patch")
@@ -87,6 +90,10 @@ func (r *StorageVirtualMachineReconciler) reconcileSecurityAccount(ctx context.C
 			_ = r.setConditionVsadminSecretUpdate(ctx, svmCR, CONDITION_STATUS_TRUE)
 		}
 	} else {
+		return ctrl.Result{}, nil //do nothing
+	}
+
+	if user.Name == "" {
 		log.Info("User not found - try to create")
 		var payload ontap.SecurityAccountPayload
 		payload.Name = userNameToModify
