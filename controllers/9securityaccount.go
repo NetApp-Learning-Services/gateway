@@ -35,7 +35,7 @@ func (r *StorageVirtualMachineReconciler) reconcileSecurityAccount(ctx context.C
 	// Check to see if username exists
 	user, err := oc.GetSecurityAccount(svmCR.Spec.SvmUuid, userNameToModify)
 	if err != nil {
-
+		log.Error(err, "Error checking to see if username exists")
 	}
 
 	if user.Name != "" {

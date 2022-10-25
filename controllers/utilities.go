@@ -41,13 +41,13 @@ func appendCondition(ctx context.Context, reconcilerClient client.Client, object
 		conditionsAware.SetConditions(append(conditionsAware.GetConditions(), condition))
 		err := reconcilerClient.Status().Update(ctx, object)
 		if err != nil {
-			errMessage := "Custom resource status update failed"
+			errMessage := "custom resource status update failed"
 			log.Error(err, errMessage)
 			return fmt.Errorf(errMessage)
 		}
 
 	} else {
-		errMessage := "Status cannot be set, custom resource doesn't support conditions"
+		errMessage := "status cannot be set, custom resource doesn't support conditions"
 		log.Info(errMessage)
 		return fmt.Errorf(errMessage)
 	}

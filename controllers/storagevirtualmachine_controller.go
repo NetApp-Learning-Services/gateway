@@ -77,10 +77,10 @@ func (r *StorageVirtualMachineReconciler) Reconcile(ctx context.Context, req ctr
 		svmCR.Spec.ClusterCredentialSecret.Name,
 		svmCR.Spec.ClusterCredentialSecret.Namespace, log)
 	if err != nil {
-		err = r.setConditionClusterSecretLookup(ctx, svmCR, CONDITION_STATUS_FALSE)
+		_ = r.setConditionClusterSecretLookup(ctx, svmCR, CONDITION_STATUS_FALSE)
 		return ctrl.Result{}, nil // not a valid secret - stop reconcile
 	} else {
-		err = r.setConditionClusterSecretLookup(ctx, svmCR, CONDITION_STATUS_TRUE)
+		_ = r.setConditionClusterSecretLookup(ctx, svmCR, CONDITION_STATUS_TRUE)
 
 	}
 
@@ -120,10 +120,10 @@ func (r *StorageVirtualMachineReconciler) Reconcile(ctx context.Context, req ctr
 	}
 
 	// Check whether we need to update or create an SVM
-	if create == false {
+	if !create {
 		// STEP 7
 		// reconcile SVM update
-		// log.Info("Reconciling SVM update")
+		log.Info("Reconciling SVM update: " + svmRetrieved.Name)
 		// _, err = r.reconcileSvmUpdate(ctx, svmCR, svmRetrieved, oc, log)
 		// if err != nil {
 		// 	log.Error(err, "Error during reconciling SVM update")
