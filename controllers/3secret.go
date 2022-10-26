@@ -12,8 +12,8 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 )
 
-const clusterAdmin = "ontap-cluster-admin"
-const svmAdmin = "ontap-svm-admin"
+const clusterAdmin = "ontap-cluster-admin" // secret word
+const svmAdmin = "ontap-svm-admin"         // secret word
 
 func (r *StorageVirtualMachineReconciler) reconcileSecret(ctx context.Context,
 	name string, namespace string, log logr.Logger) (*corev1.Secret, error) {

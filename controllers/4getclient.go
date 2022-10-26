@@ -14,7 +14,7 @@ func (r *StorageVirtualMachineReconciler) reconcileGetClient(ctx context.Context
 	adminSecret *corev1.Secret, host string, debugOn bool, trustSSL bool,
 	log logr.Logger) (*ontap.Client, error) {
 
-	log.Info("Step 4: Create ONTAP Client")
+	log.Info("Step 4: Create ONTAP client")
 
 	oc, err := ontap.NewClient(
 		string(adminSecret.Data["username"]),

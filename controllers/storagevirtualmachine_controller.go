@@ -86,9 +86,11 @@ func (r *StorageVirtualMachineReconciler) Reconcile(ctx context.Context, req ctr
 		svmCR.Spec.ClusterCredentialSecret.Name,
 		svmCR.Spec.ClusterCredentialSecret.Namespace, log)
 	if err != nil {
+		log.Info("Cluster admin credentials NOT available")
 		_ = r.setConditionClusterSecretLookup(ctx, svmCR, CONDITION_STATUS_FALSE)
 		return ctrl.Result{Requeue: false}, nil // not a valid secret - stop reconcile
 	} else {
+		log.Info("Cluster admin credentials available")
 		_ = r.setConditionClusterSecretLookup(ctx, svmCR, CONDITION_STATUS_TRUE)
 	}
 
@@ -98,6 +100,8 @@ func (r *StorageVirtualMachineReconciler) Reconcile(ctx context.Context, req ctr
 	if err != nil {
 		log.Error(err, "Error during creation of ONTAP client - requeuing")
 		return ctrl.Result{RequeueAfter: 30 * time.Second}, err //got another error - re-reconcile
+	} else {
+		log.Info("ONTAP client created")
 	}
 
 	// STEP 5
@@ -131,12 +135,15 @@ func (r *StorageVirtualMachineReconciler) Reconcile(ctx context.Context, req ctr
 	if create {
 		// STEP 7
 		// reconcile SVM creation
-		log.Info("Reconciling SVM creation")
 		_, err = r.reconcileSvmCreation(ctx, svmCR, oc, log)
 		if err != nil {
 			log.Error(err, "Error during reconciling SVM creation - requeuing")
 			return ctrl.Result{RequeueAfter: 30 * time.Second}, err //got another error - re-reconcile
+		} else {
+			log.Info("SVM created")
 		}
+	} else {
+		log.Info("Step 7: Create SVM - skipped because already created")
 	}
 
 	// STEP 8
@@ -147,21 +154,22 @@ func (r *StorageVirtualMachineReconciler) Reconcile(ctx context.Context, req ctr
 			svmCR.Spec.VsadminCredentialSecret.Name,
 			svmCR.Spec.VsadminCredentialSecret.Namespace, log)
 		if err != nil {
-
 			r.setConditionVsadminSecretLookup(ctx, svmCR, CONDITION_STATUS_FALSE)
+			log.Info("SVM managment credentials NOT available")
 			return ctrl.Result{Requeue: false}, nil // not a valid secret - ignore
+		} else {
+			log.Info("SVM managment credentials available")
+			r.setConditionVsadminSecretLookup(ctx, svmCR, CONDITION_STATUS_TRUE)
+			// STEP 9
+			// Create or update SVM management credentials
+			_, err = r.reconcileSecurityAccount(ctx, svmCR, oc, vsAdminSecret, log)
+			if err != nil {
+				log.Error(err, "Error while updating SVM management credentials - requeuing")
+				return ctrl.Result{Requeue: true}, err
+			} else {
+				log.Info("SVM managment credentials updated or created in ONTAP")
+			}
 		}
-
-		r.setConditionVsadminSecretLookup(ctx, svmCR, CONDITION_STATUS_TRUE)
-
-		// STEP 9
-		// Create or update SVM management credentials
-		_, err = r.reconcileSecurityAccount(ctx, svmCR, oc, vsAdminSecret, log)
-		if err != nil {
-			log.Error(err, "Error while updating SVM management credentials - requeuing")
-			return ctrl.Result{Requeue: true}, err
-		}
-
 	}
 
 	// Check whether we need to update the SVM
