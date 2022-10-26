@@ -54,6 +54,10 @@ func (r *StorageVirtualMachineReconciler) Reconcile(ctx context.Context, req ctr
 	log := log.FromContext(ctx).WithValues("Request.Namespace", req.Namespace, "Request.Name", req.Name)
 	log.Info("RECONCILE START")
 
+	log.Info("Start sleep for 10 seconds")
+	time.Sleep(10 * time.Second)
+	log.Info("End Sleep for 10 seconds")
+
 	// STEP 1
 	// Check for existing of CR object -
 	// if doesn't exist or error retrieving, log error and exit reconcile
