@@ -21,7 +21,7 @@ const (
 )
 
 func (r *StorageVirtualMachineReconciler) reconcileSecurityAccount(ctx context.Context,
-	svmCR *gatewayv1alpha1.StorageVirtualMachine, oc *ontap.Client, credentials *corev1.Secret, log logr.Logger) (ctrl.Result, error) {
+	svmCR *gatewayv1alpha1.StorageVirtualMachine, oc *ontap.Client, credentials *corev1.Secret, log logr.Logger) (error) {
 
 	log.Info("Step 9: Verify SVM management account is update to date")
 
@@ -29,7 +29,7 @@ func (r *StorageVirtualMachineReconciler) reconcileSecurityAccount(ctx context.C
 
 	// Check to see if we have a uuid
 	if svmCR.Spec.SvmUuid == "" {
-		return ctrl.Result{}, errors.NewBadRequest("No SVM uuid during security account update")
+		return errors.NewBadRequest("No SVM uuid during security account update")
 	}
 
 	// Check to see if username exists
@@ -76,7 +76,7 @@ func (r *StorageVirtualMachineReconciler) reconcileSecurityAccount(ctx context.C
 		if err != nil {
 			//error creating the json body
 			log.Error(err, "Error creating the json payload for security account patch")
-			return ctrl.Result{}, err
+			return err
 		}
 
 		log.Info("Security account patch attempt")
@@ -84,12 +84,14 @@ func (r *StorageVirtualMachineReconciler) reconcileSecurityAccount(ctx context.C
 		if err != nil {
 			log.Error(err, "Error occurred when patching security account")
 			_ = r.setConditionVsadminSecretUpdate(ctx, svmCR, CONDITION_STATUS_FALSE)
-			return ctrl.Result{}, nil //TODO: CHANGE THIS
+			return err 
 		} else {
+			log.Info("SVM managment credentials updated in ONTAP")
 			_ = r.setConditionVsadminSecretUpdate(ctx, svmCR, CONDITION_STATUS_TRUE)
 		}
 	} else {
-		return ctrl.Result{}, nil //do nothing
+		log.Info("Nothing to do - skipping step 9")
+		return nil //do nothing
 	}
 
 	if user.Name == "" {
@@ -127,7 +129,7 @@ func (r *StorageVirtualMachineReconciler) reconcileSecurityAccount(ctx context.C
 		if err != nil {
 			//error creating the json body
 			log.Error(err, "Error creating the json payload for security account creation")
-			return ctrl.Result{}, err
+			return err
 		}
 
 		log.Info("Security account creation attempt")
@@ -135,11 +137,12 @@ func (r *StorageVirtualMachineReconciler) reconcileSecurityAccount(ctx context.C
 		if err != nil {
 			log.Error(err, "Error occurred when creating security account")
 			_ = r.setConditionVsadminSecretUpdate(ctx, svmCR, CONDITION_STATUS_FALSE)
-			return ctrl.Result{}, err
+			return  err
 		} else {
+			log.Info("SVM managment credentials created in ONTAP")
 			_ = r.setConditionVsadminSecretUpdate(ctx, svmCR, CONDITION_STATUS_TRUE)
 		}
 	}
 
-	return ctrl.Result{}, nil
+	return nil
 }

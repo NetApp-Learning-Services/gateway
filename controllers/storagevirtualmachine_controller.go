@@ -162,12 +162,10 @@ func (r *StorageVirtualMachineReconciler) Reconcile(ctx context.Context, req ctr
 			r.setConditionVsadminSecretLookup(ctx, svmCR, CONDITION_STATUS_TRUE)
 			// STEP 9
 			// Create or update SVM management credentials
-			_, err = r.reconcileSecurityAccount(ctx, svmCR, oc, vsAdminSecret, log)
+			err = r.reconcileSecurityAccount(ctx, svmCR, oc, vsAdminSecret, log)
 			if err != nil {
 				log.Error(err, "Error while updating SVM management credentials - requeuing")
 				return ctrl.Result{Requeue: true}, err
-			} else {
-				log.Info("SVM managment credentials updated or created in ONTAP")
 			}
 		}
 	}

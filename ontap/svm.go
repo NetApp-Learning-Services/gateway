@@ -179,6 +179,70 @@ type Svm struct {
 	IpInterfaces           []IpInterface `json:"ip_interfaces,omitempty"`
 }
 
+type StorageVM struct {
+	UUID       string `json:"uuid"`
+	Name       string `json:"name"`
+	Subtype    string `json:"subtype"`
+	Language   string `json:"language"`
+	Aggregates []struct {
+		Name string `json:"name"`
+		UUID string `json:"uuid"`
+	} `json:"aggregates"`
+	State   string `json:"state"`
+	Comment string `json:"comment"`
+	Ipspace struct {
+		Name  string `json:"name"`
+		UUID  string `json:"uuid"`
+		Links struct {
+			Self struct {
+				Href string `json:"href"`
+			} `json:"self"`
+		} `json:"_links"`
+	} `json:"ipspace"`
+	SnapshotPolicy struct {
+		UUID  string `json:"uuid"`
+		Name  string `json:"name"`
+		Links struct {
+			Self struct {
+				Href string `json:"href"`
+			} `json:"self"`
+		} `json:"_links"`
+	} `json:"snapshot_policy"`
+	Nsswitch struct {
+		Hosts    []string `json:"hosts"`
+		Group    []string `json:"group"`
+		Passwd   []string `json:"passwd"`
+		Netgroup []string `json:"netgroup"`
+		Namemap  []string `json:"namemap"`
+	} `json:"nsswitch"`
+	Nis struct {
+		Enabled bool `json:"enabled"`
+	} `json:"nis"`
+	Ldap struct {
+		Enabled bool `json:"enabled"`
+	} `json:"ldap"`
+	Nfs struct {
+		Enabled bool `json:"enabled"`
+	} `json:"nfs"`
+	Cifs struct {
+		Enabled bool `json:"enabled"`
+	} `json:"cifs"`
+	Iscsi struct {
+		Enabled bool `json:"enabled"`
+	} `json:"iscsi"`
+	Fcp struct {
+		Enabled bool `json:"enabled"`
+	} `json:"fcp"`
+	Nvme struct {
+		Enabled bool `json:"enabled"`
+	} `json:"nvme"`
+	Links struct {
+		Self struct {
+			Href string `json:"href"`
+		} `json:"self"`
+	} `json:"_links"`
+}
+
 // In 9.11.1:
 // Missing QOS
 // Mssing Certificate
@@ -221,7 +285,7 @@ func (c *Client) GetStorageVmUUIDByName(name string) (uuid string, err error) {
 }
 
 // Return a SVM by UUID
-func (c *Client) GetStorageVMByUUID(uuid string) (svm Svm, err error) {
+func (c *Client) GetStorageVMByUUID(uuid string) (svm StorageVM, err error) {
 	uri := "/api/svm/svms/" + uuid
 
 	data, err := c.clientGet(uri)
@@ -229,13 +293,13 @@ func (c *Client) GetStorageVMByUUID(uuid string) (svm Svm, err error) {
 		return svm, &apiError{1, err.Error()}
 	}
 
-	var resp Svm
+	var resp StorageVM
 	err = json.Unmarshal(data, &resp)
 	if err != nil {
-		return svm, &apiError{2, err.Error()}
+		return resp, &apiError{2, err.Error()}
 	}
 
-	return svm, nil //should this return resp?
+	return resp, nil
 }
 
 // Create SVM
