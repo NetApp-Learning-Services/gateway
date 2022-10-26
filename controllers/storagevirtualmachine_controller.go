@@ -12,8 +12,10 @@ import (
 
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
+	"sigs.k8s.io/controller-runtime/pkg/builder"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/log"
+	"sigs.k8s.io/controller-runtime/pkg/predicate"
 
 	gatewayv1alpha1 "gateway/api/v1alpha1"
 )
@@ -166,9 +168,10 @@ func (r *StorageVirtualMachineReconciler) Reconcile(ctx context.Context, req ctr
 }
 
 // SetupWithManager sets up the controller with the Manager.
+// Adding predicate to prevent hotlooping when the status conditions are updated
 func (r *StorageVirtualMachineReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
-		For(&gatewayv1alpha1.StorageVirtualMachine{}).
+		For(&gatewayv1alpha1.StorageVirtualMachine{}, builder.WithPredicates(predicate.GenerationChangedPredicate{})).
 		// Owns(&corev1.Secret{}).
 		Complete(r)
 }
