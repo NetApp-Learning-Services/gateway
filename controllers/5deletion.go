@@ -56,7 +56,8 @@ func (r *StorageVirtualMachineReconciler) tryDeletions(ctx context.Context,
 				return ctrl.Result{}, err
 			}
 		}
-		_ = r.setConditionSVMDeleted(ctx, svmCR, CONDITION_STATUS_TRUE)
+		// Can't do this because custom resource is deleted
+		//_ = r.setConditionSVMDeleted(ctx, svmCR, CONDITION_STATUS_TRUE)
 		return ctrl.Result{}, nil
 	}
 	// Not deleting
