@@ -58,9 +58,8 @@ func (r *StorageVirtualMachineReconciler) Reconcile(ctx context.Context, req ctr
 	// It is a hack to stop the second reconcile that occurrs
 	// immediately after the first reconcile.
 	// If this is not present it causes errors while updating conditions.
-	log.Info("Start sleep for 1 seconds")
+	// TODO: Check this statement: https://groups.google.com/g/kubebuilder/c/tULj-TRM9ts
 	time.Sleep(1 * time.Second)
-	log.Info("End Sleep for 1 seconds")
 
 	// STEP 1
 	// Check for existing of CR object -

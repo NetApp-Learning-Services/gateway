@@ -12,12 +12,19 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 )
 
+const clusterAdmin = "ontap-cluster-admin"
+const svmAdmin = "ontap-svm-admin"
+
 func (r *StorageVirtualMachineReconciler) reconcileSecret(ctx context.Context,
 	name string, namespace string, log logr.Logger) (*corev1.Secret, error) {
 
-	log.Info("name: " + name)
-
-	log.Info("STEP 3: Resolve secret")
+	if name == clusterAdmin {
+		log.Info("STEP 3: Resolve cluster admin secret")
+	} else if name == svmAdmin {
+		log.Info("STEP 8: Resolve SVM management secret")
+	} else {
+		log.Info("STEP ?: Resolve ? secret")
+	}
 
 	secret := &corev1.Secret{}
 	err := r.Get(ctx, types.NamespacedName{
