@@ -15,11 +15,11 @@ import (
 )
 
 func (r *StorageVirtualMachineReconciler) reconcileSvmCheck(ctx context.Context,
-	svmCR *gatewayv1alpha1.StorageVirtualMachine, oc *ontap.Client, log logr.Logger) (ontap.Svm, error) {
+	svmCR *gatewayv1alpha1.StorageVirtualMachine, oc *ontap.Client, log logr.Logger) (ontap.StorageVM, error) {
 
 	log.Info("STEP 6: Check for a valid SVM")
 
-	var svm ontap.Svm
+	var svm ontap.StorageVM
 
 	// Check to see if SVM exists by the uuid in CR
 	uuid := strings.TrimSpace(svmCR.Spec.SvmUuid)

@@ -13,7 +13,6 @@ import (
 	"github.com/go-logr/logr"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
-	ctrl "sigs.k8s.io/controller-runtime"
 )
 
 const (
@@ -21,7 +20,7 @@ const (
 )
 
 func (r *StorageVirtualMachineReconciler) reconcileSecurityAccount(ctx context.Context,
-	svmCR *gatewayv1alpha1.StorageVirtualMachine, oc *ontap.Client, credentials *corev1.Secret, log logr.Logger) (error) {
+	svmCR *gatewayv1alpha1.StorageVirtualMachine, oc *ontap.Client, credentials *corev1.Secret, log logr.Logger) error {
 
 	log.Info("Step 9: Verify SVM management account is update to date")
 
@@ -84,7 +83,7 @@ func (r *StorageVirtualMachineReconciler) reconcileSecurityAccount(ctx context.C
 		if err != nil {
 			log.Error(err, "Error occurred when patching security account")
 			_ = r.setConditionVsadminSecretUpdate(ctx, svmCR, CONDITION_STATUS_FALSE)
-			return err 
+			return err
 		} else {
 			log.Info("SVM managment credentials updated in ONTAP")
 			_ = r.setConditionVsadminSecretUpdate(ctx, svmCR, CONDITION_STATUS_TRUE)
@@ -137,7 +136,7 @@ func (r *StorageVirtualMachineReconciler) reconcileSecurityAccount(ctx context.C
 		if err != nil {
 			log.Error(err, "Error occurred when creating security account")
 			_ = r.setConditionVsadminSecretUpdate(ctx, svmCR, CONDITION_STATUS_FALSE)
-			return  err
+			return err
 		} else {
 			log.Info("SVM managment credentials created in ONTAP")
 			_ = r.setConditionVsadminSecretUpdate(ctx, svmCR, CONDITION_STATUS_TRUE)
