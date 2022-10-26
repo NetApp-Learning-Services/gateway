@@ -54,10 +54,10 @@ func (r *StorageVirtualMachineReconciler) Reconcile(ctx context.Context, req ctr
 	log := log.FromContext(ctx).WithValues("Request.Namespace", req.Namespace, "Request.Name", req.Name)
 	log.Info("RECONCILE START")
 
-	// This works.  
-	// It is a hack to stop the second reconcile that occurrs 
+	// This works.
+	// It is a hack to stop the second reconcile that occurrs
 	// immediately after the first reconcile.
-	// If this is not present it causes errors while updating conditions. 
+	// If this is not present it causes errors while updating conditions.
 	log.Info("Start sleep for 10 seconds")
 	time.Sleep(10 * time.Second)
 	log.Info("End Sleep for 10 seconds")
@@ -70,6 +70,7 @@ func (r *StorageVirtualMachineReconciler) Reconcile(ctx context.Context, req ctr
 	if err != nil && errors.IsNotFound(err) {
 		return ctrl.Result{Requeue: false}, nil
 	} else if err != nil {
+		log.Error(err, "Error during custom resource discovery - requeuing")
 		return ctrl.Result{RequeueAfter: 30 * time.Second}, err //re-reconcile
 	}
 
@@ -87,16 +88,16 @@ func (r *StorageVirtualMachineReconciler) Reconcile(ctx context.Context, req ctr
 		svmCR.Spec.ClusterCredentialSecret.Namespace, log)
 	if err != nil {
 		_ = r.setConditionClusterSecretLookup(ctx, svmCR, CONDITION_STATUS_FALSE)
-		return ctrl.Result{}, nil // not a valid secret - stop reconcile
+		return ctrl.Result{Requeue: false}, nil // not a valid secret - stop reconcile
 	} else {
 		_ = r.setConditionClusterSecretLookup(ctx, svmCR, CONDITION_STATUS_TRUE)
-
 	}
 
 	// STEP 4
 	//create ONTAP client
 	oc, err := r.reconcileGetClient(ctx, svmCR, adminSecret, host, debugOn, trustSSL, log)
 	if err != nil {
+		log.Error(err, "Error during creation of ONTAP client - requeuing")
 		return ctrl.Result{RequeueAfter: 30 * time.Second}, err //got another error - re-reconcile
 	}
 
@@ -106,7 +107,7 @@ func (r *StorageVirtualMachineReconciler) Reconcile(ctx context.Context, req ctr
 	if isSMVMarkedToBeDeleted {
 		_, err = r.tryDeletions(ctx, svmCR, oc, log)
 		if err != nil {
-			log.Error(err, "Error during svmCR deletion")
+			log.Error(err, "Error during custom resource deletion - requeuing")
 			return ctrl.Result{RequeueAfter: 30 * time.Second}, err //got another error - re-reconcile
 		} else {
 			log.Info("SVM deleted, removed finalizer, cleaning up custom resource")
@@ -123,7 +124,7 @@ func (r *StorageVirtualMachineReconciler) Reconcile(ctx context.Context, req ctr
 			create = true
 		} else {
 			// some other error
-			log.Error(err, "Some other error while trying to retrieve SVM, other then SVM not created")
+			log.Error(err, "Some other error while trying to retrieve SVM, other then SVM not created - requeuing")
 			return ctrl.Result{RequeueAfter: 30 * time.Second}, err // got another error - re-reconcile
 		}
 	}
@@ -145,7 +146,7 @@ func (r *StorageVirtualMachineReconciler) Reconcile(ctx context.Context, req ctr
 		log.Info("Reconciling SVM creation")
 		_, err = r.reconcileSvmCreation(ctx, svmCR, oc, log)
 		if err != nil {
-			log.Error(err, "Error during reconciling SVM creation")
+			log.Error(err, "Error during reconciling SVM creation - requeuing")
 			return ctrl.Result{RequeueAfter: 30 * time.Second}, err //got another error - re-reconcile
 		}
 	}
@@ -166,7 +167,8 @@ func (r *StorageVirtualMachineReconciler) Reconcile(ctx context.Context, req ctr
 		r.setConditionVsadminSecretLookup(ctx, svmCR, CONDITION_STATUS_TRUE)
 		_, err = r.reconcileSecurityAccount(ctx, svmCR, oc, vsAdminSecret, log)
 		if err != nil {
-			return ctrl.Result{Requeue: false}, nil // TODO:  Ignore errors for now
+			log.Error(err, "Error while updating SVM management credentials - requeuing")
+			return ctrl.Result{Requeue: true}, err
 		}
 
 	}
