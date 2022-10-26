@@ -7,6 +7,7 @@ package controllers
 
 import (
 	"context"
+	"time"
 
 	"k8s.io/apimachinery/pkg/api/errors"
 
@@ -53,24 +54,22 @@ func (r *StorageVirtualMachineReconciler) Reconcile(ctx context.Context, req ctr
 	log := log.FromContext(ctx).WithValues("Request.Namespace", req.Namespace, "Request.Name", req.Name)
 	log.Info("RECONCILE START")
 
-	// TODO: Check out this: https://github.com/kubernetes-sigs/kubebuilder/issues/618
-
 	// STEP 1
 	// Check for existing of CR object -
 	// if doesn't exist or error retrieving, log error and exit reconcile
 	// if discovered, write condition and move on
 	svmCR, err := r.reconcileDiscoverObject(ctx, req, log)
 	if err != nil && errors.IsNotFound(err) {
-		return ctrl.Result{}, nil
+		return ctrl.Result{Requeue: false}, nil
 	} else if err != nil {
-		return ctrl.Result{}, err //re-reconcile
+		return ctrl.Result{RequeueAfter: 30 * time.Second}, err //re-reconcile
 	}
 
 	// STEP 2
 	// Get cluster management host
 	host, err := r.reconcileClusterHost(ctx, svmCR, log)
 	if err != nil {
-		return ctrl.Result{}, nil // not a valid cluster Url - stop reconcile
+		return ctrl.Result{Requeue: false}, nil // not a valid cluster Url - stop reconcile
 	}
 
 	// STEP 3
@@ -90,7 +89,7 @@ func (r *StorageVirtualMachineReconciler) Reconcile(ctx context.Context, req ctr
 	//create ONTAP client
 	oc, err := r.reconcileGetClient(ctx, svmCR, adminSecret, host, debugOn, trustSSL, log)
 	if err != nil {
-		return ctrl.Result{}, err //got another error - re-reconcile
+		return ctrl.Result{RequeueAfter: 30 * time.Second}, err //got another error - re-reconcile
 	}
 
 	// STEP 5
@@ -100,10 +99,10 @@ func (r *StorageVirtualMachineReconciler) Reconcile(ctx context.Context, req ctr
 		_, err = r.tryDeletions(ctx, svmCR, oc, log)
 		if err != nil {
 			log.Error(err, "Error during svmCR deletion")
-			return ctrl.Result{}, err //got another error - re-reconcile
+			return ctrl.Result{RequeueAfter: 30 * time.Second}, err //got another error - re-reconcile
 		} else {
 			log.Info("SVM deleted, removed finalizer, cleaning up custom resource")
-			return ctrl.Result{}, nil //stop reconcile
+			return ctrl.Result{Requeue: false}, nil //stop reconcile
 		}
 	}
 
@@ -117,7 +116,7 @@ func (r *StorageVirtualMachineReconciler) Reconcile(ctx context.Context, req ctr
 		} else {
 			// some other error
 			log.Error(err, "Some other error while trying to retrieve SVM, other then SVM not created")
-			return ctrl.Result{}, err // got another error - re-reconcile
+			return ctrl.Result{RequeueAfter: 30 * time.Second}, err // got another error - re-reconcile
 		}
 	}
 
@@ -139,7 +138,7 @@ func (r *StorageVirtualMachineReconciler) Reconcile(ctx context.Context, req ctr
 		_, err = r.reconcileSvmCreation(ctx, svmCR, oc, log)
 		if err != nil {
 			log.Error(err, "Error during reconciling SVM creation")
-			return ctrl.Result{}, err //got another error - re-reconcile
+			return ctrl.Result{RequeueAfter: 30 * time.Second}, err //got another error - re-reconcile
 		}
 	}
 
@@ -153,22 +152,24 @@ func (r *StorageVirtualMachineReconciler) Reconcile(ctx context.Context, req ctr
 		if err != nil {
 
 			r.setConditionVsadminSecretLookup(ctx, svmCR, CONDITION_STATUS_FALSE)
-			return ctrl.Result{}, nil // not a valid secret - ignore
+			return ctrl.Result{Requeue: false}, nil // not a valid secret - ignore
 		}
 
 		r.setConditionVsadminSecretLookup(ctx, svmCR, CONDITION_STATUS_TRUE)
 		_, err = r.reconcileSecurityAccount(ctx, svmCR, oc, vsAdminSecret, log)
 		if err != nil {
-			return ctrl.Result{}, nil // TODO:  Ignore errors for now
+			return ctrl.Result{Requeue: false}, nil // TODO:  Ignore errors for now
 		}
 
 	}
 	log.Info("RECONCILE END")
-	return ctrl.Result{}, nil //no error - end reconcile
+	return ctrl.Result{Requeue: false}, nil //no error - end reconcile
 }
 
 // SetupWithManager sets up the controller with the Manager.
 // Adding predicate to prevent hotlooping when the status conditions are updated
+// From this: https://github.com/kubernetes-sigs/kubebuilder/issues/618
+
 func (r *StorageVirtualMachineReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&gatewayv1alpha1.StorageVirtualMachine{}, builder.WithPredicates(predicate.GenerationChangedPredicate{})).

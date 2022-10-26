@@ -38,8 +38,7 @@ func (r *StorageVirtualMachineReconciler) reconcileSecurityAccount(ctx context.C
 		log.Error(err, "Error checking to see if username exists")
 	}
 
-	log.Info("User: " + user.Name)
-	log.Info("Locked: " + fmt.Sprintf("%v/n", user.Locked))
+	log.Info("User: " + user.Name + " locked: " + fmt.Sprintf("%v", user.Locked))
 
 	if user.Name != "" && user.Locked {
 		// User already created - need to patch
