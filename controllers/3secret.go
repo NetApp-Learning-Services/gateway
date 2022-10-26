@@ -15,6 +15,8 @@ import (
 func (r *StorageVirtualMachineReconciler) reconcileSecret(ctx context.Context,
 	name string, namespace string, log logr.Logger) (*corev1.Secret, error) {
 
+	log.Info("name: " + name)
+
 	log.Info("STEP 3: Resolve secret")
 
 	secret := &corev1.Secret{}
