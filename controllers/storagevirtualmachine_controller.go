@@ -54,6 +54,10 @@ func (r *StorageVirtualMachineReconciler) Reconcile(ctx context.Context, req ctr
 	log := log.FromContext(ctx).WithValues("Request.Namespace", req.Namespace, "Request.Name", req.Name)
 	log.Info("RECONCILE START")
 
+	// This works.  
+	// It is a hack to stop the second reconcile that occurrs 
+	// immediately after the first reconcile.
+	// If this is not present it causes errors while updating conditions. 
 	log.Info("Start sleep for 10 seconds")
 	time.Sleep(10 * time.Second)
 	log.Info("End Sleep for 10 seconds")
