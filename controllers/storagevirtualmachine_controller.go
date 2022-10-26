@@ -176,15 +176,17 @@ func (r *StorageVirtualMachineReconciler) Reconcile(ctx context.Context, req ctr
 	if !create {
 		// STEP 10
 		// reconcile SVM update
-		log.Info("Reconciling SVM update: " + svmRetrieved.Name)
-		// _, err = r.reconcileSvmUpdate(ctx, svmCR, svmRetrieved, oc, log)
-		// if err != nil {
-		// 	log.Error(err, "Error during reconciling SVM update")
-		// 	return ctrl.Result{}, nil //TODO: REMOVE THIS
-		// }
+		err = r.reconcileSvmUpdate(ctx, svmCR, svmRetrieved, oc, log)
+		if err != nil {
+			log.Error(err, "Error during reconciling SVM update - requeuing")
+			return ctrl.Result{Requeue: true}, err
+		}
 
 		// STEP 11
-		// Check if we need implement NFS
+		// Reconcile Management IP Address information
+
+		// STEP 12
+		// Reconcile NFS information
 
 	}
 
