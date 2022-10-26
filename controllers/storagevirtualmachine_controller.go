@@ -58,9 +58,9 @@ func (r *StorageVirtualMachineReconciler) Reconcile(ctx context.Context, req ctr
 	// It is a hack to stop the second reconcile that occurrs
 	// immediately after the first reconcile.
 	// If this is not present it causes errors while updating conditions.
-	log.Info("Start sleep for 10 seconds")
-	time.Sleep(10 * time.Second)
-	log.Info("End Sleep for 10 seconds")
+	log.Info("Start sleep for 1 seconds")
+	time.Sleep(1 * time.Second)
+	log.Info("End Sleep for 1 seconds")
 
 	// STEP 1
 	// Check for existing of CR object -
@@ -129,19 +129,8 @@ func (r *StorageVirtualMachineReconciler) Reconcile(ctx context.Context, req ctr
 		}
 	}
 
-	// Check whether we need to update or create an SVM
-	if !create {
+	if create {
 		// STEP 7
-		// reconcile SVM update
-		log.Info("Reconciling SVM update: " + svmRetrieved.Name)
-		// _, err = r.reconcileSvmUpdate(ctx, svmCR, svmRetrieved, oc, log)
-		// if err != nil {
-		// 	log.Error(err, "Error during reconciling SVM update")
-		// 	return ctrl.Result{}, nil //TODO: REMOVE THIS
-		// }
-
-	} else {
-		// STEP 8
 		// reconcile SVM creation
 		log.Info("Reconciling SVM creation")
 		_, err = r.reconcileSvmCreation(ctx, svmCR, oc, log)
@@ -151,10 +140,10 @@ func (r *StorageVirtualMachineReconciler) Reconcile(ctx context.Context, req ctr
 		}
 	}
 
-	// STEP 9
-	//Check to see if need to create vsadmin
+	// STEP 8
+	// Check to see if SVM management credentials is available
 	if svmCR.Spec.VsadminCredentialSecret.Name != "" {
-		// Look up vsadmin secret
+		// Look up SVM management credentials secret
 		vsAdminSecret, err := r.reconcileSecret(ctx,
 			svmCR.Spec.VsadminCredentialSecret.Name,
 			svmCR.Spec.VsadminCredentialSecret.Namespace, log)
@@ -165,6 +154,9 @@ func (r *StorageVirtualMachineReconciler) Reconcile(ctx context.Context, req ctr
 		}
 
 		r.setConditionVsadminSecretLookup(ctx, svmCR, CONDITION_STATUS_TRUE)
+
+		// STEP 9
+		// Create or update SVM management credentials
 		_, err = r.reconcileSecurityAccount(ctx, svmCR, oc, vsAdminSecret, log)
 		if err != nil {
 			log.Error(err, "Error while updating SVM management credentials - requeuing")
@@ -172,6 +164,23 @@ func (r *StorageVirtualMachineReconciler) Reconcile(ctx context.Context, req ctr
 		}
 
 	}
+
+	// Check whether we need to update the SVM
+	if !create {
+		// STEP 10
+		// reconcile SVM update
+		log.Info("Reconciling SVM update: " + svmRetrieved.Name)
+		// _, err = r.reconcileSvmUpdate(ctx, svmCR, svmRetrieved, oc, log)
+		// if err != nil {
+		// 	log.Error(err, "Error during reconciling SVM update")
+		// 	return ctrl.Result{}, nil //TODO: REMOVE THIS
+		// }
+
+		// STEP 11
+		// Check if we need implement NFS
+
+	}
+
 	log.Info("RECONCILE END")
 	return ctrl.Result{Requeue: false}, nil //no error - end reconcile
 }

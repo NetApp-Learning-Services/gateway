@@ -17,7 +17,7 @@ const CONDITION_STATUS_UNKNOWN = "Unknown"
 // STEP 1
 // Report whether custom resource was located by operator
 // Note: Status of RESOURCE_FOUND can only be true; otherwise there is no condition
-const CONDITION_TYPE_RESOURCE_FOUND = "Step1ResourceDiscovered"
+const CONDITION_TYPE_RESOURCE_FOUND = "1: ResourceDiscovered"
 const CONDITION_REASON_RESOURCE_FOUND = "ResourceFound"
 const CONDITION_MESSAGE_RESOURCE_FOUND = "Resource discovered"
 
@@ -34,7 +34,7 @@ func (reconciler *StorageVirtualMachineReconciler) setConditionResourceFound(ctx
 // STEP 2
 // Host name discovery
 // Note: Status of HOST_FOUND can only be true, false, unknown
-const CONDITION_TYPE_HOST_FOUND = "Step2HostDiscovered"
+const CONDITION_TYPE_HOST_FOUND = "2: HostDiscovered"
 const CONDITION_REASON_HOST_FOUND = "HostFound"
 const CONDITION_MESSAGE_HOST_FOUND_TRUE = "A valid host found"
 const CONDITION_MESSAGE_HOST_FOUND_FALSE = "A valid host was not found"
@@ -67,7 +67,7 @@ func (reconciler *StorageVirtualMachineReconciler) setConditionHostFound(ctx con
 // STEP 3
 // Resolve Secret
 // Note: Status of CLUSTER_SECRET_LOOKUP can only be true or false
-const CONDITION_TYPE_CLUSTER_SECRET_LOOKUP = "Step3ClusterAdminSecretLookup"
+const CONDITION_TYPE_CLUSTER_SECRET_LOOKUP = "3: ClusterAdminSecretLookup"
 const CONDITION_REASON_CLUSTER_SECRET_LOOKUP = "ClusterAdminSecretLookup"
 const CONDITION_MESSAGE_CLUSTER_SECRET_LOOKUP_TRUE = "Cluster Admin credentials available"
 const CONDITION_MESSAGE_CLUSTER_SECRET_LOOKUP_FALSE = "Cluster Admin credentials NOT available"
@@ -94,7 +94,7 @@ func (reconciler *StorageVirtualMachineReconciler) setConditionClusterSecretLook
 // STEP 4
 // ONTAP client Creation
 // Note: Status of ONTAP_CREATED can only be true or false
-const CONDITION_TYPE_ONTAP_CREATED = "Step4CreatedONTAPClient"
+const CONDITION_TYPE_ONTAP_CREATED = "4: CreatedONTAPClient"
 const CONDITION_REASON_ONTAP_CREATED = "ONTAPClientCreation"
 const CONDITION_MESSAGE_ONTAP_CREATED_TRUE = "ONTAP client created"
 const CONDITION_MESSAGE_ONTAP_CREATED_FALSE = "ONTAP client failed"
@@ -121,7 +121,7 @@ func (reconciler *StorageVirtualMachineReconciler) setConditionONTAPCreation(ctx
 // STEP 5
 // SVM Deletion
 // Note: Status of SVM_DELETION can only be true, false, or unknown
-const CONDITION_TYPE_SVM_DELETION = "Step5SVMDeletion"
+const CONDITION_TYPE_SVM_DELETION = "5: SVMDeletion"
 const CONDITION_REASON_SVM_DELETION = "SVMDeleted"
 const CONDITION_MESSAGE_SVM_DELETION_TRUE = "SVM deleted"
 const CONDITION_MESSAGE_SVM_DELETION_FALSE = "SVM NOT deleted - finalizer remains"
@@ -154,7 +154,7 @@ func (reconciler *StorageVirtualMachineReconciler) setConditionSVMDeleted(ctx co
 // STEP 6
 // SVM Lookup
 // Note: Status of SVM_FOUND can only be true, false, or unknown
-const CONDITION_TYPE_SVM_FOUND = "Step6SVMDiscovered"
+const CONDITION_TYPE_SVM_FOUND = "6: SVMDiscovered"
 const CONDITION_REASON_SVM_FOUND = "SVMFound"
 const CONDITION_MESSAGE_SVM_FOUND_TRUE = "UUID maps to SVM"
 const CONDITION_MESSAGE_SVM_FOUND_FALSE = "NO UUID"
@@ -185,37 +185,9 @@ func (reconciler *StorageVirtualMachineReconciler) setConditionSVMFound(ctx cont
 }
 
 // STEP 7
-// SVM Update
-// Note: Status of SVM_UPDATED can only be true or false
-// const CONDITION_TYPE_SVM_UPDATED = "Step7UpdatedSVM"
-// const CONDITION_REASON_SVM_UPDATED = "SVMUpdate"
-// const CONDITION_MESSAGE_SVM_UPDATED_TRUE = "SVM update succeeded"
-// const CONDITION_MESSAGE_SVM_UPDATED_FALSE = "SVM update failed"
-
-// func (reconciler *StorageVirtualMachineReconciler) setConditionSVMUpdate(ctx context.Context,
-// 	svmCR *gatewayv1alpha1.StorageVirtualMachine, status metav1.ConditionStatus) error {
-
-// 	// I don't want to delete old references to updates to make a history
-// 	// if reconciler.containsCondition(ctx, svmCR, CONDITION_REASON_SVM_UPDATED) {
-// 	// 	reconciler.deleteCondition(ctx, svmCR, CONDITION_TYPE_SVM_UPDATED, CONDITION_REASON_SVM_UPDATED)
-// 	// }
-
-// 	if status == CONDITION_STATUS_TRUE {
-// 		return appendCondition(ctx, reconciler.Client, svmCR, CONDITION_TYPE_SVM_UPDATED, status,
-// 			CONDITION_REASON_SVM_UPDATED, CONDITION_MESSAGE_SVM_UPDATED_TRUE)
-// 	}
-
-// 	if status == CONDITION_STATUS_FALSE {
-// 		return appendCondition(ctx, reconciler.Client, svmCR, CONDITION_TYPE_SVM_UPDATED, status,
-// 			CONDITION_REASON_SVM_UPDATED, CONDITION_MESSAGE_SVM_UPDATED_FALSE)
-// 	}
-// 	return nil
-// }
-
-// STEP 8
 // SVM Creation
 // Note: Status of SVM_CREATED can only be true or false
-const CONDITION_TYPE_SVM_CREATED = "Step8CreatedSVM"
+const CONDITION_TYPE_SVM_CREATED = "7: CreatedSVM"
 const CONDITION_REASON_SVM_CREATED = "SVMCreation"
 const CONDITION_MESSAGE_SVM_CREATED_TRUE = "SVM creation succeeded"
 const CONDITION_MESSAGE_SVM_CREATED_FALSE = "SVM creation failed"
@@ -239,10 +211,10 @@ func (reconciler *StorageVirtualMachineReconciler) setConditionSVMCreation(ctx c
 	return nil
 }
 
-// STEP 9
-// VSADMIN UPDATE
+// STEP 8
+// VSADMIN LOOKUP
 // Note: Status of VSADMIN_SECRET_LOOKUP can only be true or false
-const CONDITION_TYPE_VSADMIN_SECRET_LOOKUP = "Step9-1VsAdminSecretLookup"
+const CONDITION_TYPE_VSADMIN_SECRET_LOOKUP = "8: VsAdminSecretLookup"
 const CONDITION_REASON_VSADMIN_SECRET_LOOKUP = "VsAdminSecretLookup"
 const CONDITION_MESSAGE_VSADMIN_SECRET_LOOKUP_TRUE = "SVM Admin credentials available"
 const CONDITION_MESSAGE_VSADMIN_SECRET_LOOKUP_FALSE = "SVM Admin credentials NOT available"
@@ -266,8 +238,10 @@ func (reconciler *StorageVirtualMachineReconciler) setConditionVsadminSecretLook
 	return nil
 }
 
+// STEP 9
+// VSADMIN UPDATE
 // Note: Status of VSADMIN_UPDATE can only be true or false
-const CONDITION_TYPE_VSADMIN_SECRET_UPDATE = "Step9-2VsAdminSecretUpdate"
+const CONDITION_TYPE_VSADMIN_SECRET_UPDATE = "9: VsAdminSecretUpdate"
 const CONDITION_REASON_VSADMIN_SECRET_UPDATE = "VsAdminSecretUpdate"
 const CONDITION_MESSAGE_VSADMIN_SECRET_UPDATE_TRUE = "SVM Admin credentials updated in ONTAP"
 const CONDITION_MESSAGE_VSADMIN_SECRET_UPDATE_FALSE = "SVM Admin credentials NOT updated in ONTAP"
@@ -290,3 +264,31 @@ func (reconciler *StorageVirtualMachineReconciler) setConditionVsadminSecretUpda
 	}
 	return nil
 }
+
+// STEP 10
+// SVM Update
+// Note: Status of SVM_UPDATED can only be true or false
+// const CONDITION_TYPE_SVM_UPDATED = "10: UpdatedSVM"
+// const CONDITION_REASON_SVM_UPDATED = "SVMUpdate"
+// const CONDITION_MESSAGE_SVM_UPDATED_TRUE = "SVM update succeeded"
+// const CONDITION_MESSAGE_SVM_UPDATED_FALSE = "SVM update failed"
+
+// func (reconciler *StorageVirtualMachineReconciler) setConditionSVMUpdate(ctx context.Context,
+// 	svmCR *gatewayv1alpha1.StorageVirtualMachine, status metav1.ConditionStatus) error {
+
+// 	// I don't want to delete old references to updates to make a history
+// 	// if reconciler.containsCondition(ctx, svmCR, CONDITION_REASON_SVM_UPDATED) {
+// 	// 	reconciler.deleteCondition(ctx, svmCR, CONDITION_TYPE_SVM_UPDATED, CONDITION_REASON_SVM_UPDATED)
+// 	// }
+
+// 	if status == CONDITION_STATUS_TRUE {
+// 		return appendCondition(ctx, reconciler.Client, svmCR, CONDITION_TYPE_SVM_UPDATED, status,
+// 			CONDITION_REASON_SVM_UPDATED, CONDITION_MESSAGE_SVM_UPDATED_TRUE)
+// 	}
+
+// 	if status == CONDITION_STATUS_FALSE {
+// 		return appendCondition(ctx, reconciler.Client, svmCR, CONDITION_TYPE_SVM_UPDATED, status,
+// 			CONDITION_REASON_SVM_UPDATED, CONDITION_MESSAGE_SVM_UPDATED_FALSE)
+// 	}
+// 	return nil
+// }
