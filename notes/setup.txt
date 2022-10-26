@@ -1,0 +1,48 @@
+Initialized Project: 
+
+curtis@NetApp-MacBook-Pro gateway % operator-sdk init --domain netapp.com --repo github.com/NetApp-Learning-Services/gateway
+
+Created API and Controller:
+
+curtis@NetApp-MacBook-Pro gateway % operator-sdk create api --group gateway --version v1alpha1 --kind StorageVirtualMachine --resource --controller
+
+Updated storagevirtualmachine_types.go
+
+Execute to update zz_generated.deepcopy.go:  make generate 
+
+Execute to create the CRDs:  make manifests
+
+Wrote reconcile method
+
+Make the file:  make build
+
+Install operator-sdk on kubwor2-1: 
+
+export ARCH=$(case $(uname -m) in x86_64) echo -n amd64 ;; aarch64) echo -n arm64 ;; *) echo -n $(uname -m) ;; esac)
+export OS=$(uname | awk '{print tolower($0)}')
+export OPERATOR_SDK_DL_URL=https://github.com/operator-framework/operator-sdk/releases/download/v1.23.0
+curl -LO ${OPERATOR_SDK_DL_URL}/operator-sdk_${OS}_${ARCH}
+chmod +x operator-sdk_${OS}_${ARCH} && sudo mv operator-sdk_${OS}_${ARCH} /usr/local/bin/operator-sdk
+
+Install go on kubwor2-1:
+
+rm -rf /usr/local/go && tar -C /usr/local -xzf go1.19.2.linux-amd64.tar.gz
+export PATH=$PATH:/usr/local/go/bin
+wget https://dl.google.com/go/go1.19.2.linux-amd64.tar.gz
+sudo tar -C /usr/local/ -xzf go1.19.2.linux-amd64.tar.gz
+
+Copy to kubwor2-1:  git clone https://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@github.com/NetApp-Learning-Services/gateway/
+
+setup kubectl config on kubwor2-1
+
+install the CRD on kubwor2-1:  kubectl create -f config/crd/bases/gateway.netapp.com_storagevirtualmachines.yaml
+
+To update source on kubwor2-1:  git pull origin (instead gateway directory)
+
+To build in docker:  make docker-build docker-push IMG=docker-registry:30001/gateway:v0.1
+
+To build in go: go main.go
+
+To override existing files in git and pull again:
+git fetch --all
+git reset --hard origin/master
