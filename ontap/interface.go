@@ -16,7 +16,7 @@ type IpInterfaceCreation struct {
 
 type IpInterface struct {
 	Name          string        `json:"name,omitempty"`
-	Ip            Ip            `json:"ip,omitempty"`
+	Ip            Ip            `json:"ip"`
 	Location      Location      `json:"location,omitempty"`
 	ServicePolicy ServicePolicy `json:"service_policy,omitempty"`
 	State         string        `json:"state,omitempty"`
@@ -26,9 +26,9 @@ type IpInterface struct {
 }
 
 type Ip struct {
-	Address string `json:"address,omitempty"`
-	Netmask string `json:"netmask,omitempty"`
-	//Family  string `json:"family,omitempty"`
+	Address string `json:"address"`
+	Netmask string `json:"netmask"`
+	Family  string `json:"family"`
 }
 
 type Location struct {
@@ -55,9 +55,25 @@ type IPInterfacesResponse struct {
 	Records []IpInterface `json:"records,omitempty"`
 }
 
-// Return a SVM by UUID
 func (c *Client) GetInterfacesForSVMByUUID(uuid string) (lifs IPInterfacesResponse, err error) {
-	uri := "/api/network/ip/interfaces" //?svm.uuid=" + uuid
+	uri := "/api/network/ip/interfaces?svm.uuid=" + uuid
+
+	data, err := c.clientGet(uri)
+	if err != nil {
+		return lifs, &apiError{1, err.Error()}
+	}
+
+	var resp IPInterfacesResponse
+	err = json.Unmarshal(data, &resp)
+	if err != nil {
+		return resp, &apiError{2, err.Error()}
+	}
+
+	return resp, nil
+}
+
+func (c *Client) GetInterfacesByUUID(uuid string) (lifs IPInterfacesResponse, err error) {
+	uri := "/api/network/ip/interfaces?svm.uuid=" + uuid
 
 	data, err := c.clientGet(uri)
 	if err != nil {
