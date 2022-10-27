@@ -14,7 +14,7 @@ import (
 )
 
 func (r *StorageVirtualMachineReconciler) reconcileSvmUpdate(ctx context.Context, svmCR *gatewayv1alpha1.StorageVirtualMachine,
-	svmRetrieved ontap.StorageVM, oc *ontap.Client, log logr.Logger) error {
+	svmRetrieved ontap.SvmByUUID, oc *ontap.Client, log logr.Logger) error {
 
 	log.Info("Step 10: Update SVM")
 
@@ -53,7 +53,7 @@ func (r *StorageVirtualMachineReconciler) reconcileSvmUpdate(ctx context.Context
 	err = oc.PatchStorageVM(svmRetrieved.UUID, jsonPayload)
 	if err != nil {
 		log.Error(err, "Error occurred when updating SVM")
-		_ = r.setConditionSVMCreation(ctx, svmCR, CONDITION_STATUS_FALSE)
+		_ = r.setConditionSVMUpdate(ctx, svmCR, CONDITION_STATUS_FALSE)
 		return err
 	}
 	log.Info("SVM updated successful")

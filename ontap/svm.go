@@ -76,11 +76,11 @@ type NsSwitch struct {
 	Passwd   []string `json:"passwd,omitempty"`
 }
 
-type IpInfo struct {
-	Address string `json:"address,omitempty"`
-	Netmask string `json:"netmask,omitempty"`
-	Family  string `json:"family,omitempty"`
-}
+// type IpInfo struct {
+// 	Address string `json:"address,omitempty"`
+// 	Netmask string `json:"netmask,omitempty"`
+// 	Family  string `json:"family,omitempty"`
+// }
 
 type FcPortReference struct {
 	Resource
@@ -95,10 +95,10 @@ type FcInterfaceSvm struct {
 	} `json:"location,omitempty"`
 }
 
-type NetworkRouteForSvmSvm struct {
-	Gateway     string `json:"gateway,omitempty"`
-	Destination IpInfo `json:"destination,omitempty"`
-}
+// type NetworkRouteForSvmSvm struct {
+// 	Gateway     string `json:"gateway,omitempty"`
+// 	Destination IpInfo `json:"destination,omitempty"`
+// }
 
 type SnapMirror struct {
 	IsProtected           bool `json:"is_protected"`
@@ -122,10 +122,10 @@ type SelfLink struct {
 }
 
 type SVMCreationPayload struct {
-	Name         string        `json:"name,omitempty"`
-	Comment      string        `json:"comment,omitempty"`
-	State        string        `json:"state,omitempty"`
-	IpInterfaces []IpInterface `json:"ip_interfaces,omitempty"`
+	Name         string                `json:"name,omitempty"`
+	Comment      string                `json:"comment,omitempty"`
+	State        string                `json:"state,omitempty"`
+	IpInterfaces []IpInterfaceCreation `json:"ip_interfaces,omitempty"`
 }
 
 // type SvmResponse struct {
@@ -179,7 +179,7 @@ type Svm struct {
 	IpInterfaces           []IpInterface `json:"ip_interfaces,omitempty"`
 }
 
-type StorageVM struct {
+type SvmByUUID struct {
 	UUID       string `json:"uuid"`
 	Name       string `json:"name"`
 	Subtype    string `json:"subtype"`
@@ -236,11 +236,7 @@ type StorageVM struct {
 	Nvme struct {
 		Enabled bool `json:"enabled"`
 	} `json:"nvme"`
-	Links struct {
-		Self struct {
-			Href string `json:"href"`
-		} `json:"self"`
-	} `json:"_links"`
+	Links SelfLinks `json:"_links"`
 }
 
 // In 9.11.1:
@@ -285,7 +281,7 @@ func (c *Client) GetStorageVmUUIDByName(name string) (uuid string, err error) {
 }
 
 // Return a SVM by UUID
-func (c *Client) GetStorageVMByUUID(uuid string) (svm StorageVM, err error) {
+func (c *Client) GetStorageVMByUUID(uuid string) (svm SvmByUUID, err error) {
 	uri := "/api/svm/svms/" + uuid
 
 	data, err := c.clientGet(uri)
@@ -293,7 +289,7 @@ func (c *Client) GetStorageVMByUUID(uuid string) (svm StorageVM, err error) {
 		return svm, &apiError{1, err.Error()}
 	}
 
-	var resp StorageVM
+	var resp SvmByUUID
 	err = json.Unmarshal(data, &resp)
 	if err != nil {
 		return resp, &apiError{2, err.Error()}

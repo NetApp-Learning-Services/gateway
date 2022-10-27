@@ -295,3 +295,55 @@ func (reconciler *StorageVirtualMachineReconciler) setConditionSVMUpdate(ctx con
 	}
 	return nil
 }
+
+// STEP 11
+// Management LIF Upsert
+// Note: Status of MANGEMENTLIF_UPDATED can only be true or false
+const CONDITION_TYPE_MANGEMENTLIF_UPSERT = "11UpsertdManagementLIF"
+const CONDITION_REASON_MANGEMENTLIF_UPDATED = "ManagementLIFUpdate"
+const CONDITION_MESSAGE_MANGEMENTLIF_UPDATED_TRUE = "Management LIF update succeeded"
+const CONDITION_MESSAGE_MANGEMENTLIF_UPDATED_FALSE = "Management LIF update failed"
+
+func (reconciler *StorageVirtualMachineReconciler) setConditionManagementLIFUpdate(ctx context.Context,
+	svmCR *gatewayv1alpha1.StorageVirtualMachine, status metav1.ConditionStatus) error {
+
+	// I don't want to delete old references to updates to make a history
+	// if reconciler.containsCondition(ctx, svmCR, CONDITION_REASON_MANGEMENTLIF_UPSERT) {
+	// 	reconciler.deleteCondition(ctx, svmCR, CONDITION_TYPE_MANGEMENTLIF_UPDATED, CONDITION_REASON_MANGEMENTLIF_UPDATED)
+	// }
+
+	if status == CONDITION_STATUS_TRUE {
+		return appendCondition(ctx, reconciler.Client, svmCR, CONDITION_TYPE_MANGEMENTLIF_UPSERT, status,
+			CONDITION_REASON_MANGEMENTLIF_UPDATED, CONDITION_MESSAGE_MANGEMENTLIF_UPDATED_TRUE)
+	}
+
+	if status == CONDITION_STATUS_FALSE {
+		return appendCondition(ctx, reconciler.Client, svmCR, CONDITION_TYPE_MANGEMENTLIF_UPSERT, status,
+			CONDITION_REASON_MANGEMENTLIF_UPDATED, CONDITION_MESSAGE_MANGEMENTLIF_UPDATED_FALSE)
+	}
+	return nil
+}
+
+const CONDITION_REASON_MANGEMENTLIF_CREATION = "ManagementLIFCreation"
+const CONDITION_MESSAGE_MANGEMENTLIF_CREATION_TRUE = "Management LIF creation succeeded"
+const CONDITION_MESSAGE_MANGEMENTLIF_CREATION_FALSE = "Management LIF creation failed"
+
+func (reconciler *StorageVirtualMachineReconciler) setConditionManagementLIFCreation(ctx context.Context,
+	svmCR *gatewayv1alpha1.StorageVirtualMachine, status metav1.ConditionStatus) error {
+
+	// I don't want to delete old references to updates to make a history
+	// if reconciler.containsCondition(ctx, svmCR, CONDITION_REASON_MANGEMENTLIF_CREATION) {
+	// 	reconciler.deleteCondition(ctx, svmCR, CONDITION_TYPE_MANGEMENTLIF_UPSERT, CONDITION_REASON_MANGEMENTLIF_CREATION)
+	// }
+
+	if status == CONDITION_STATUS_TRUE {
+		return appendCondition(ctx, reconciler.Client, svmCR, CONDITION_TYPE_MANGEMENTLIF_UPSERT, status,
+			CONDITION_REASON_MANGEMENTLIF_CREATION, CONDITION_MESSAGE_MANGEMENTLIF_CREATION_TRUE)
+	}
+
+	if status == CONDITION_STATUS_FALSE {
+		return appendCondition(ctx, reconciler.Client, svmCR, CONDITION_TYPE_MANGEMENTLIF_UPSERT, status,
+			CONDITION_REASON_MANGEMENTLIF_CREATION, CONDITION_MESSAGE_MANGEMENTLIF_CREATION_FALSE)
+	}
+	return nil
+}

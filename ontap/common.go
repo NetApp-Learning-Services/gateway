@@ -43,3 +43,9 @@ type JobResponse struct {
 		Uuid     string   `json:"uuid"`
 	} `json:"job"`
 }
+
+type SelfLinks struct {
+	Self struct {
+		Href string `json:"href"`
+	} `json:"self"`
+}

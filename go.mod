@@ -10,7 +10,7 @@ require (
 	sigs.k8s.io/controller-runtime v0.12.2
 )
 
-//require golang.org/x/exp v0.0.0-20221023144134-a1e5550cf13e // direct
+require golang.org/x/exp v0.0.0-20221023144134-a1e5550cf13e // direct
 
 require (
 	cloud.google.com/go v0.81.0 // indirect

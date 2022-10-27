@@ -180,8 +180,15 @@ func (r *StorageVirtualMachineReconciler) Reconcile(ctx context.Context, req ctr
 			return ctrl.Result{Requeue: true}, err
 		}
 
-		// STEP 11
-		// Reconcile Management IP Address information
+		if svmRetrieved.UUID != "" {
+			// STEP 11
+			// Reconcile Management LIF information
+			err = r.reconcileManagementLifUpdate(ctx, svmCR, svmRetrieved.UUID, oc, log)
+			if err != nil {
+				log.Error(err, "Error during reconciling management LIF - requeuing")
+				return ctrl.Result{Requeue: true}, err
+			}
+		}
 
 		// STEP 12
 		// Reconcile NFS information

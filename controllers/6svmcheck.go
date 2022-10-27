@@ -15,11 +15,11 @@ import (
 )
 
 func (r *StorageVirtualMachineReconciler) reconcileSvmCheck(ctx context.Context,
-	svmCR *gatewayv1alpha1.StorageVirtualMachine, oc *ontap.Client, log logr.Logger) (ontap.StorageVM, error) {
+	svmCR *gatewayv1alpha1.StorageVirtualMachine, oc *ontap.Client, log logr.Logger) (ontap.SvmByUUID, error) {
 
 	log.Info("STEP 6: Check for a valid SVM")
 
-	var svm ontap.StorageVM
+	var svm ontap.SvmByUUID
 
 	// Check to see if SVM exists by the uuid in CR
 	uuid := strings.TrimSpace(svmCR.Spec.SvmUuid)
@@ -34,11 +34,11 @@ func (r *StorageVirtualMachineReconciler) reconcileSvmCheck(ctx context.Context,
 		// Check to see if SVM exists
 		svm, err := oc.GetStorageVMByUUID(uuid)
 		if err != nil {
-			log.Error(err, "SVM UUID in the custom resource is invalid")
+			log.Error(err, "SVM uuid in the custom resource is invalid")
 			_ = r.setConditionSVMFound(ctx, svmCR, CONDITION_STATUS_UNKNOWN)
 			return svm, err
 		}
-		log.Info("SVM UUID in the custom resource is valid", "svm retrieved: ", svm)
+		log.Info("SVM uuid in the custom resource is valid", "svm retrieved: ", svm)
 		_ = r.setConditionSVMFound(ctx, svmCR, CONDITION_STATUS_TRUE)
 		return svm, nil
 	}

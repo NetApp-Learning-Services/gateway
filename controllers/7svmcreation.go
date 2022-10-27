@@ -24,7 +24,7 @@ func (r *StorageVirtualMachineReconciler) reconcileSvmCreation(ctx context.Conte
 	payload.Name = svmCR.Spec.SvmName
 	payload.Comment = "Created by Astra Gateway"
 	if svmCR.Spec.ManagementLIF != nil {
-		var ifpayload ontap.IpInterface
+		var ifpayload ontap.IpInterfaceCreation
 		ifpayload.Name = svmCR.Spec.ManagementLIF.Name
 		ifpayload.Ip.Address = svmCR.Spec.ManagementLIF.IPAddress
 		ifpayload.Ip.Netmask = svmCR.Spec.ManagementLIF.Netmask
