@@ -57,7 +57,7 @@ type IPInterfacesResponse struct {
 
 // Return a SVM by UUID
 func (c *Client) GetInterfacesForSVMByUUID(uuid string) (lifs IPInterfacesResponse, err error) {
-	uri := "/network/ip/interfaces"
+	uri := "/api/network/ip/interfaces?svm.uuid=" + uuid
 
 	data, err := c.clientGet(uri)
 	if err != nil {
@@ -74,7 +74,7 @@ func (c *Client) GetInterfacesForSVMByUUID(uuid string) (lifs IPInterfacesRespon
 }
 
 func (c *Client) CreateInterface(jsonPayload []byte) (err error) {
-	uri := "/network/ip/interfaces"
+	uri := "/api/network/ip/interfaces"
 	data, err := c.clientPost(uri, jsonPayload)
 	if err != nil {
 		//fmt.Println("Error: " + err.Error())
@@ -102,7 +102,7 @@ func (c *Client) CreateInterface(jsonPayload []byte) (err error) {
 }
 
 func (c *Client) PatchInterface(uuid string, jsonPayload []byte) (err error) {
-	uri := "/network/ip/interfaces/" + uuid
+	uri := "/api/network/ip/interfaces/" + uuid
 
 	data, err := c.clientPatch(uri, jsonPayload)
 	if err != nil {
