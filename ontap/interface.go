@@ -45,7 +45,7 @@ type HomeNode struct {
 }
 
 type ServicePolicy struct {
-	Links SelfLinks `json:"_links"`
+	Links SelfLinks `json:"_links,omitempty"`
 	Name  string    `json:"name,omitempty"`
 	Uuid  string    `json:"uuid,omitempty"`
 }
