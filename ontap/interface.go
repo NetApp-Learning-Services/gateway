@@ -28,7 +28,7 @@ type IpInterface struct {
 type Ip struct {
 	Address string `json:"address,omitempty"`
 	Netmask string `json:"netmask,omitempty"`
-	Family  string `json:"family,omitempty"`
+	//Family  string `json:"family,omitempty"`
 }
 
 type Location struct {
@@ -57,7 +57,7 @@ type IPInterfacesResponse struct {
 
 // Return a SVM by UUID
 func (c *Client) GetInterfacesForSVMByUUID(uuid string) (lifs IPInterfacesResponse, err error) {
-	uri := "/api/network/ip/interfaces?svm.uuid=" + uuid
+	uri := "/api/network/ip/interfaces" //?svm.uuid=" + uuid
 
 	data, err := c.clientGet(uri)
 	if err != nil {
