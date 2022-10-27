@@ -41,6 +41,8 @@ func (r *StorageVirtualMachineReconciler) reconcileManagementLifUpdate(ctx conte
 		// create new LIF
 		log.Info("No LIFs defined for SVM: " + uuid + " - creating management LIF")
 		create = true
+	} else {
+		log.Info(fmt.Sprintf("%#v", lifs))
 	}
 
 	var patchManagementLif ontap.IpInterface
