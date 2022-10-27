@@ -46,6 +46,6 @@ type JobResponse struct {
 
 type SelfLinks struct {
 	Self struct {
-		Href string `json:"href"`
-	} `json:"self"`
+		Href string `json:"href,omitempty"`
+	} `json:"self,omitempty"`
 }
