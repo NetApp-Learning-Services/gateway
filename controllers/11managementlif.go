@@ -13,8 +13,6 @@ import (
 	"golang.org/x/exp/slices"
 
 	"github.com/go-logr/logr"
-
-	"k8s.io/apimachinery/pkg/api/errors"
 )
 
 func (r *StorageVirtualMachineReconciler) reconcileManagementLifUpdate(ctx context.Context, svmCR *gatewayv1alpha1.StorageVirtualMachine,
@@ -22,11 +20,12 @@ func (r *StorageVirtualMachineReconciler) reconcileManagementLifUpdate(ctx conte
 
 	log.Info("Step 11: Update management LIF")
 
+	execute := false
 	create := false
 	lifUuid := ""
 
 	if svmCR.Spec.ManagementLIF == nil {
-		log.Info("No management LIF defined - skipping step")
+		log.Info("No management LIF defined - skipping Step 11")
 		return nil
 	}
 
@@ -41,101 +40,61 @@ func (r *StorageVirtualMachineReconciler) reconcileManagementLifUpdate(ctx conte
 		// create new LIF
 		log.Info("No LIFs defined for SVM: " + uuid + " - creating management LIF")
 		create = true
-	} else {
-		log.Info(fmt.Sprintf("%#v", lifs))
 	}
 
 	var patchManagementLif ontap.IpInterface
 
-	ipIndex := slices.IndexFunc(lifs.Records, func(i ontap.IpInterface) bool { return i.Ip.Address == svmCR.Spec.ManagementLIF.IPAddress })
 	nameIndex := slices.IndexFunc(lifs.Records, func(i ontap.IpInterface) bool { return i.Name == svmCR.Spec.ManagementLIF.Name })
 
 	if oc.Debug {
-		log.Info("[DEBUG] ipIndex: " + fmt.Sprintf("%v", ipIndex))
 		log.Info("[DEBUG] nameIndex: " + fmt.Sprintf("%v", nameIndex))
 	}
 
-	if ipIndex != -1 {
-		// IP Address in custom resource found in SVM's LIFs
-		if nameIndex != -1 {
-			// LIF name in custom resource found in SVM's LIFs
-			lifUuid = lifs.Records[ipIndex].Uuid
-			if ipIndex == nameIndex {
-				patchManagementLif.Name = svmCR.Spec.ManagementLIF.Name
-				patchManagementLif.Ip.Address = svmCR.Spec.ManagementLIF.IPAddress
-				//same object
-				if lifs.Records[ipIndex].Ip.Netmask != svmCR.Spec.ManagementLIF.Netmask {
-					// need to update netmask
-					patchManagementLif.Ip.Netmask = svmCR.Spec.ManagementLIF.Netmask
-				}
-				// if lifs.Records[ipIndex].Location.BroadcastDomain.Name != svmCR.Spec.ManagementLIF.BroacastDomain {
-				// 	// need to update broadcast domain
-				// 	patchManagementLif.Location.BroadcastDomain.Name = svmCR.Spec.ManagementLIF.BroacastDomain
-				// }
-				// if lifs.Records[ipIndex].Location.HomeNode.Name != svmCR.Spec.ManagementLIF.HomeNode {
-				// 	// need to update homenode
-				// 	patchManagementLif.Location.HomeNode.Name = svmCR.Spec.ManagementLIF.HomeNode
-				// }
-			} else {
-				// error state - don't know which one to choose the LIf with the correct IP address or the LIF with the correct name
-				err := errors.NewBadRequest("Both Managment LIF name and IP address found on different LIFs")
-				return err
-			}
-		} else {
-			// ipIndex correct, no name
-			// need to update name of lifs.Records[ipIndex]
-			lifUuid = lifs.Records[ipIndex].Uuid
-			patchManagementLif.Name = svmCR.Spec.ManagementLIF.Name
-			patchManagementLif.Ip.Address = lifs.Records[ipIndex].Ip.Address
+	//IP not returned at least in 9.9.1 vsims - can only check the Name
+	if nameIndex != -1 {
+		// name found
+		// need to update IP of lifs.Records[nameIndex]
+		lifUuid = lifs.Records[nameIndex].Uuid
 
-			if lifs.Records[ipIndex].Ip.Netmask != svmCR.Spec.ManagementLIF.Netmask {
-				// need to update netmask
-				patchManagementLif.Ip.Netmask = svmCR.Spec.ManagementLIF.Netmask
-			}
-			// if lifs.Records[ipIndex].Location.BroadcastDomain.Name != svmCR.Spec.ManagementLIF.BroacastDomain {
-			// 	// need to update broadcast domain
-			// 	patchManagementLif.Location.BroadcastDomain.Name = svmCR.Spec.ManagementLIF.BroacastDomain
-			// }
-			// if lifs.Records[ipIndex].Location.HomeNode.Name != svmCR.Spec.ManagementLIF.HomeNode {
-			// 	// need to update homenode
-			// 	patchManagementLif.Location.HomeNode.Name = svmCR.Spec.ManagementLIF.HomeNode
-			// }
+		// Get current LIF details by LIF UUID
+		lifRetrieved, err := oc.GetInterfaceByUUID(lifUuid)
+		if err != nil {
+			log.Error(err, "Error retreiving LIF details by LIF UUID")
 		}
 
-	} else {
-		//IP not found
-		if nameIndex != -1 {
-			// name found but not IP
-			// need to update IP of lifs.Records[nameIndex]
-			lifUuid = lifs.Records[nameIndex].Uuid
-			patchManagementLif.Name = lifs.Records[nameIndex].Name
-			patchManagementLif.Ip.Address = svmCR.Spec.ManagementLIF.IPAddress
+		patchManagementLif.Name = lifs.Records[nameIndex].Name
 
-			if lifs.Records[nameIndex].Ip.Netmask != svmCR.Spec.ManagementLIF.Netmask {
-				// need to update netmask
-				patchManagementLif.Ip.Netmask = svmCR.Spec.ManagementLIF.Netmask
-			}
-			// if lifs.Records[nameIndex].Location.BroadcastDomain.Name != svmCR.Spec.ManagementLIF.BroacastDomain {
-			// 	// need to update broadcast domain
-			// 	patchManagementLif.Location.BroadcastDomain.Name = svmCR.Spec.ManagementLIF.BroacastDomain
-			// }
-			// if lifs.Records[nameIndex].Location.HomeNode.Name != svmCR.Spec.ManagementLIF.HomeNode {
-			// 	// need to update homenode
-			// 	patchManagementLif.Location.HomeNode.Name = svmCR.Spec.ManagementLIF.HomeNode
-			// }
-		} else {
-			// nothing defined in SVM create new management LIF
-			create = true
-			patchManagementLif.Name = svmCR.Spec.ManagementLIF.Name
+		if lifRetrieved.Ip.Address != svmCR.Spec.ManagementLIF.IPAddress {
+			// need to update ip address
+			execute = true
 			patchManagementLif.Ip.Address = svmCR.Spec.ManagementLIF.IPAddress
+		}
+
+		if lifRetrieved.Ip.Netmask != svmCR.Spec.ManagementLIF.Netmask {
+			// need to update netmask
+			execute = true
 			patchManagementLif.Ip.Netmask = svmCR.Spec.ManagementLIF.Netmask
-			patchManagementLif.Location.BroadcastDomain.Name = svmCR.Spec.ManagementLIF.BroacastDomain
-			patchManagementLif.Location.HomeNode.Name = svmCR.Spec.ManagementLIF.HomeNode
 		}
-
+	} else {
+		// nothing defined in SVM create new management LIF
+		execute = true
+		create = true
+		patchManagementLif.Name = svmCR.Spec.ManagementLIF.Name
+		patchManagementLif.Ip.Address = svmCR.Spec.ManagementLIF.IPAddress
+		patchManagementLif.Ip.Netmask = svmCR.Spec.ManagementLIF.Netmask
+		patchManagementLif.Location.BroadcastDomain.Name = svmCR.Spec.ManagementLIF.BroacastDomain
+		patchManagementLif.Location.HomeNode.Name = svmCR.Spec.ManagementLIF.HomeNode
 	}
 
-	log.Info("SVM management LIF update payload: " + fmt.Sprintf("%#v\n", patchManagementLif))
+	if !execute {
+		log.Info("No changes detected - skipping Step 11")
+		return nil
+	}
+
+	// otherwise changes need to be implemented
+	if oc.Debug {
+		log.Info("[DEBUG] SVM management LIF update payload: " + fmt.Sprintf("%#v\n", patchManagementLif))
+	}
 
 	jsonPayload, err := json.Marshal(patchManagementLif)
 	if err != nil {
