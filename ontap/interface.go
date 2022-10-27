@@ -122,10 +122,12 @@ func (c *Client) PatchInterface(uuid string, jsonPayload []byte) (err error) {
 
 	_, err = c.clientPatch(uri, jsonPayload)
 	if err != nil {
-		if strings.Contains(err.Error(), "Error-4") {
-			return &apiError{4, fmt.Sprintf("SVM with UUID \"%s\" not found", uuid)}
+		if strings.Contains(err.Error(), "404") {
+			return &apiError{404, fmt.Sprintf("LIF with UUID \"%s\" not found", uuid)}
 		}
-		return &apiError{1, err.Error()}
+		if strings.Contains(err.Error(), "Duplicate") {
+			return &apiError{1376963, err.Error()}
+		}
 	}
 
 	// var result map[string]interface{}
