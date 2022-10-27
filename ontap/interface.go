@@ -120,7 +120,7 @@ func (c *Client) CreateInterface(jsonPayload []byte) (err error) {
 func (c *Client) PatchInterface(uuid string, jsonPayload []byte) (err error) {
 	uri := "/api/network/ip/interfaces/" + uuid
 
-	data, err := c.clientPatch(uri, jsonPayload)
+	_, err = c.clientPatch(uri, jsonPayload)
 	if err != nil {
 		if strings.Contains(err.Error(), "Error-4") {
 			return &apiError{4, fmt.Sprintf("SVM with UUID \"%s\" not found", uuid)}
@@ -128,33 +128,33 @@ func (c *Client) PatchInterface(uuid string, jsonPayload []byte) (err error) {
 		return &apiError{1, err.Error()}
 	}
 
-	var result map[string]interface{}
-	err = json.Unmarshal(data, &result)
-	if err != nil {
-		return &apiError{2, err.Error()}
-	}
+	// var result map[string]interface{}
+	// err = json.Unmarshal(data, &result)
+	// if err != nil {
+	// 	return &apiError{2, err.Error()}
+	// }
 
-	job := result["job"].(map[string]interface{})
-	link := job["_links"].(map[string]interface{})
-	href := link["self"].(map[string]interface{})
-	url := href["href"].(string)
+	// job := result["job"].(map[string]interface{})
+	// link := job["_links"].(map[string]interface{})
+	// href := link["self"].(map[string]interface{})
+	// url := href["href"].(string)
 
-	patchJob, _ := c.GetJob(url)
+	// patchJob, _ := c.GetJob(url)
 
-	for patchJob.State == "running" {
-		time.Sleep(time.Second)
-		patchJob, _ = c.GetJob(url)
-	}
+	// for patchJob.State == "running" {
+	// 	time.Sleep(time.Second)
+	// 	patchJob, _ = c.GetJob(url)
+	// }
 
-	if patchJob.State == "failure" {
-		return &apiError{int64(patchJob.Code), patchJob.Message}
-	}
+	// if patchJob.State == "failure" {
+	// 	return &apiError{int64(patchJob.Code), patchJob.Message}
+	// }
 
-	if patchJob.State == "success" {
-		//uuid, err = ParseUUID(patchJob.Description, " ")
-		//return uuid, err
-		return nil
-	}
+	// if patchJob.State == "success" {
+	// 	//uuid, err = ParseUUID(patchJob.Description, " ")
+	// 	//return uuid, err
+	// 	return nil
+	// }
 
 	return nil
 }
