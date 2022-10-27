@@ -186,7 +186,7 @@ func (r *StorageVirtualMachineReconciler) Reconcile(ctx context.Context, req ctr
 			// Reconcile Management LIF information
 			err = r.reconcileManagementLifUpdate(ctx, svmCR, svmRetrieved.UUID, oc, log)
 			if err != nil {
-				if strings.Contains(err.Error(), "Duplicate") {
+				if strings.Contains(err.Error(), "Duplicate IP") {
 					log.Error(err, "Duplicated IP Address - stop reconcile")
 					return ctrl.Result{Requeue: false}, nil
 				}

@@ -94,6 +94,7 @@ func (r *StorageVirtualMachineReconciler) reconcileManagementLifUpdate(ctx conte
 		patchManagementLif.Ip.Netmask = svmCR.Spec.ManagementLIF.Netmask
 		patchManagementLif.Location.BroadcastDomain.Name = svmCR.Spec.ManagementLIF.BroacastDomain
 		patchManagementLif.Location.HomeNode.Name = svmCR.Spec.ManagementLIF.HomeNode
+		patchManagementLif.Scope = "svm" //special word
 	}
 
 	if !execute {
