@@ -28,7 +28,7 @@ type IpInterface struct {
 type Ip struct {
 	Address string `json:"address"`
 	Netmask string `json:"netmask"`
-	Family  string `json:"family"`
+	Family  string `json:"family,omitempty"`
 }
 
 type Location struct {
