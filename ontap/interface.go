@@ -23,6 +23,7 @@ type IpInterface struct {
 	Uuid          string        `json:"uuid,omitempty"`
 	Scope         string        `json:"scope,omitempty"`
 	Enabled       bool          `json:"enabled,omitempty"`
+	Svm           SvmId         `json:"svm,omitempty"`
 }
 
 type Ip struct {
@@ -53,6 +54,11 @@ type ServicePolicy struct {
 type IPInterfacesResponse struct {
 	BaseResponse
 	Records []IpInterface `json:"records,omitempty"`
+}
+
+type SvmId struct {
+	Name string `json:"name,omitempty"`
+	Uuid string `json:"uuid,omitempty"`
 }
 
 func (c *Client) GetInterfacesForSVMByUUID(uuid string) (lifs IPInterfacesResponse, err error) {
