@@ -57,7 +57,7 @@ type IPInterfacesResponse struct {
 
 // Return a SVM by UUID
 func (c *Client) GetInterfacesForSVMByUUID(uuid string) (lifs IPInterfacesResponse, err error) {
-	uri := "/network/ip/interfaces?svm.uuid=" + uuid
+	uri := "/network/ip/interfaces"
 
 	data, err := c.clientGet(uri)
 	if err != nil {
