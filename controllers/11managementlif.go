@@ -66,14 +66,14 @@ func (r *StorageVirtualMachineReconciler) reconcileManagementLifUpdate(ctx conte
 					// need to update netmask
 					patchManagementLif.Ip.Netmask = svmCR.Spec.ManagementLIF.Netmask
 				}
-				if lifs.Records[ipIndex].Location.BroadcastDomain.Name != svmCR.Spec.ManagementLIF.BroacastDomain {
-					// need to update broadcast domain
-					patchManagementLif.Location.BroadcastDomain.Name = svmCR.Spec.ManagementLIF.BroacastDomain
-				}
-				if lifs.Records[ipIndex].Location.HomeNode.Name != svmCR.Spec.ManagementLIF.HomeNode {
-					// need to update homenode
-					patchManagementLif.Location.HomeNode.Name = svmCR.Spec.ManagementLIF.HomeNode
-				}
+				// if lifs.Records[ipIndex].Location.BroadcastDomain.Name != svmCR.Spec.ManagementLIF.BroacastDomain {
+				// 	// need to update broadcast domain
+				// 	patchManagementLif.Location.BroadcastDomain.Name = svmCR.Spec.ManagementLIF.BroacastDomain
+				// }
+				// if lifs.Records[ipIndex].Location.HomeNode.Name != svmCR.Spec.ManagementLIF.HomeNode {
+				// 	// need to update homenode
+				// 	patchManagementLif.Location.HomeNode.Name = svmCR.Spec.ManagementLIF.HomeNode
+				// }
 			} else {
 				// error state - don't know which one to choose the LIf with the correct IP address or the LIF with the correct name
 				err := errors.NewBadRequest("Both Managment LIF name and IP address found on different LIFs")
@@ -90,14 +90,14 @@ func (r *StorageVirtualMachineReconciler) reconcileManagementLifUpdate(ctx conte
 				// need to update netmask
 				patchManagementLif.Ip.Netmask = svmCR.Spec.ManagementLIF.Netmask
 			}
-			if lifs.Records[ipIndex].Location.BroadcastDomain.Name != svmCR.Spec.ManagementLIF.BroacastDomain {
-				// need to update broadcast domain
-				patchManagementLif.Location.BroadcastDomain.Name = svmCR.Spec.ManagementLIF.BroacastDomain
-			}
-			if lifs.Records[ipIndex].Location.HomeNode.Name != svmCR.Spec.ManagementLIF.HomeNode {
-				// need to update homenode
-				patchManagementLif.Location.HomeNode.Name = svmCR.Spec.ManagementLIF.HomeNode
-			}
+			// if lifs.Records[ipIndex].Location.BroadcastDomain.Name != svmCR.Spec.ManagementLIF.BroacastDomain {
+			// 	// need to update broadcast domain
+			// 	patchManagementLif.Location.BroadcastDomain.Name = svmCR.Spec.ManagementLIF.BroacastDomain
+			// }
+			// if lifs.Records[ipIndex].Location.HomeNode.Name != svmCR.Spec.ManagementLIF.HomeNode {
+			// 	// need to update homenode
+			// 	patchManagementLif.Location.HomeNode.Name = svmCR.Spec.ManagementLIF.HomeNode
+			// }
 		}
 
 	} else {
@@ -113,14 +113,14 @@ func (r *StorageVirtualMachineReconciler) reconcileManagementLifUpdate(ctx conte
 				// need to update netmask
 				patchManagementLif.Ip.Netmask = svmCR.Spec.ManagementLIF.Netmask
 			}
-			if lifs.Records[nameIndex].Location.BroadcastDomain.Name != svmCR.Spec.ManagementLIF.BroacastDomain {
-				// need to update broadcast domain
-				patchManagementLif.Location.BroadcastDomain.Name = svmCR.Spec.ManagementLIF.BroacastDomain
-			}
-			if lifs.Records[nameIndex].Location.HomeNode.Name != svmCR.Spec.ManagementLIF.HomeNode {
-				// need to update homenode
-				patchManagementLif.Location.HomeNode.Name = svmCR.Spec.ManagementLIF.HomeNode
-			}
+			// if lifs.Records[nameIndex].Location.BroadcastDomain.Name != svmCR.Spec.ManagementLIF.BroacastDomain {
+			// 	// need to update broadcast domain
+			// 	patchManagementLif.Location.BroadcastDomain.Name = svmCR.Spec.ManagementLIF.BroacastDomain
+			// }
+			// if lifs.Records[nameIndex].Location.HomeNode.Name != svmCR.Spec.ManagementLIF.HomeNode {
+			// 	// need to update homenode
+			// 	patchManagementLif.Location.HomeNode.Name = svmCR.Spec.ManagementLIF.HomeNode
+			// }
 		} else {
 			// nothing defined in SVM create new management LIF
 			create = true
