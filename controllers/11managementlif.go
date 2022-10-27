@@ -6,6 +6,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"strconv"
 
 	gatewayv1alpha1 "gateway/api/v1alpha1"
 	"gateway/ontap"
@@ -68,12 +69,21 @@ func (r *StorageVirtualMachineReconciler) reconcileManagementLifUpdate(ctx conte
 			// need to update ip address
 			execute = true
 			patchManagementLif.Ip.Address = svmCR.Spec.ManagementLIF.IPAddress
+			patchManagementLif.Ip.Netmask = svmCR.Spec.ManagementLIF.Netmask
 		}
 
-		if lifRetrieved.Ip.Netmask != svmCR.Spec.ManagementLIF.Netmask {
+		netmaskAsInt, _ := strconv.Atoi(lifRetrieved.Ip.Netmask)
+		netmaskAsIP := NetMaskToString(netmaskAsInt)
+		if oc.Debug {
+			log.Info("[DEBUG] netmaskAsInt: " + fmt.Sprintf("%v", netmaskAsInt))
+			log.Info("[DEBUG] netmaskAsIP: " + fmt.Sprintf("%v", netmaskAsIP))
+		}
+
+		if netmaskAsIP != svmCR.Spec.ManagementLIF.Netmask {
 			// need to update netmask
 			execute = true
 			patchManagementLif.Ip.Netmask = svmCR.Spec.ManagementLIF.Netmask
+			patchManagementLif.Ip.Address = svmCR.Spec.ManagementLIF.IPAddress
 		}
 	} else {
 		// nothing defined in SVM create new management LIF
@@ -135,4 +145,26 @@ func (r *StorageVirtualMachineReconciler) reconcileManagementLifUpdate(ctx conte
 	}
 
 	return nil
+}
+
+func NetMaskToString(mask int) (netmaskstring string) {
+	var binarystring string
+
+	for ii := 1; ii <= mask; ii++ {
+		binarystring = binarystring + "1"
+	}
+	for ii := 1; ii <= (32 - mask); ii++ {
+		binarystring = binarystring + "0"
+	}
+	oct1 := binarystring[0:8]
+	oct2 := binarystring[8:16]
+	oct3 := binarystring[16:24]
+	oct4 := binarystring[24:]
+
+	ii1, _ := strconv.ParseInt(oct1, 2, 64)
+	ii2, _ := strconv.ParseInt(oct2, 2, 64)
+	ii3, _ := strconv.ParseInt(oct3, 2, 64)
+	ii4, _ := strconv.ParseInt(oct4, 2, 64)
+	netmaskstring = strconv.Itoa(int(ii1)) + "." + strconv.Itoa(int(ii2)) + "." + strconv.Itoa(int(ii3)) + "." + strconv.Itoa(int(ii4))
+	return
 }
