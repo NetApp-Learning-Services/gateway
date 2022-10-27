@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"strings"
-	"time"
 )
 
 type IpInterfaceCreation struct {
@@ -61,7 +60,7 @@ type SvmId struct {
 	Uuid string `json:"uuid,omitempty"`
 }
 
-func (c *Client) GetInterfacesForSVMByUUID(uuid string) (lifs IPInterfacesResponse, err error) {
+func (c *Client) GetIPInterfacesForSVMByUUID(uuid string) (lifs IPInterfacesResponse, err error) {
 	uri := "/api/network/ip/interfaces?svm.uuid=" + uuid
 
 	data, err := c.clientGet(uri)
@@ -78,7 +77,7 @@ func (c *Client) GetInterfacesForSVMByUUID(uuid string) (lifs IPInterfacesRespon
 	return resp, nil
 }
 
-func (c *Client) GetInterfaceByUUID(uuid string) (lif IpInterface, err error) {
+func (c *Client) GetIPInterfaceByUUID(uuid string) (lif IpInterface, err error) {
 	uri := "/api/network/ip/interfaces/" + uuid
 
 	data, err := c.clientGet(uri)
@@ -95,35 +94,35 @@ func (c *Client) GetInterfaceByUUID(uuid string) (lif IpInterface, err error) {
 	return resp, nil
 }
 
-func (c *Client) CreateInterface(jsonPayload []byte) (err error) {
+func (c *Client) CreateIPInterface(jsonPayload []byte) (err error) {
 	uri := "/api/network/ip/interfaces"
-	data, err := c.clientPost(uri, jsonPayload)
+	_, err = c.clientPost(uri, jsonPayload)
 	if err != nil {
 		//fmt.Println("Error: " + err.Error())
 		return &apiError{1, err.Error()}
 	}
 
-	var result JobResponse
-	json.Unmarshal(data, &result)
+	// var result JobResponse
+	// json.Unmarshal(data, &result)
 
-	url := result.Job.Selflink.Self.Href
+	// url := result.Job.Selflink.Self.Href
 
-	createJob, _ := c.GetJob(url)
+	// createJob, _ := c.GetJob(url)
 
-	for createJob.State == "running" {
-		time.Sleep(time.Second * 2)
-		createJob, _ = c.GetJob(url)
-	}
+	// for createJob.State == "running" {
+	// 	time.Sleep(time.Second * 2)
+	// 	createJob, _ = c.GetJob(url)
+	// }
 
-	if createJob.State == "failure" {
-		return &apiError{int64(createJob.Code), createJob.Message}
-		//return fmt.Errorf("%d - %s", createJob.Code, createJob.Message)
-	}
+	// if createJob.State == "failure" {
+	// 	return &apiError{int64(createJob.Code), createJob.Message}
+	// 	//return fmt.Errorf("%d - %s", createJob.Code, createJob.Message)
+	// }
 
 	return nil
 }
 
-func (c *Client) PatchInterface(uuid string, jsonPayload []byte) (err error) {
+func (c *Client) PatchIPInterface(uuid string, jsonPayload []byte) (err error) {
 	uri := "/api/network/ip/interfaces/" + uuid
 
 	_, err = c.clientPatch(uri, jsonPayload)

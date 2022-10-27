@@ -31,7 +31,7 @@ func (r *StorageVirtualMachineReconciler) reconcileManagementLifUpdate(ctx conte
 	}
 
 	// Get current LIFs for SVM provided in UUID
-	lifs, err := oc.GetInterfacesForSVMByUUID(uuid)
+	lifs, err := oc.GetIPInterfacesForSVMByUUID(uuid)
 	if err != nil {
 		log.Error(err, "Error retreiving LIFs for SVM by UUID")
 	}
@@ -58,7 +58,7 @@ func (r *StorageVirtualMachineReconciler) reconcileManagementLifUpdate(ctx conte
 		lifUuid = lifs.Records[nameIndex].Uuid
 
 		// Get current LIF details by LIF UUID
-		lifRetrieved, err := oc.GetInterfaceByUUID(lifUuid)
+		lifRetrieved, err := oc.GetIPInterfaceByUUID(lifUuid)
 		if err != nil {
 			log.Error(err, "Error retreiving LIF details by LIF UUID")
 		}
@@ -120,7 +120,7 @@ func (r *StorageVirtualMachineReconciler) reconcileManagementLifUpdate(ctx conte
 	if !create {
 		// After building update string execute it and check for errors
 		log.Info("SVM management LIF update attempt of: " + lifUuid)
-		err = oc.PatchInterface(lifUuid, jsonPayload)
+		err = oc.PatchIPInterface(lifUuid, jsonPayload)
 		if err != nil {
 			log.Error(err, "Error occurred when updating SVM management LIF")
 			_ = r.setConditionManagementLIFUpdate(ctx, svmCR, CONDITION_STATUS_FALSE)
@@ -134,7 +134,7 @@ func (r *StorageVirtualMachineReconciler) reconcileManagementLifUpdate(ctx conte
 	} else {
 		// Create new management LIF
 		log.Info("SVM management LIF creation attempt")
-		err = oc.CreateInterface(jsonPayload)
+		err = oc.CreateIPInterface(jsonPayload)
 		if err != nil {
 			log.Error(err, "Error occurred when creating SVM management LIF")
 			_ = r.setConditionManagementLIFCreation(ctx, svmCR, CONDITION_STATUS_FALSE)
