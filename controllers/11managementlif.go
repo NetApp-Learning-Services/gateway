@@ -33,6 +33,10 @@ func (r *StorageVirtualMachineReconciler) reconcileManagementLifUpdate(ctx conte
 	// Get current LIFs for SVM provided in UUID
 	lifs, err := oc.GetInterfacesForSVMByUUID(uuid)
 	if err != nil {
+		log.Error(err, "Error retreiving LIFs for SVM by UUID")
+	}
+
+	if lifs.NumRecords == 0 {
 		// no LIFs for the SVM provided in UUID
 		// create new LIF
 		log.Info("No LIFs defined for SVM: " + uuid + " - creating management LIF")

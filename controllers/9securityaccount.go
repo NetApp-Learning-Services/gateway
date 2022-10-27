@@ -89,7 +89,7 @@ func (r *StorageVirtualMachineReconciler) reconcileSecurityAccount(ctx context.C
 			_ = r.setConditionVsadminSecretUpdate(ctx, svmCR, CONDITION_STATUS_TRUE)
 		}
 	} else {
-		log.Info("Nothing to do - skipping step 9")
+		log.Info("Nothing to do - skipping Step 9")
 		return nil //do nothing
 	}
 
