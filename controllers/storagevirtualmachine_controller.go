@@ -193,10 +193,15 @@ func (r *StorageVirtualMachineReconciler) Reconcile(ctx context.Context, req ctr
 				log.Error(err, "Error during reconciling management LIF - requeuing")
 				return ctrl.Result{Requeue: true}, err
 			}
-		}
 
-		// STEP 12
-		// Reconcile NFS information
+			// STEP 12
+			// Reconcile NFS information
+			err = r.reconcileNFSUpdate(ctx, svmCR, svmRetrieved.UUID, oc, log)
+			if err != nil {
+				log.Error(err, "Error during reconciling NFS update - requeuing")
+				return ctrl.Result{Requeue: true}, err
+			}
+		}
 
 	}
 
