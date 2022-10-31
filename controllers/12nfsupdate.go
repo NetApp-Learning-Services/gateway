@@ -10,5 +10,8 @@ import (
 
 func (r *StorageVirtualMachineReconciler) reconcileNFSUpdate(ctx context.Context, svmCR *gatewayv1alpha1.StorageVirtualMachine,
 	uuid string, oc *ontap.Client, log logr.Logger) error {
+
+	//
+
 	return nil
 }

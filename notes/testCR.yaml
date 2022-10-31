@@ -22,7 +22,7 @@ apiVersion: gateway.netapp.com/v1alpha1
 kind: StorageVirtualMachine
 metadata:
   name: storagevirtualmachine-sample
-  namespace:  gateway-system
+  namespace: gateway-system
 spec:
   svmName: testVs
   clusterHost: 192.168.0.102
@@ -34,7 +34,25 @@ spec:
     homeNode: Cluster2-01
   vsadminCredentials:
     name: ontap-svm-admin
-    namespace:   gateway-system 
+    namespace: gateway-system 
   clusterCredentials:
     name: ontap-cluster-admin
-    namespace:   gateway-system
+    namespace: gateway-system
+  nfs:
+    enabled: true
+    v3: true
+    v4: true
+    v41: true
+    interfaces:
+    - name: lif1
+      ip: 192.168.0.30
+      netmask: 255.255.255.0
+      broadcastDomain: Default
+      homeNode: Cluster2-01
+    rules:
+    - client: 0.0.0.0/0
+      protocols: any
+      rw: any
+      ro: any
+      superuser: any
+      anon: 65534
