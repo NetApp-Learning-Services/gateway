@@ -3,6 +3,7 @@ package controllers
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	gatewayv1alpha1 "gateway/api/v1alpha1"
 	"gateway/ontap"
 
@@ -83,6 +84,10 @@ func (r *StorageVirtualMachineReconciler) reconcileNFSUpdate(ctx context.Context
 			upsertNfsService.Protocol.V41Enable = svmCR.Spec.NfsConfig.Nfsv41
 		}
 
+		if oc.Debug {
+			log.Info("[DEBUG] NFS service update payload: " + fmt.Sprintf("%#v\n", upsertNfsService))
+		}
+
 		if updateNfsService {
 
 			jsonPayload, err := json.Marshal(upsertNfsService)
@@ -94,6 +99,7 @@ func (r *StorageVirtualMachineReconciler) reconcileNFSUpdate(ctx context.Context
 			}
 
 			//Patch Nfs service
+			log.Info("NFS service update attempt for SVM: " + uuid)
 			err = oc.PatchNfsService(uuid, jsonPayload)
 			if err != nil {
 				log.Error(err, "Error updating the NFS service")

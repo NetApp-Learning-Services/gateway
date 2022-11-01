@@ -44,7 +44,7 @@ func (r *StorageVirtualMachineReconciler) reconcileManagementLifUpdate(ctx conte
 		create = true
 	}
 
-	var patchManagementLif ontap.IpInterface
+	var upsertManagementLif ontap.IpInterface
 
 	nameIndex := slices.IndexFunc(lifs.Records, func(i ontap.IpInterface) bool { return i.Name == svmCR.Spec.ManagementLIF.Name })
 
@@ -64,13 +64,13 @@ func (r *StorageVirtualMachineReconciler) reconcileManagementLifUpdate(ctx conte
 			log.Error(err, "Error retreiving LIF details by LIF UUID")
 		}
 
-		patchManagementLif.Name = lifs.Records[nameIndex].Name
+		upsertManagementLif.Name = lifs.Records[nameIndex].Name
 
 		if lifRetrieved.Ip.Address != svmCR.Spec.ManagementLIF.IPAddress {
 			// need to update ip address
 			execute = true
-			patchManagementLif.Ip.Address = svmCR.Spec.ManagementLIF.IPAddress
-			patchManagementLif.Ip.Netmask = svmCR.Spec.ManagementLIF.Netmask
+			upsertManagementLif.Ip.Address = svmCR.Spec.ManagementLIF.IPAddress
+			upsertManagementLif.Ip.Netmask = svmCR.Spec.ManagementLIF.Netmask
 		}
 
 		netmaskAsInt, _ := strconv.Atoi(lifRetrieved.Ip.Netmask)
@@ -83,21 +83,21 @@ func (r *StorageVirtualMachineReconciler) reconcileManagementLifUpdate(ctx conte
 		if netmaskAsIP != svmCR.Spec.ManagementLIF.Netmask {
 			// need to update netmask
 			execute = true
-			patchManagementLif.Ip.Netmask = svmCR.Spec.ManagementLIF.Netmask
-			patchManagementLif.Ip.Address = svmCR.Spec.ManagementLIF.IPAddress
+			upsertManagementLif.Ip.Netmask = svmCR.Spec.ManagementLIF.Netmask
+			upsertManagementLif.Ip.Address = svmCR.Spec.ManagementLIF.IPAddress
 		}
 	} else {
 		// nothing defined in SVM create new management LIF
 		execute = true
 		create = true
-		patchManagementLif.Name = svmCR.Spec.ManagementLIF.Name
-		patchManagementLif.Ip.Address = svmCR.Spec.ManagementLIF.IPAddress
-		patchManagementLif.Ip.Netmask = svmCR.Spec.ManagementLIF.Netmask
-		patchManagementLif.Location.BroadcastDomain.Name = svmCR.Spec.ManagementLIF.BroacastDomain
-		patchManagementLif.Location.HomeNode.Name = svmCR.Spec.ManagementLIF.HomeNode
-		patchManagementLif.ServicePolicy.Name = "default-management" // special word
-		patchManagementLif.Scope = "svm"                             //special word
-		patchManagementLif.Svm.Uuid = uuid
+		upsertManagementLif.Name = svmCR.Spec.ManagementLIF.Name
+		upsertManagementLif.Ip.Address = svmCR.Spec.ManagementLIF.IPAddress
+		upsertManagementLif.Ip.Netmask = svmCR.Spec.ManagementLIF.Netmask
+		upsertManagementLif.Location.BroadcastDomain.Name = svmCR.Spec.ManagementLIF.BroacastDomain
+		upsertManagementLif.Location.HomeNode.Name = svmCR.Spec.ManagementLIF.HomeNode
+		upsertManagementLif.ServicePolicy.Name = "default-management" // special word
+		upsertManagementLif.Scope = "svm"                             //special word
+		upsertManagementLif.Svm.Uuid = uuid
 	}
 
 	if !execute {
@@ -107,10 +107,10 @@ func (r *StorageVirtualMachineReconciler) reconcileManagementLifUpdate(ctx conte
 
 	// otherwise changes need to be implemented
 	if oc.Debug {
-		log.Info("[DEBUG] SVM management LIF update payload: " + fmt.Sprintf("%#v\n", patchManagementLif))
+		log.Info("[DEBUG] SVM management LIF update payload: " + fmt.Sprintf("%#v\n", upsertManagementLif))
 	}
 
-	jsonPayload, err := json.Marshal(patchManagementLif)
+	jsonPayload, err := json.Marshal(upsertManagementLif)
 	if err != nil {
 		//error creating the json body
 		log.Error(err, "Error creating the json payload for SVM managment LIF update")
