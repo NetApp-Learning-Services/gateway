@@ -26,6 +26,7 @@ metadata:
 spec:
   svmName: testVs
   clusterHost: 192.168.0.102
+  debug: true
   management:
     name: lif1
     ip: 192.168.0.30

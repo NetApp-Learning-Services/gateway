@@ -97,7 +97,7 @@ func (r *StorageVirtualMachineReconciler) Reconcile(ctx context.Context, req ctr
 
 	// STEP 4
 	//create ONTAP client
-	oc, err := r.reconcileGetClient(ctx, svmCR, adminSecret, host, debugOn, trustSSL, log)
+	oc, err := r.reconcileGetClient(ctx, svmCR, adminSecret, host, trustSSL, log)
 	if err != nil {
 		log.Error(err, "Error during creation of ONTAP client - requeuing")
 		return ctrl.Result{RequeueAfter: 30 * time.Second}, err //got another error - re-reconcile

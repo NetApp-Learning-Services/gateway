@@ -11,7 +11,7 @@ import (
 
 func (r *StorageVirtualMachineReconciler) reconcileGetClient(ctx context.Context,
 	svmCR *gatewayv1alpha1.StorageVirtualMachine,
-	adminSecret *corev1.Secret, host string, debugOn bool, trustSSL bool,
+	adminSecret *corev1.Secret, host string, trustSSL bool,
 	log logr.Logger) (*ontap.Client, error) {
 
 	log.Info("Step 4: Create ONTAP client")
@@ -19,7 +19,7 @@ func (r *StorageVirtualMachineReconciler) reconcileGetClient(ctx context.Context
 	oc, err := ontap.NewClient(
 		string(adminSecret.Data["username"]),
 		string(adminSecret.Data["password"]),
-		host, debugOn, trustSSL)
+		host, svmCR.Spec.SvmDebug, trustSSL)
 
 	if err != nil {
 		log.Error(err, "Error creating ONTAP client")

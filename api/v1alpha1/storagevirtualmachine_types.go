@@ -40,8 +40,13 @@ type StorageVirtualMachineSpec struct {
 	// Stores SVM's uuid after it is created
 	SvmUuid string `json:"svmUuid,omitempty"`
 
-	// Stores SVM's uuid after it is created
+	// Stores optional SVM's comment
+	// +kubebuilder:validation:Optional
 	SvmComment string `json:"svmComment,omitempty"`
+
+	// Stores optional debug
+	// +kubebuilder:default:=false
+	SvmDebug bool `json:"debug,omitempty"`
 
 	// Provides optional SVM managment LIF
 	// +kubebuilder:validation:Optional
