@@ -11,6 +11,7 @@ type IpInterfaceCreation struct {
 	Ip            Ip       `json:"ip,omitempty"`
 	Location      Location `json:"location,omitempty"`
 	ServicePolicy string   `json:"service_policy,omitempty"`
+	Scope         string   `json:"scope,omitempty"`
 }
 
 type IpInterface struct {
