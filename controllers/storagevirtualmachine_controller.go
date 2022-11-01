@@ -181,10 +181,10 @@ func (r *StorageVirtualMachineReconciler) Reconcile(ctx context.Context, req ctr
 			return ctrl.Result{Requeue: true}, err
 		}
 
-		if svmRetrieved.UUID != "" {
+		if svmRetrieved.Uuid != "" {
 			// STEP 11
 			// Reconcile Management LIF information
-			err = r.reconcileManagementLifUpdate(ctx, svmCR, svmRetrieved.UUID, oc, log)
+			err = r.reconcileManagementLifUpdate(ctx, svmCR, svmRetrieved.Uuid, oc, log)
 			if err != nil {
 				if strings.Contains(err.Error(), "Duplicate IP") {
 					log.Error(err, "Duplicated IP Address - stop reconcile")
@@ -196,7 +196,7 @@ func (r *StorageVirtualMachineReconciler) Reconcile(ctx context.Context, req ctr
 
 			// STEP 12
 			// Reconcile NFS information
-			err = r.reconcileNFSUpdate(ctx, svmCR, svmRetrieved.UUID, oc, log)
+			err = r.reconcileNFSUpdate(ctx, svmCR, svmRetrieved.Uuid, oc, log)
 			if err != nil {
 				log.Error(err, "Error during reconciling NFS update - requeuing")
 				return ctrl.Result{Requeue: true}, err

@@ -49,8 +49,8 @@ func (r *StorageVirtualMachineReconciler) reconcileSvmUpdate(ctx context.Context
 	}
 
 	// After building update string execute it and check for errors
-	log.Info("SVM update attempt for SVM: " + svmRetrieved.UUID)
-	err = oc.PatchStorageVM(svmRetrieved.UUID, jsonPayload)
+	log.Info("SVM update attempt for SVM: " + svmRetrieved.Uuid)
+	err = oc.PatchStorageVM(svmRetrieved.Uuid, jsonPayload)
 	if err != nil {
 		log.Error(err, "Error occurred when updating SVM")
 		_ = r.setConditionSVMUpdate(ctx, svmCR, CONDITION_STATUS_FALSE)

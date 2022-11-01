@@ -156,7 +156,7 @@ type SvmResponse struct {
 
 type Svm struct {
 	Resource
-	UUID                   string        `json:"uuid,omitempty"`
+	Uuid                   string        `json:"uuid,omitempty"`
 	Name                   string        `json:"name,omitempty"`
 	Subtype                string        `json:"subtype,omitempty"`
 	Language               string        `json:"language,omitempty"`
@@ -180,7 +180,7 @@ type Svm struct {
 }
 
 type SvmByUUID struct {
-	UUID       string `json:"uuid"`
+	Uuid       string `json:"uuid"`
 	Name       string `json:"name"`
 	Subtype    string `json:"subtype"`
 	Language   string `json:"language"`
@@ -192,7 +192,7 @@ type SvmByUUID struct {
 	Comment string `json:"comment"`
 	Ipspace struct {
 		Name  string `json:"name"`
-		UUID  string `json:"uuid"`
+		Uuid  string `json:"uuid"`
 		Links struct {
 			Self struct {
 				Href string `json:"href"`
@@ -200,7 +200,7 @@ type SvmByUUID struct {
 		} `json:"_links"`
 	} `json:"ipspace"`
 	SnapshotPolicy struct {
-		UUID  string `json:"uuid"`
+		Uuid  string `json:"uuid"`
 		Name  string `json:"name"`
 		Links struct {
 			Self struct {

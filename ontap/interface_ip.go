@@ -61,7 +61,7 @@ type SvmId struct {
 	Uuid string `json:"uuid,omitempty"`
 }
 
-func (c *Client) GetIPInterfacesForSVMByUUID(uuid string) (lifs IPInterfacesResponse, err error) {
+func (c *Client) GetIpInterfacesBySvmUuid(uuid string) (lifs IPInterfacesResponse, err error) {
 	uri := "/api/network/ip/interfaces?svm.uuid=" + uuid
 
 	data, err := c.clientGet(uri)
@@ -78,7 +78,7 @@ func (c *Client) GetIPInterfacesForSVMByUUID(uuid string) (lifs IPInterfacesResp
 	return resp, nil
 }
 
-func (c *Client) GetIPInterfaceByUUID(uuid string) (lif IpInterface, err error) {
+func (c *Client) GetIpInterfaceByLifUuid(uuid string) (lif IpInterface, err error) {
 	uri := "/api/network/ip/interfaces/" + uuid
 
 	data, err := c.clientGet(uri)
@@ -95,7 +95,7 @@ func (c *Client) GetIPInterfaceByUUID(uuid string) (lif IpInterface, err error) 
 	return resp, nil
 }
 
-func (c *Client) CreateIPInterface(jsonPayload []byte) (err error) {
+func (c *Client) CreateIpInterface(jsonPayload []byte) (err error) {
 	uri := "/api/network/ip/interfaces"
 	_, err = c.clientPost(uri, jsonPayload)
 	if err != nil {
@@ -123,7 +123,7 @@ func (c *Client) CreateIPInterface(jsonPayload []byte) (err error) {
 	return nil
 }
 
-func (c *Client) PatchIPInterface(uuid string, jsonPayload []byte) (err error) {
+func (c *Client) PatchIpInterface(uuid string, jsonPayload []byte) (err error) {
 	uri := "/api/network/ip/interfaces/" + uuid
 
 	_, err = c.clientPatch(uri, jsonPayload)
@@ -134,6 +134,8 @@ func (c *Client) PatchIPInterface(uuid string, jsonPayload []byte) (err error) {
 		if strings.Contains(err.Error(), "Duplicate") {
 			return &apiError{1376963, err.Error()}
 		}
+		//miscellaneous errror
+		return &apiError{1, err.Error()}
 	}
 
 	// var result map[string]interface{}

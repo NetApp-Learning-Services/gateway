@@ -62,7 +62,7 @@ type StorageVirtualMachineSpec struct {
 
 	// Provide optional NFS configuration
 	// +kubebuilder:validation:Optional
-	NfsConfig NfsSubSpec `json:"nfs,omitempty"`
+	NfsConfig *NfsSubSpec `json:"nfs,omitempty"`
 }
 
 // StorageVirtualMachineStatus defines the observed state of StorageVirtualMachine
