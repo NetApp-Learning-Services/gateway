@@ -66,21 +66,25 @@ func (r *StorageVirtualMachineReconciler) reconcileNFSUpdate(ctx context.Context
 		if nfsService.Enabled != svmCR.Spec.NfsConfig.NfsEnabled {
 			updateNfsService = true
 			upsertNfsService.Enabled = svmCR.Spec.NfsConfig.NfsEnabled
+			upsertNfsService.Svm.Uuid = svmCR.Spec.SvmUuid
 		}
 
 		if nfsService.Protocol.V3Enable != svmCR.Spec.NfsConfig.Nfsv3 {
 			updateNfsService = true
 			upsertNfsService.Protocol.V3Enable = svmCR.Spec.NfsConfig.Nfsv3
+			upsertNfsService.Svm.Uuid = svmCR.Spec.SvmUuid
 		}
 
 		if nfsService.Protocol.V4Enable != svmCR.Spec.NfsConfig.Nfsv4 {
 			updateNfsService = true
 			upsertNfsService.Protocol.V4Enable = svmCR.Spec.NfsConfig.Nfsv4
+			upsertNfsService.Svm.Uuid = svmCR.Spec.SvmUuid
 		}
 
 		if nfsService.Protocol.V41Enable != svmCR.Spec.NfsConfig.Nfsv41 {
 			updateNfsService = true
 			upsertNfsService.Protocol.V41Enable = svmCR.Spec.NfsConfig.Nfsv41
+			upsertNfsService.Svm.Uuid = svmCR.Spec.SvmUuid
 		}
 
 		if updateNfsService {
@@ -102,7 +106,7 @@ func (r *StorageVirtualMachineReconciler) reconcileNFSUpdate(ctx context.Context
 			}
 			log.Info("NFS service updated successful")
 		} else {
-			log.Info("No changes detected - NFS service")
+			log.Info("No changes detected - skip updating NFS service")
 		}
 	}
 
