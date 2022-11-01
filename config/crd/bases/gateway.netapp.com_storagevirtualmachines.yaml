@@ -135,7 +135,7 @@ spec:
                       properties:
                         anon:
                           description: Provides required NFS rule anonyomous user
-                          type: string
+                          type: integer
                         client:
                           description: Provides required NFS rule client match
                           type: string

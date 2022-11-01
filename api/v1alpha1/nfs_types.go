@@ -50,5 +50,5 @@ type NfsRule struct {
 
 	// Provides required NFS rule anonyomous user
 	// +kubebuilder:validation:Optional
-	NfsRuleAnon string `json:"anon,omitempty"`
+	NfsRuleAnon int `json:"anon,omitempty"`
 }
