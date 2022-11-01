@@ -54,6 +54,10 @@ type StorageVirtualMachineSpec struct {
 	// Provides optional SVM administrator credentials
 	// +kubebuilder:validation:Optional
 	VsadminCredentialSecret NamespacedName `json:"vsadminCredentials,omitempty"`
+
+	// Provide optional NFS configuration
+	// +kubebuilder:validation:Optional
+	NfsConfig NfsSubSpec `json:"nfs,omitempty"`
 }
 
 // StorageVirtualMachineStatus defines the observed state of StorageVirtualMachine

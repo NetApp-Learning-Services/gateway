@@ -51,7 +51,7 @@ spec:
       homeNode: Cluster2-01
     rules:
     - client: 0.0.0.0/0
-      protocols: any
+      protocol: any
       rw: any
       ro: any
       superuser: any
