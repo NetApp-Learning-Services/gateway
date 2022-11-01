@@ -59,7 +59,7 @@ func (r *StorageVirtualMachineReconciler) reconcileNFSUpdate(ctx context.Context
 			//TODO: _ = r.setConditionManagementLIFUpdate(ctx, svmCR, CONDITION_STATUS_FALSE)
 			return err
 		}
-
+		log.Info("NFS service created successful")
 	} else {
 
 		// Compare enabled to custom resource enabled
@@ -116,7 +116,9 @@ func (r *StorageVirtualMachineReconciler) reconcileNFSUpdate(ctx context.Context
 				//TODO: _ = r.setConditionManagementLIFUpdate(ctx, svmCR, CONDITION_STATUS_FALSE)
 				return err
 			}
-
+			log.Info("NFS service updated successful")
+		} else {
+			log.Info("No changes detected - NFS service")
 		}
 	}
 
