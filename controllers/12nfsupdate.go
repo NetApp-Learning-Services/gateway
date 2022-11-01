@@ -43,6 +43,7 @@ func (r *StorageVirtualMachineReconciler) reconcileNFSUpdate(ctx context.Context
 		upsertNfsService.Protocol.V3Enable = svmCR.Spec.NfsConfig.Nfsv3
 		upsertNfsService.Protocol.V4Enable = svmCR.Spec.NfsConfig.Nfsv4
 		upsertNfsService.Protocol.V41Enable = svmCR.Spec.NfsConfig.Nfsv41
+		upsertNfsService.Svm.Uuid = svmCR.Spec.SvmUuid
 
 		jsonPayload, err := json.Marshal(upsertNfsService)
 		if err != nil {
