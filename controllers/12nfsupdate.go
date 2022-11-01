@@ -2,16 +2,21 @@ package controllers
 
 import (
 	"context"
+	"encoding/json"
 	gatewayv1alpha1 "gateway/api/v1alpha1"
 	"gateway/ontap"
 
 	"github.com/go-logr/logr"
+	"k8s.io/apimachinery/pkg/api/errors"
 )
 
 func (r *StorageVirtualMachineReconciler) reconcileNFSUpdate(ctx context.Context, svmCR *gatewayv1alpha1.StorageVirtualMachine,
 	uuid string, oc *ontap.Client, log logr.Logger) error {
 
 	log.Info("Step 12: Update NFS service")
+
+	create := false
+	updateNfsService := false
 
 	// Check to see if nfs configuration is provided in custom resource
 	if svmCR.Spec.NfsConfig == nil {
@@ -22,19 +27,97 @@ func (r *StorageVirtualMachineReconciler) reconcileNFSUpdate(ctx context.Context
 
 	// Get the NFS configuration of SVM
 	nfsService, err := oc.GetNfsServiceBySvmUuid(uuid)
-	if err != nil {
-		log.Error(err, "Error retreiving NFS service for SVM by UUID")
+	if err != nil && errors.IsNotFound(err) {
+		create = true
+	} else if err != nil {
+		// some other error
+		log.Error(err, "Error retrieving NFS service for SVM by UUID")
 		return err
 	}
 
-	// Compare enabled to custom resource enabled
-	if nfsService.Enabled != svmCR.Spec.NfsConfig.NfsEnabled {
-		log.Info("inside")
-	}
-	// If not and enabled in custom resource, POST /procotols/nfs/services
+	var upsertNfsService ontap.NFSService
 
-	// Compare v3, v4, v41 to custom resource enabled
-	// If not and enabled in custom resource, PATCH /procotols/nfs/services
+	if create {
+
+		upsertNfsService.Enabled = svmCR.Spec.NfsConfig.NfsEnabled
+		upsertNfsService.Protocol.V3Enable = svmCR.Spec.NfsConfig.Nfsv3
+		upsertNfsService.Protocol.V4Enable = svmCR.Spec.NfsConfig.Nfsv4
+		upsertNfsService.Protocol.V41Enable = svmCR.Spec.NfsConfig.Nfsv41
+
+		jsonPayload, err := json.Marshal(upsertNfsService)
+		if err != nil {
+			//error creating the json body
+			log.Error(err, "Error creating the json payload for NFS service creation")
+			//TODO: _ = r.setConditionManagementLIFUpdate(ctx, svmCR, CONDITION_STATUS_FALSE)
+			return err
+		}
+
+		err = oc.CreateNfsService(jsonPayload)
+		if err != nil {
+			log.Error(err, "Error creating the NFS service")
+			//TODO: _ = r.setConditionManagementLIFUpdate(ctx, svmCR, CONDITION_STATUS_FALSE)
+			return err
+		}
+
+	} else {
+
+		// Compare enabled to custom resource enabled
+		if nfsService.Enabled != svmCR.Spec.NfsConfig.NfsEnabled {
+			updateNfsService = true
+			upsertNfsService.Enabled = svmCR.Spec.NfsConfig.NfsEnabled
+			// do everything else
+			upsertNfsService.Protocol.V3Enable = svmCR.Spec.NfsConfig.Nfsv3
+			upsertNfsService.Protocol.V4Enable = svmCR.Spec.NfsConfig.Nfsv4
+			upsertNfsService.Protocol.V41Enable = svmCR.Spec.NfsConfig.Nfsv41
+		}
+
+		if nfsService.Protocol.V3Enable != svmCR.Spec.NfsConfig.Nfsv3 {
+			updateNfsService = true
+			upsertNfsService.Protocol.V3Enable = svmCR.Spec.NfsConfig.Nfsv3
+			// do everything else
+			upsertNfsService.Enabled = svmCR.Spec.NfsConfig.NfsEnabled
+			upsertNfsService.Protocol.V4Enable = svmCR.Spec.NfsConfig.Nfsv4
+			upsertNfsService.Protocol.V41Enable = svmCR.Spec.NfsConfig.Nfsv41
+		}
+
+		if nfsService.Protocol.V4Enable != svmCR.Spec.NfsConfig.Nfsv4 {
+			updateNfsService = true
+			upsertNfsService.Protocol.V4Enable = svmCR.Spec.NfsConfig.Nfsv4
+			// do everything else
+			upsertNfsService.Enabled = svmCR.Spec.NfsConfig.NfsEnabled
+			upsertNfsService.Protocol.V3Enable = svmCR.Spec.NfsConfig.Nfsv3
+			upsertNfsService.Protocol.V41Enable = svmCR.Spec.NfsConfig.Nfsv41
+		}
+
+		if nfsService.Protocol.V41Enable != svmCR.Spec.NfsConfig.Nfsv41 {
+			updateNfsService = true
+			upsertNfsService.Protocol.V41Enable = svmCR.Spec.NfsConfig.Nfsv41
+			// do everything else
+			upsertNfsService.Enabled = svmCR.Spec.NfsConfig.NfsEnabled
+			upsertNfsService.Protocol.V3Enable = svmCR.Spec.NfsConfig.Nfsv3
+			upsertNfsService.Protocol.V4Enable = svmCR.Spec.NfsConfig.Nfsv4
+		}
+
+		if updateNfsService {
+
+			jsonPayload, err := json.Marshal(upsertNfsService)
+			if err != nil {
+				//error creating the json body
+				log.Error(err, "Error creating the json payload for NFS service update")
+				//TODO: _ = r.setConditionManagementLIFUpdate(ctx, svmCR, CONDITION_STATUS_FALSE)
+				return err
+			}
+
+			//Patch Nfs service
+			err = oc.PatchNfsService(uuid, jsonPayload)
+			if err != nil {
+				log.Error(err, "Error updating the NFS service")
+				//TODO: _ = r.setConditionManagementLIFUpdate(ctx, svmCR, CONDITION_STATUS_FALSE)
+				return err
+			}
+
+		}
+	}
 
 	// Check to see if NFS interfaces are defined in custom resource
 

@@ -33,7 +33,7 @@ func (r *StorageVirtualMachineReconciler) reconcileManagementLifUpdate(ctx conte
 	// Get current LIFs for SVM provided in UUID
 	lifs, err := oc.GetIpInterfacesBySvmUuid(uuid)
 	if err != nil {
-		log.Error(err, "Error retreiving LIFs for SVM by UUID")
+		log.Error(err, "Error retrieving LIFs for SVM by UUID")
 		return err
 	}
 
