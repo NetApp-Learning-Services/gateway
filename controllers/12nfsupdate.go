@@ -166,7 +166,7 @@ func (r *StorageVirtualMachineReconciler) reconcileNFSUpdate(ctx context.Context
 						lifs.Records[index].Name != val.Name ||
 						netmaskAsIP != val.Netmask ||
 						lifs.Records[index].ServicePolicy.Name != NfsLifType ||
-						lifs.Records[index].Enabled {
+						!lifs.Records[index].Enabled {
 						//reset value
 						var updateLif ontap.IpInterface
 						updateLif.Name = val.Name
