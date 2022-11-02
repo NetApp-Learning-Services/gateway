@@ -40,10 +40,10 @@ func (r *StorageVirtualMachineReconciler) reconcileNFSUpdate(ctx context.Context
 
 	if create {
 
-		upsertNfsService.Enabled = svmCR.Spec.NfsConfig.NfsEnabled
-		upsertNfsService.Protocol.V3Enable = svmCR.Spec.NfsConfig.Nfsv3
-		upsertNfsService.Protocol.V4Enable = svmCR.Spec.NfsConfig.Nfsv4
-		upsertNfsService.Protocol.V41Enable = svmCR.Spec.NfsConfig.Nfsv41
+		upsertNfsService.Enabled = &svmCR.Spec.NfsConfig.NfsEnabled
+		upsertNfsService.Protocol.V3Enable = &svmCR.Spec.NfsConfig.Nfsv3
+		upsertNfsService.Protocol.V4Enable = &svmCR.Spec.NfsConfig.Nfsv4
+		upsertNfsService.Protocol.V41Enable = &svmCR.Spec.NfsConfig.Nfsv41
 		upsertNfsService.Svm.Uuid = svmCR.Spec.SvmUuid
 
 		jsonPayload, err := json.Marshal(upsertNfsService)
@@ -64,24 +64,24 @@ func (r *StorageVirtualMachineReconciler) reconcileNFSUpdate(ctx context.Context
 	} else {
 
 		// Compare enabled to custom resource enabled
-		if nfsService.Enabled != svmCR.Spec.NfsConfig.NfsEnabled {
+		if nfsService.Enabled != &svmCR.Spec.NfsConfig.NfsEnabled {
 			updateNfsService = true
-			upsertNfsService.Enabled = svmCR.Spec.NfsConfig.NfsEnabled
+			upsertNfsService.Enabled = &svmCR.Spec.NfsConfig.NfsEnabled
 		}
 
-		if nfsService.Protocol.V3Enable != svmCR.Spec.NfsConfig.Nfsv3 {
+		if nfsService.Protocol.V3Enable != &svmCR.Spec.NfsConfig.Nfsv3 {
 			updateNfsService = true
-			upsertNfsService.Protocol.V3Enable = svmCR.Spec.NfsConfig.Nfsv3
+			upsertNfsService.Protocol.V3Enable = &svmCR.Spec.NfsConfig.Nfsv3
 		}
 
-		if nfsService.Protocol.V4Enable != svmCR.Spec.NfsConfig.Nfsv4 {
+		if nfsService.Protocol.V4Enable != &svmCR.Spec.NfsConfig.Nfsv4 {
 			updateNfsService = true
-			upsertNfsService.Protocol.V4Enable = svmCR.Spec.NfsConfig.Nfsv4
+			upsertNfsService.Protocol.V4Enable = &svmCR.Spec.NfsConfig.Nfsv4
 		}
 
-		if nfsService.Protocol.V41Enable != svmCR.Spec.NfsConfig.Nfsv41 {
+		if nfsService.Protocol.V41Enable != &svmCR.Spec.NfsConfig.Nfsv41 {
 			updateNfsService = true
-			upsertNfsService.Protocol.V41Enable = svmCR.Spec.NfsConfig.Nfsv41
+			upsertNfsService.Protocol.V41Enable = &svmCR.Spec.NfsConfig.Nfsv41
 		}
 
 		if oc.Debug {

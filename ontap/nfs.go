@@ -10,15 +10,15 @@ import (
 )
 
 type NFSService struct {
-	Enabled  bool        `json:"enabled,omitempty"`
+	Enabled  *bool        `json:"enabled,omitempty"`
 	Protocol NFSProtocol `json:"protocol,omitempty"`
 	Svm      NfsSvm      `json:"svm,omitempty"`
 }
 
 type NFSProtocol struct {
-	V3Enable  bool `json:"v3_enabled,omitempty"`
-	V4Enable  bool `json:"v40_enabled,omitempty"`
-	V41Enable bool `json:"v41_enabled,omitempty"`
+	V3Enable  *bool `json:"v3_enabled,omitempty"`
+	V4Enable  *bool `json:"v40_enabled,omitempty"`
+	V41Enable *bool `json:"v41_enabled,omitempty"`
 }
 
 type NfsSvm struct {
