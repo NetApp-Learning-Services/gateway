@@ -303,25 +303,28 @@ func (r *StorageVirtualMachineReconciler) reconcileNFSUpdate(ctx context.Context
 			if exportUpdate {
 				// Build out complete export if there is any change
 				idToReplace := exportRetrieved.Records[0].Id // get the id
-				var exportUpdateVal ontap.ExportPolicy
-				exportUpdateVal.Name = svmCR.Spec.NfsConfig.Export.Name
+				var newExport ontap.ExportPolicy
+				newExport.Name = svmCR.Spec.NfsConfig.Export.Name
 
 				for _, val := range svmCR.Spec.NfsConfig.Export.Rules {
-					var exportRuleToAdd ontap.ExportRule
-					exportRuleToAdd.Anonuser = val.Anon
-					exportRuleToAdd.Protocols[0] = val.Protocols
-					exportRuleToAdd.RwRule[0] = val.Rw
-					exportRuleToAdd.Superuser[0] = val.Superuser
-					exportRuleToAdd.Clients[0].Match = val.Clients
-					exportUpdateVal.Rules = append(exportUpdateVal.Rules, exportRuleToAdd)
+					var newRule ontap.ExportRule
+					newRule.Anonuser = val.Anon
+					newRule.Protocols = append(newRule.Protocols, val.Protocols)
+					newRule.RwRule = append(newRule.RwRule, val.Rw)
+					newRule.RoRule = append(newRule.RoRule, val.Ro)
+					newRule.Superuser = append(newRule.Superuser, val.Superuser)
+					var match ontap.ExportMatch
+					match.Match = val.Clients
+					newRule.Clients = append(newRule.Clients, match)
+					newExport.Rules = append(newExport.Rules, newRule)
 				}
 
 				// otherwise changes need to be implemented
 				if oc.Debug {
-					log.Info("[DEBUG] NFS export update payload: " + fmt.Sprintf("%#v\n", exportUpdateVal))
+					log.Info("[DEBUG] NFS export update payload: " + fmt.Sprintf("%#v\n", newExport))
 				}
 
-				jsonPayload, err := json.Marshal(exportUpdateVal)
+				jsonPayload, err := json.Marshal(newExport)
 				if err != nil {
 					//error creating the json body
 					log.Error(err, "Error creating the json payload for NFS export update")
@@ -391,12 +394,14 @@ func CreateExport(exportToCreate gatewayv1alpha1.NfsExport, uuid string, oc *ont
 
 	for _, val := range exportToCreate.Rules {
 		var newRule ontap.ExportRule
-		newRule.Protocols[0] = val.Protocols
-		newRule.RwRule[0] = val.Rw
-		newRule.RoRule[0] = val.Ro
 		newRule.Anonuser = val.Anon
-		newRule.Superuser[0] = val.Superuser
-		newRule.Clients[0].Match = val.Clients
+		newRule.Protocols = append(newRule.Protocols, val.Protocols)
+		newRule.RwRule = append(newRule.RwRule, val.Rw)
+		newRule.RoRule = append(newRule.RoRule, val.Ro)
+		newRule.Superuser = append(newRule.Superuser, val.Superuser)
+		var match ontap.ExportMatch
+		match.Match = val.Clients
+		newRule.Clients = append(newRule.Clients, match)
 		newExport.Rules = append(newExport.Rules, newRule)
 	}
 
