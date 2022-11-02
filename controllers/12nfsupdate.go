@@ -302,9 +302,9 @@ func (r *StorageVirtualMachineReconciler) reconcileNFSUpdate(ctx context.Context
 
 			if exportUpdate {
 				// Build out complete export if there is any change
-				//idToReplace := exportRetrieved.Records[0].Id // get the id
+				idToReplace := exportRetrieved.Records[0].Id // get the id
 				var newExport ontap.ExportPolicy
-				newExport.Name = svmCR.Spec.NfsConfig.Export.Name
+				//newExport.Name = svmCR.Spec.NfsConfig.Export.Name
 
 				for _, val := range svmCR.Spec.NfsConfig.Export.Rules {
 					var newRule ontap.ExportRule
@@ -334,18 +334,18 @@ func (r *StorageVirtualMachineReconciler) reconcileNFSUpdate(ctx context.Context
 
 				// Patch doesn't seem to work well.  I keep getting duplicate name entries.
 				// Deleting and then just re-creating
-				oc.DeleteNfsExport(exportRetrieved.Records[0].Id)
-				if err != nil {
-					log.Error(err, "Error occurred when deleting NFS export: "+exportRetrieved.Records[0].Name)
-					//TODO: _ = r.setConditionManagementLIFCreation(ctx, svmCR, CONDITION_STATUS_FALSE)
-					// don't requeue on failed delete request
-					// return err
-				} else {
-					log.Info("NFS LIF delete successful: " + exportRetrieved.Records[0].Name)
-				}
+				// oc.DeleteNfsExport(exportRetrieved.Records[0].Id)
+				// if err != nil {
+				// 	log.Error(err, "Error occurred when deleting NFS export: "+exportRetrieved.Records[0].Name)
+				// 	//TODO: _ = r.setConditionManagementLIFCreation(ctx, svmCR, CONDITION_STATUS_FALSE)
+				// 	// don't requeue on failed delete request
+				// 	// return err
+				// } else {
+				// 	log.Info("NFS LIF delete successful: " + exportRetrieved.Records[0].Name)
+				// }
 
-				//err = oc.PatchNfsExport(idToReplace, jsonPayload)
-				err = oc.CreateNfsExport(jsonPayload)
+				err = oc.PatchNfsExport(idToReplace, jsonPayload)
+				//err = oc.CreateNfsExport(jsonPayload)
 				if err != nil {
 					log.Error(err, "Error occurred when updating NFS export")
 					//Todo: _ = r.setConditionManagementLIFUpdate(ctx, svmCR, CONDITION_STATUS_FALSE)
