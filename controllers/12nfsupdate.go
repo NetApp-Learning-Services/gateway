@@ -146,6 +146,7 @@ func (r *StorageVirtualMachineReconciler) reconcileNFSUpdate(ctx context.Context
 				newLif.Location.HomeNode.Name = val.HomeNode
 				newLif.ServicePolicy.Name = "default-data-files" //special word
 				newLif.Scope = "svm"                             //special word
+				newLif.Svm.Uuid = uuid
 
 				jsonPayload, err := json.Marshal(newLif)
 				if err != nil {
