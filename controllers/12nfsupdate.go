@@ -272,25 +272,30 @@ func (r *StorageVirtualMachineReconciler) reconcileNFSUpdate(ctx context.Context
 
 			for indx, val := range svmCR.Spec.NfsConfig.Export.Rules {
 
-				if val.Anon != exportRetrieved.Records[0].Rules[indx].Anonuser {
+				if len(exportRetrieved.Records[0].Rules) == 0 {
+					//nothing defined
 					exportUpdate = true
-				}
+				} else {
+					if val.Anon != exportRetrieved.Records[0].Rules[indx].Anonuser {
+						exportUpdate = true
+					}
 
-				if val.Client != exportRetrieved.Records[0].Rules[indx].Anonuser {
-					exportUpdate = true
-				}
-				if val.Protocols != exportRetrieved.Records[0].Rules[indx].Protocols {
-					exportUpdate = true
-				}
+					if val.Client != exportRetrieved.Records[0].Rules[indx].Anonuser {
+						exportUpdate = true
+					}
+					if val.Protocols != exportRetrieved.Records[0].Rules[indx].Protocols {
+						exportUpdate = true
+					}
 
-				if val.Ro != exportRetrieved.Records[0].Rules[indx].RoRule {
-					exportUpdate = true
-				}
-				if val.Rw != exportRetrieved.Records[0].Rules[indx].RwRule {
-					exportUpdate = true
-				}
-				if val.Superuser != exportRetrieved.Records[0].Rules[indx].Superuser {
-					exportUpdate = true
+					if val.Ro != exportRetrieved.Records[0].Rules[indx].RoRule {
+						exportUpdate = true
+					}
+					if val.Rw != exportRetrieved.Records[0].Rules[indx].RwRule {
+						exportUpdate = true
+					}
+					if val.Superuser != exportRetrieved.Records[0].Rules[indx].Superuser {
+						exportUpdate = true
+					}
 				}
 
 			}
