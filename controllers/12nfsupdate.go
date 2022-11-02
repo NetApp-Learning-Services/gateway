@@ -280,20 +280,20 @@ func (r *StorageVirtualMachineReconciler) reconcileNFSUpdate(ctx context.Context
 						exportUpdate = true
 					}
 
-					if val.Client != exportRetrieved.Records[0].Rules[indx].Anonuser {
+					if val.Clients != exportRetrieved.Records[0].Rules[indx].Clients[0].Match {
 						exportUpdate = true
 					}
-					if val.Protocols != exportRetrieved.Records[0].Rules[indx].Protocols {
+					if val.Protocols != exportRetrieved.Records[0].Rules[indx].Protocols[0] {
 						exportUpdate = true
 					}
 
-					if val.Ro != exportRetrieved.Records[0].Rules[indx].RoRule {
+					if val.Ro != exportRetrieved.Records[0].Rules[indx].RoRule[0] {
 						exportUpdate = true
 					}
-					if val.Rw != exportRetrieved.Records[0].Rules[indx].RwRule {
+					if val.Rw != exportRetrieved.Records[0].Rules[indx].RwRule[0] {
 						exportUpdate = true
 					}
-					if val.Superuser != exportRetrieved.Records[0].Rules[indx].Superuser {
+					if val.Superuser != exportRetrieved.Records[0].Rules[indx].Superuser[0] {
 						exportUpdate = true
 					}
 				}
@@ -309,9 +309,10 @@ func (r *StorageVirtualMachineReconciler) reconcileNFSUpdate(ctx context.Context
 				for _, val := range svmCR.Spec.NfsConfig.Export.Rules {
 					var exportRuleToAdd ontap.ExportRule
 					exportRuleToAdd.Anonuser = val.Anon
-					exportRuleToAdd.Protocols = val.Protocols
-					exportRuleToAdd.RwRule = val.Rw
-					exportRuleToAdd.Superuser = val.Superuser
+					exportRuleToAdd.Protocols[0] = val.Protocols
+					exportRuleToAdd.RwRule[0] = val.Rw
+					exportRuleToAdd.Superuser[0] = val.Superuser
+					exportRuleToAdd.Clients[0].Match = val.Clients
 					exportUpdateVal.Rules = append(exportUpdateVal.Rules, exportRuleToAdd)
 				}
 
@@ -390,11 +391,12 @@ func CreateExport(exportToCreate gatewayv1alpha1.NfsExport, uuid string, oc *ont
 
 	for _, val := range exportToCreate.Rules {
 		var newRule ontap.ExportRule
-		newRule.Protocols = val.Protocols
-		newRule.RwRule = val.Rw
-		newRule.RoRule = val.Ro
+		newRule.Protocols[0] = val.Protocols
+		newRule.RwRule[0] = val.Rw
+		newRule.RoRule[0] = val.Ro
 		newRule.Anonuser = val.Anon
-		newRule.Superuser = val.Superuser
+		newRule.Superuser[0] = val.Superuser
+		newRule.Clients[0].Match = val.Clients
 		newExport.Rules = append(newExport.Rules, newRule)
 	}
 

@@ -38,9 +38,30 @@ type NfsExport struct {
 }
 
 type NfsRule struct {
+	//Simplifed NFS Rule for now - but it should be like this
+	/* 	// Provides required NFS rule client match
+	   	// +kubebuilder:validation:Required
+	   	Clients []NFSRuleClient `json:"clients"`
+
+	   	// Provides required NFS rule protocol
+	   	// +kubebuilder:validation:Required
+	   	Protocols []NFSRuleVal `json:"protocols"`
+
+	   	// Provides required NFS rule read-write
+	   	// +kubebuilder:validation:Optional
+	   	Rw []NFSRuleVal `json:"rw,omitempty"`
+
+	   	// Provides required NFS rule read-only
+	   	// +kubebuilder:validation:Optional
+	   	Ro []NFSRuleVal `json:"ro,omitempty"`
+
+	   	// Provides required NFS rule superuser
+	   	// +kubebuilder:validation:Optional
+	   	Superuser []NFSRuleVal `json:"superuser,omitempty"` */
+
 	// Provides required NFS rule client match
 	// +kubebuilder:validation:Required
-	Client string `json:"client"`
+	Clients string `json:"clients"`
 
 	// Provides required NFS rule protocol
 	// +kubebuilder:validation:Required
@@ -62,3 +83,11 @@ type NfsRule struct {
 	// +kubebuilder:validation:Optional
 	Anon string `json:"anon,omitempty"`
 }
+
+// type NFSRuleVal struct {
+// 	Value string
+// }
+
+// type NFSRuleClient struct {
+// 	Match string `json:"match,omitempty"`
+// }

@@ -52,10 +52,24 @@ spec:
       homeNode: Cluster2-01
     export:
       name: default
+      #simplified rules 
       rules:
-      - client: 0.0.0.0/0
+      - clients: 0.0.0.0/0
         protocols: any
         rw: any
         ro: any
         superuser: any
-        anon: "65534"
+        anon:  "65534"
+      #but rules should look like this:
+      # rules:
+      # - clients: 
+      #   - Match: 0.0.0.0/0
+      #   protocols: 
+      #   - any
+      #   rw: 
+      #   - any
+      #   ro: 
+      #   - any
+      #   superuser: 
+      #   - any
+      #   anon: "65534"

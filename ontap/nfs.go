@@ -42,11 +42,14 @@ type ExportPolicy struct {
 
 // Requires ONTAP 9.10?
 type ExportRule struct {
-	Protocols string `json:"protocols,omitempty"`
-	RwRule    string `json:"rw_rule,omitempty"`
-	RoRule    string `json:"ro_rule,omitempty"`
-	Superuser string `json:"superuser,omitempty"`
-	Anonuser  string `json:"anonymous_user,omitempty"`
+	Protocols []string `json:"protocols,omitempty"`
+	RwRule    []string `json:"rw_rule,omitempty"`
+	RoRule    []string `json:"ro_rule,omitempty"`
+	Superuser []string `json:"superuser,omitempty"`
+	Anonuser  string   `json:"anonymous_user,omitempty"`
+	Clients   []struct {
+		Match string `json:"match,omitempty"`
+	} `json:"clients,omitempty"`
 }
 
 type ExportResponse struct {
