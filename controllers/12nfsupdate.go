@@ -148,10 +148,11 @@ func (r *StorageVirtualMachineReconciler) reconcileNFSUpdate(ctx context.Context
 			}
 
 		} else {
+			// update LIFs
 			for index, val := range svmCR.Spec.NfsConfig.NfsLifs {
 
 				// Check to see if lifs.Records[index] is out of index - if so, need to create LIF
-				if index > lifs.NumRecords {
+				if index > lifs.NumRecords-1 {
 					// Need to create LIF for val
 					err = CreateLIF(val, uuid, oc, log)
 					if err != nil {
