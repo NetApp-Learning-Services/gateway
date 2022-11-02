@@ -190,7 +190,7 @@ func (r *StorageVirtualMachineReconciler) reconcileNFSUpdate(ctx context.Context
 						return err
 					}
 					log.Info("NFS LIF update attempt: " + val.Name)
-					err = oc.PatchIpInterface(updateLif.Uuid, jsonPayload)
+					err = oc.PatchIpInterface(lifs.Records[index].Uuid, jsonPayload)
 					if err != nil {
 						log.Error(err, "Error occurred when updating NFS LIF: "+val.Name)
 						//TODO: _ = r.setConditionManagementLIFCreation(ctx, svmCR, CONDITION_STATUS_FALSE)
