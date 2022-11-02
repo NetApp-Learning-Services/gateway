@@ -167,3 +167,14 @@ func (c *Client) PatchIpInterface(uuid string, jsonPayload []byte) (err error) {
 
 	return nil
 }
+
+func (c *Client) DeleteIpInterface(uuid string) (err error) {
+	uri := "/api/network/ip/interfaces/" + uuid
+
+	_, err = c.clientDelete(uri)
+	if err != nil {
+		return &apiError{1, err.Error()}
+	}
+
+	return nil
+}

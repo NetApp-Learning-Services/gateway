@@ -11,6 +11,9 @@ import (
 	"k8s.io/apimachinery/pkg/api/errors"
 )
 
+const NfsLifType = "default-data-files" //special word
+const NfsLifScope = "svm"               //special word
+
 func (r *StorageVirtualMachineReconciler) reconcileNFSUpdate(ctx context.Context, svmCR *gatewayv1alpha1.StorageVirtualMachine,
 	uuid string, oc *ontap.Client, log logr.Logger) error {
 
@@ -144,8 +147,8 @@ func (r *StorageVirtualMachineReconciler) reconcileNFSUpdate(ctx context.Context
 				newLif.Ip.Netmask = val.Netmask
 				newLif.Location.BroadcastDomain.Name = val.BroacastDomain
 				newLif.Location.HomeNode.Name = val.HomeNode
-				newLif.ServicePolicy.Name = "default-data-files" //special word
-				newLif.Scope = "svm"                             //special word
+				newLif.ServicePolicy.Name = NfsLifType
+				newLif.Scope = NfsLifScope
 				newLif.Svm.Uuid = uuid
 
 				jsonPayload, err := json.Marshal(newLif)
@@ -171,38 +174,61 @@ func (r *StorageVirtualMachineReconciler) reconcileNFSUpdate(ctx context.Context
 
 		} else {
 			for index, val := range svmCR.Spec.NfsConfig.NfsLifs {
-				if val.IPAddress != lifs.Records[index].Ip.Address || val.Name != lifs.Records[index].Name {
-					//reset value
-					var updateLif ontap.IpInterface
-					updateLif.Name = val.Name
-					updateLif.Ip.Address = val.IPAddress
-					updateLif.Ip.Netmask = val.Netmask
-					//updateLif.Location.BroadcastDomain.Name = val.BroacastDomain
-					//updateLif.Location.HomeNode.Name = val.HomeNode
-					updateLif.ServicePolicy.Name = "default-data-files" //special word
-					updateLif.Enabled = true
 
-					jsonPayload, err := json.Marshal(updateLif)
-					if err != nil {
-						//error creating the json body
-						log.Error(err, "Error creating the json payload for NFS LIF update: "+val.Name)
-						//TODO: _ = r.setConditionManagementLIFUpdate(ctx, svmCR, CONDITION_STATUS_FALSE)
-						return err
-					}
-					log.Info("NFS LIF update attempt: " + val.Name)
-					err = oc.PatchIpInterface(lifs.Records[index].Uuid, jsonPayload)
-					if err != nil {
-						log.Error(err, "Error occurred when updating NFS LIF: "+val.Name)
-						//TODO: _ = r.setConditionManagementLIFCreation(ctx, svmCR, CONDITION_STATUS_FALSE)
-						return err
-					}
-					log.Info("NFS LIF update successful: " + val.Name)
+				//TODO: need to check to see if lifs.Records[index] is out of index - if so, need to create LIF
+				if index > lifs.NumRecords {
+					//need to create LIF for val
 				} else {
-					log.Info("No changes detected for NFS LIf: " + val.Name)
+					if lifs.Records[index].Ip.Address != val.IPAddress ||
+						lifs.Records[index].Name != val.Name ||
+						lifs.Records[index].Ip.Netmask != val.Netmask ||
+						lifs.Records[index].ServicePolicy.Name != NfsLifType ||
+						lifs.Records[index].Enabled {
+						//reset value
+						var updateLif ontap.IpInterface
+						updateLif.Name = val.Name
+						updateLif.Ip.Address = val.IPAddress
+						updateLif.Ip.Netmask = val.Netmask
+						//updateLif.Location.BroadcastDomain.Name = val.BroacastDomain
+						//updateLif.Location.HomeNode.Name = val.HomeNode
+						updateLif.ServicePolicy.Name = NfsLifType
+						updateLif.Enabled = true
+
+						jsonPayload, err := json.Marshal(updateLif)
+						if err != nil {
+							//error creating the json body
+							log.Error(err, "Error creating the json payload for NFS LIF update: "+val.Name)
+							//TODO: _ = r.setConditionManagementLIFUpdate(ctx, svmCR, CONDITION_STATUS_FALSE)
+							return err
+						}
+						log.Info("NFS LIF update attempt: " + val.Name)
+						err = oc.PatchIpInterface(lifs.Records[index].Uuid, jsonPayload)
+						if err != nil {
+							log.Error(err, "Error occurred when updating NFS LIF: "+val.Name)
+							//TODO: _ = r.setConditionManagementLIFCreation(ctx, svmCR, CONDITION_STATUS_FALSE)
+							return err
+						}
+						log.Info("NFS LIF update successful: " + val.Name)
+					} else {
+						log.Info("No changes detected for NFS LIf: " + val.Name)
+					}
+				}
+
+			} // Need looping through NFS LIF definitions in custom resource
+
+			// Delete all SVM data LIFs that are not defined in the custom resource
+			for i := len(svmCR.Spec.NfsConfig.NfsLifs); i < lifs.NumRecords; i++ {
+				log.Info("NFS LIF delete attempt: " + lifs.Records[i].Name)
+				oc.DeleteIpInterface(lifs.Records[i].Uuid)
+				if err != nil {
+					log.Error(err, "Error occurred when deleting NFS LIF: "+lifs.Records[i].Name)
+					//TODO: _ = r.setConditionManagementLIFCreation(ctx, svmCR, CONDITION_STATUS_FALSE)
+					// return err // don't requeue
 				}
 			}
+
 		} // Checking for NFS LIFs updates
-	} //LIFs defined in custom resource
+	} // LIFs defined in custom resource
 
 	// Check to see if NFS rules are defined in custom resources
 	if svmCR.Spec.NfsConfig.NfsRules == nil {
@@ -212,7 +238,8 @@ func (r *StorageVirtualMachineReconciler) reconcileNFSUpdate(ctx context.Context
 		// If so, GET /protocols/nfs/export-policies compare rules with result based upon index/id
 		// PATCH /protocols/nfs/export-policies/id if needed
 		// If rule missing in ONTAP, POST /protocols/nfs/export-policies/
-	}
+
+	} // NFS exports rules defined in custom resource
 
 	return nil
 }
