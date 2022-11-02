@@ -240,6 +240,7 @@ func (r *StorageVirtualMachineReconciler) reconcileNFSUpdate(ctx context.Context
 		}
 
 		if exportsCreate {
+			// this will probably never happen because there is always a default export
 			// creating export
 			err = CreateExport(*svmCR.Spec.NfsConfig.Export, uuid, oc, log)
 			if err != nil {
@@ -249,6 +250,7 @@ func (r *StorageVirtualMachineReconciler) reconcileNFSUpdate(ctx context.Context
 		} else {
 
 			// if more than one export, delete anything after the first one
+			// never delete the first export
 			for i := 1; i < exportRetrieved.NumRecords; i++ {
 				log.Info("NFS export delete attempt: " + exportRetrieved.Records[i].Name)
 				oc.DeleteNfsExport(exportRetrieved.Records[i].Id)
@@ -304,6 +306,8 @@ func (r *StorageVirtualMachineReconciler) reconcileNFSUpdate(ctx context.Context
 				// Build out complete export if there is any change
 				idToReplace := exportRetrieved.Records[0].Id // get the id
 				var newExport ontap.ExportPolicy
+
+				//NOT CHANGING NAME DURING UPDATE
 				//newExport.Name = svmCR.Spec.NfsConfig.Export.Name
 
 				for _, val := range svmCR.Spec.NfsConfig.Export.Rules {
