@@ -6,6 +6,7 @@ import (
 	"fmt"
 	gatewayv1alpha1 "gateway/api/v1alpha1"
 	"gateway/ontap"
+	"strconv"
 
 	"github.com/go-logr/logr"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -159,9 +160,11 @@ func (r *StorageVirtualMachineReconciler) reconcileNFSUpdate(ctx context.Context
 						return err
 					}
 				} else {
+					netmaskAsInt, _ := strconv.Atoi(lifs.Records[index].Ip.Netmask)
+					netmaskAsIP := NetmaskToString(netmaskAsInt)
 					if lifs.Records[index].Ip.Address != val.IPAddress ||
 						lifs.Records[index].Name != val.Name ||
-						lifs.Records[index].Ip.Netmask != val.Netmask ||
+						netmaskAsIP != val.Netmask ||
 						lifs.Records[index].ServicePolicy.Name != NfsLifType ||
 						lifs.Records[index].Enabled {
 						//reset value

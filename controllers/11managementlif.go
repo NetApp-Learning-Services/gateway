@@ -74,7 +74,7 @@ func (r *StorageVirtualMachineReconciler) reconcileManagementLifUpdate(ctx conte
 		}
 
 		netmaskAsInt, _ := strconv.Atoi(lifRetrieved.Ip.Netmask)
-		netmaskAsIP := NetMaskToString(netmaskAsInt)
+		netmaskAsIP := NetmaskToString(netmaskAsInt)
 		if oc.Debug {
 			log.Info("[DEBUG] netmaskAsInt: " + fmt.Sprintf("%v", netmaskAsInt))
 			log.Info("[DEBUG] netmaskAsIP: " + fmt.Sprintf("%v", netmaskAsIP))
@@ -151,7 +151,7 @@ func (r *StorageVirtualMachineReconciler) reconcileManagementLifUpdate(ctx conte
 	return nil
 }
 
-func NetMaskToString(mask int) (netmaskstring string) {
+func NetmaskToString(mask int) (netmaskstring string) {
 	var binarystring string
 
 	for ii := 1; ii <= mask; ii++ {
