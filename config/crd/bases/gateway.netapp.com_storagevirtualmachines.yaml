@@ -38,6 +38,20 @@ spec:
           spec:
             description: StorageVirtualMachineSpec defines the desired state of StorageVirtualMachine
             properties:
+              aggregates:
+                default: false
+                description: Stores optional aggregate list
+                items:
+                  properties:
+                    name:
+                      description: Provides Name of a particular aggregate assigned
+                        to the SVM
+                      format: string
+                      type: string
+                  required:
+                  - name
+                  type: object
+                type: array
               clusterCredentials:
                 description: Provides required ONTAP cluster administrator credentials
                 properties:
@@ -109,7 +123,7 @@ spec:
                             anon:
                               description: Provides required NFS rule anonyomous user
                               type: string
-                            client:
+                            clients:
                               description: Provides required NFS rule client match
                               type: string
                             protocols:
@@ -125,7 +139,7 @@ spec:
                               description: Provides required NFS rule superuser
                               type: string
                           required:
-                          - client
+                          - clients
                           - protocols
                           type: object
                         type: array

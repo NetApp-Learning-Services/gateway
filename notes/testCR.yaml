@@ -21,12 +21,14 @@ stringData:
 apiVersion: gateway.netapp.com/v1alpha1
 kind: StorageVirtualMachine
 metadata:
-  name: storagevirtualmachine-sample
+  name: storagevirtualmachine-testcase
   namespace: gateway-system
 spec:
   svmName: testVs
   clusterHost: 192.168.0.102
   debug: true
+  aggregates:
+  - name: Cluster2_01_FC_1
   management:
     name: manage1
     ip: 192.168.0.30

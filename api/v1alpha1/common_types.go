@@ -1,5 +1,14 @@
 package v1alpha1
 
+// SvmOperationStates defined here
+const (
+	SvmOperationStateProvisioning OperationState = "Provisioning"
+	SvmOperationStateProvisioned  OperationState = "Provisioned"
+	SvmOperationStateFailed       OperationState = "Failed"
+	SvmOperationStateUnknown      OperationState = "Unknown"
+	SvmOperationStateDeleting     OperationState = "Deleting"
+)
+
 // NamespacedName contains the name of a object and its namespace
 type NamespacedName struct {
 
@@ -49,11 +58,9 @@ type LIF struct {
 // OperationState defines the potential states
 type OperationState string
 
-// SvmOperationStates defined here
-const (
-	SvmOperationStateProvisioning OperationState = "Provisioning"
-	SvmOperationStateProvisioned  OperationState = "Provisioned"
-	SvmOperationStateFailed       OperationState = "Failed"
-	SvmOperationStateUnknown      OperationState = "Unknown"
-	SvmOperationStateDeleting     OperationState = "Deleting"
-)
+type Aggregate struct {
+	// Provides Name of a particular aggregate assigned to the SVM
+	// +kubebuilder:validation:Required
+	// +kubebuilder:validation:Format:=string
+	Name string `json:"name"`
+}
