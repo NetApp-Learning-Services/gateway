@@ -138,13 +138,14 @@ func (r *StorageVirtualMachineReconciler) reconcileNFSUpdate(ctx context.Context
 		if lifsCreate {
 			//creating lifs
 			for _, val := range svmCR.Spec.NfsConfig.NfsLifs {
-				var newLif ontap.IpInterfaceCreation
+				var newLif ontap.IpInterface
 				newLif.Name = val.Name
 				newLif.Ip.Address = val.IPAddress
 				newLif.Ip.Netmask = val.Netmask
 				newLif.Location.BroadcastDomain.Name = val.BroacastDomain
 				newLif.Location.HomeNode.Name = val.HomeNode
-				newLif.ServicePolicy = "default-data-files" //special word
+				newLif.ServicePolicy.Name = "default-data-files" //special word
+				newLif.Scope = "svm"                             //special word
 
 				jsonPayload, err := json.Marshal(newLif)
 				if err != nil {
