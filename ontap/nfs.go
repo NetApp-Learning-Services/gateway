@@ -10,7 +10,7 @@ import (
 )
 
 type NFSService struct {
-	Enabled  *bool        `json:"enabled,omitempty"`
+	Enabled  *bool       `json:"enabled,omitempty"`
 	Protocol NFSProtocol `json:"protocol,omitempty"`
 	Svm      NfsSvm      `json:"svm,omitempty"`
 }
@@ -170,4 +170,21 @@ func (c *Client) DeleteNfsExport(uuid string) (err error) {
 	}
 
 	return nil
+}
+
+func (c *Client) GetNfsInterfacesBySvmUuid(uuid string) (lifs IpInterfacesResponse, err error) {
+	uri := "/api/network/ip/interfaces?service_policy.name=default-data-files&svm.uuid=" + uuid
+
+	data, err := c.clientGet(uri)
+	if err != nil {
+		return lifs, &apiError{1, err.Error()}
+	}
+
+	var resp IpInterfacesResponse
+	err = json.Unmarshal(data, &resp)
+	if err != nil {
+		return resp, &apiError{2, err.Error()}
+	}
+
+	return resp, nil
 }

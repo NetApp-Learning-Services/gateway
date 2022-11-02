@@ -108,19 +108,109 @@ func (r *StorageVirtualMachineReconciler) reconcileNFSUpdate(ctx context.Context
 			}
 			log.Info("NFS service updated successful")
 		} else {
-			log.Info("No changes detected - skip updating NFS service")
+			log.Info("No NFS service changes detected - skip updating")
 		}
 	}
 
 	// Check to see if NFS interfaces are defined in custom resource
+	if svmCR.Spec.NfsConfig.NfsLifs == nil {
+		// If not, exit with no error
+		log.Info("No NFS LIFs defined - skipping updates")
+	} else {
+		lifsCreate := false
 
-	// If so, check to see if NFS interfaces defined and compare to custom resource's definitions
+		// Check to see if NFS interfaces defined and compare to custom resource's definitions
+		lifs, err := oc.GetNfsInterfacesBySvmUuid(uuid)
+		if err != nil {
+			//error creating the json body
+			log.Error(err, "Error getting NFS service LIFs for SVM: "+uuid)
+			//TODO: _ = r.setConditionManagementLIFUpdate(ctx, svmCR, CONDITION_STATUS_FALSE)
+			return err
+		}
+
+		if lifs.NumRecords == 0 {
+			// no data LIFs for the SVM provided in UUID
+			// create new LIF(s)
+			log.Info("No LIFs defined for SVM: " + uuid + " - creating NFS Lif(s)")
+			lifsCreate = true
+		}
+
+		if lifsCreate {
+			//creating lifs
+			for _, val := range svmCR.Spec.NfsConfig.NfsLifs {
+				var newLif ontap.IpInterfaceCreation
+				newLif.Name = val.Name
+				newLif.Ip.Address = val.IPAddress
+				newLif.Ip.Netmask = val.Netmask
+				newLif.Location.BroadcastDomain.Name = val.BroacastDomain
+				newLif.Location.HomeNode.Name = val.HomeNode
+				newLif.ServicePolicy = "default-data-files" //special word
+
+				jsonPayload, err := json.Marshal(newLif)
+				if err != nil {
+					//error creating the json body
+					log.Error(err, "Error creating the json payload for NFS LIF creation: "+val.Name)
+					//TODO: _ = r.setConditionManagementLIFUpdate(ctx, svmCR, CONDITION_STATUS_FALSE)
+					return err
+				}
+				log.Info("NFS LIF creation attempt: " + val.Name)
+				err = oc.CreateIpInterface(jsonPayload)
+				if err != nil {
+					log.Error(err, "Error occurred when creating NFS LIF: "+val.Name)
+					//TODO: _ = r.setConditionManagementLIFCreation(ctx, svmCR, CONDITION_STATUS_FALSE)
+					return err
+				}
+				log.Info("NFS LIF creation successful: " + val.Name)
+				// err = r.setConditionManagementLIFCreation(ctx, svmCR, CONDITION_STATUS_TRUE)
+				// if err != nil {
+				// 	return nil //even though condition not create, don't reconcile again
+				// }
+			}
+
+		} else {
+			for index, val := range svmCR.Spec.NfsConfig.NfsLifs {
+				if val.IPAddress != lifs.Records[index].Ip.Address || val.Name != lifs.Records[index].Name {
+					//reset value
+					var updateLif ontap.IpInterface = lifs.Records[index]
+					updateLif.Name = val.Name
+					updateLif.Ip.Address = val.IPAddress
+					updateLif.Ip.Netmask = val.Netmask
+					updateLif.Location.BroadcastDomain.Name = val.BroacastDomain
+					updateLif.Location.HomeNode.Name = val.HomeNode
+					updateLif.ServicePolicy.Name = "default-data-files" //special word
+					updateLif.Enabled = true
+
+					jsonPayload, err := json.Marshal(updateLif)
+					if err != nil {
+						//error creating the json body
+						log.Error(err, "Error creating the json payload for NFS LIF update: "+val.Name)
+						//TODO: _ = r.setConditionManagementLIFUpdate(ctx, svmCR, CONDITION_STATUS_FALSE)
+						return err
+					}
+					log.Info("NFS LIF update attempt: " + val.Name)
+					err = oc.PatchIpInterface(updateLif.Uuid, jsonPayload)
+					if err != nil {
+						log.Error(err, "Error occurred when updating NFS LIF: "+val.Name)
+						//TODO: _ = r.setConditionManagementLIFCreation(ctx, svmCR, CONDITION_STATUS_FALSE)
+						return err
+					}
+					log.Info("NFS LIF update successful: " + val.Name)
+				} else {
+					log.Info("No changes detected for NFS LIf: " + val.Name)
+				}
+			}
+		} // Checking for NFS LIFs updates
+	} //LIFs defined in custom resource
 
 	// Check to see if NFS rules are defined in custom resources
-
-	// If so, GET /protocols/nfs/export-policies compare rules with result based upon index/id
-	// PATCH /protocols/nfs/export-policies/id if needed
-	// If rule missing in ONTAP, POST /protocols/nfs/export-policies/
+	if svmCR.Spec.NfsConfig.NfsRules == nil {
+		// If not, exit with no error
+		log.Info("No NFS export rules - skipping")
+	} else {
+		// If so, GET /protocols/nfs/export-policies compare rules with result based upon index/id
+		// PATCH /protocols/nfs/export-policies/id if needed
+		// If rule missing in ONTAP, POST /protocols/nfs/export-policies/
+	}
 
 	return nil
 }

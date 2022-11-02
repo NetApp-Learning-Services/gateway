@@ -50,7 +50,7 @@ type ServicePolicy struct {
 	Uuid  string    `json:"uuid,omitempty"`
 }
 
-type IPInterfacesResponse struct {
+type IpInterfacesResponse struct {
 	BaseResponse
 	Records []IpInterface `json:"records,omitempty"`
 }
@@ -60,7 +60,7 @@ type SvmId struct {
 	Uuid string `json:"uuid,omitempty"`
 }
 
-func (c *Client) GetIpInterfacesBySvmUuid(uuid string) (lifs IPInterfacesResponse, err error) {
+func (c *Client) GetIpInterfacesBySvmUuid(uuid string) (lifs IpInterfacesResponse, err error) {
 	uri := "/api/network/ip/interfaces?svm.uuid=" + uuid
 
 	data, err := c.clientGet(uri)
@@ -68,7 +68,7 @@ func (c *Client) GetIpInterfacesBySvmUuid(uuid string) (lifs IPInterfacesRespons
 		return lifs, &apiError{1, err.Error()}
 	}
 
-	var resp IPInterfacesResponse
+	var resp IpInterfacesResponse
 	err = json.Unmarshal(data, &resp)
 	if err != nil {
 		return resp, &apiError{2, err.Error()}
