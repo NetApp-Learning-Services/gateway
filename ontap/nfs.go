@@ -173,7 +173,7 @@ func (c *Client) DeleteNfsExport(uuid string) (err error) {
 }
 
 func (c *Client) GetNfsInterfacesBySvmUuid(uuid string) (lifs IpInterfacesResponse, err error) {
-	uri := "/api/network/ip/interfaces?service_policy.name=default-data-files&svm.uuid=" + uuid
+	uri := "/api/network/ip/interfaces?service_policy.name=default-data-files&fields=[enabled,ip.address,ip.netmask]&svm.uuid=" + uuid
 
 	data, err := c.clientGet(uri)
 	if err != nil {
