@@ -208,6 +208,8 @@ func (r *StorageVirtualMachineReconciler) reconcileNFSUpdate(ctx context.Context
 					//TODO: _ = r.setConditionManagementLIFCreation(ctx, svmCR, CONDITION_STATUS_FALSE)
 					// don't requeue on failed delete request
 					// return err
+				} else {
+					log.Info("NFS LIF delete successful: " + lifs.Records[i].Name)
 				}
 			}
 
