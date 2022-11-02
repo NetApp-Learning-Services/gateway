@@ -194,7 +194,11 @@ func (r *StorageVirtualMachineReconciler) Reconcile(ctx context.Context, req ctr
 				return ctrl.Result{Requeue: true}, err
 			}
 
-			// STEP 12
+			// STEP 12 
+			// Reconcile Aggregates
+			
+
+			// STEP 13
 			// Reconcile NFS information
 			err = r.reconcileNFSUpdate(ctx, svmCR, svmRetrieved.Uuid, oc, log)
 			if err != nil {
