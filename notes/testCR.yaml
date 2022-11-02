@@ -28,7 +28,7 @@ spec:
   clusterHost: 192.168.0.102
   debug: true
   management:
-    name: lif1
+    name: manage1
     ip: 192.168.0.30
     netmask: 255.255.255.0
     broadcastDomain: Default
@@ -45,7 +45,7 @@ spec:
     v4: true
     v41: true
     interfaces:
-    - name: lif1
+    - name: nfs1
       ip: 192.168.0.30
       netmask: 255.255.255.0
       broadcastDomain: Default
