@@ -96,6 +96,42 @@ spec:
                   enabled:
                     description: Provides required NFS enablement
                     type: boolean
+                  export:
+                    description: Provides optional NFS export definition
+                    properties:
+                      name:
+                        description: Provides required NFS export name
+                        type: string
+                      rules:
+                        description: Provides optional NFS rules
+                        items:
+                          properties:
+                            anon:
+                              description: Provides required NFS rule anonyomous user
+                              type: string
+                            client:
+                              description: Provides required NFS rule client match
+                              type: string
+                            protocols:
+                              description: Provides required NFS rule protocol
+                              type: string
+                            ro:
+                              description: Provides required NFS rule read-only
+                              type: string
+                            rw:
+                              description: Provides required NFS rule read-write
+                              type: string
+                            superuser:
+                              description: Provides required NFS rule superuser
+                              type: string
+                          required:
+                          - client
+                          - protocols
+                          type: object
+                        type: array
+                    required:
+                    - name
+                    type: object
                   interfaces:
                     description: Provides optional NFS LIFs
                     items:
@@ -127,33 +163,6 @@ spec:
                       - ip
                       - name
                       - netmask
-                      type: object
-                    type: array
-                  rules:
-                    description: Provides optional NFS rules
-                    items:
-                      properties:
-                        anon:
-                          description: Provides required NFS rule anonyomous user
-                          type: integer
-                        client:
-                          description: Provides required NFS rule client match
-                          type: string
-                        protocol:
-                          description: Provides required NFS rule protocol
-                          type: string
-                        ro:
-                          description: Provides required NFS rule read-only
-                          type: string
-                        rw:
-                          description: Provides required NFS rule read-write
-                          type: string
-                        superuser:
-                          description: Provides required NFS rule superuser
-                          type: string
-                      required:
-                      - client
-                      - protocol
                       type: object
                     type: array
                   v3:

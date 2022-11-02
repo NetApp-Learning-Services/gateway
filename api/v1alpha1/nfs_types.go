@@ -4,7 +4,7 @@ type NfsSubSpec struct {
 
 	// Provides required NFS enablement
 	// +kubebuilder:validation:Required
-	NfsEnabled bool `json:"enabled"`
+	Enabled bool `json:"enabled"`
 
 	// Provides optional NFS v3 enablement
 	// +kubebuilder:validation:Optional
@@ -20,35 +20,45 @@ type NfsSubSpec struct {
 
 	// Provides optional NFS LIFs
 	// +kubebuilder:validation:Optional
-	NfsLifs []LIF `json:"interfaces,omitempty"`
+	Lifs []LIF `json:"interfaces,omitempty"`
+
+	// Provides optional NFS export definition
+	// +kubebuilder:validation:Optional
+	Export *NfsExport `json:"export,omitempty"`
+}
+
+type NfsExport struct {
+	// Provides required NFS export name
+	// +kubebuilder:validation:Required
+	Name string `json:"name"`
 
 	// Provides optional NFS rules
 	// +kubebuilder:validation:Optional
-	NfsRules []NfsRule `json:"rules,omitempty"`
+	Rules []NfsRule `json:"rules,omitempty"`
 }
 
 type NfsRule struct {
 	// Provides required NFS rule client match
 	// +kubebuilder:validation:Required
-	NfsRuleClient string `json:"client"`
+	Client string `json:"client"`
 
 	// Provides required NFS rule protocol
 	// +kubebuilder:validation:Required
-	NfsRuleProtocol string `json:"protocol"`
+	Protocols string `json:"protocols"`
 
 	// Provides required NFS rule read-write
 	// +kubebuilder:validation:Optional
-	NfsRuleRw string `json:"rw,omitempty"`
+	Rw string `json:"rw,omitempty"`
 
 	// Provides required NFS rule read-only
 	// +kubebuilder:validation:Optional
-	NfsRuleRo string `json:"ro,omitempty"`
+	Ro string `json:"ro,omitempty"`
 
 	// Provides required NFS rule superuser
 	// +kubebuilder:validation:Optional
-	NfsRuleSuperuser string `json:"superuser,omitempty"`
+	Superuser string `json:"superuser,omitempty"`
 
 	// Provides required NFS rule anonyomous user
 	// +kubebuilder:validation:Optional
-	NfsRuleAnon int `json:"anon,omitempty"`
+	Anon string `json:"anon,omitempty"`
 }

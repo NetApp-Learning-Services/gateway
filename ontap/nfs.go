@@ -3,6 +3,7 @@ package ontap
 import (
 	"encoding/json"
 	"fmt"
+	"strconv"
 	"strings"
 
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -36,7 +37,7 @@ type ExportPolicy struct {
 	Name  string       `json:"name,omitempty"`
 	Svm   NfsSvm       `json:"svm,omitempty"`
 	Rules []ExportRule `json:"rules,omitempty"`
-	Id    int16        `json:"id,omitempty"`
+	Id    int          `json:"id,omitempty"`
 }
 
 // Requires ONTAP 9.10?
@@ -50,7 +51,7 @@ type ExportRule struct {
 
 type ExportResponse struct {
 	BaseResponse
-	Records []Svm `json:"records,omitempty"`
+	Records []ExportPolicy `json:"records,omitempty"`
 }
 
 func (c *Client) GetNfsServiceBySvmUuid(uuid string) (nfsService NFSService, err error) {
@@ -113,7 +114,7 @@ func (c *Client) DeleteNfsService(uuid string) (err error) {
 	return nil
 }
 
-func (c *Client) GetNfsExportBySvmUuid(uuid string) (exports ExportPolicy, err error) {
+func (c *Client) GetNfsExportBySvmUuid(uuid string) (exports ExportResponse, err error) {
 	uri := "/api/protocols/nfs/export-policies?svm.uuid=" + uuid
 
 	data, err := c.clientGet(uri)
@@ -121,7 +122,7 @@ func (c *Client) GetNfsExportBySvmUuid(uuid string) (exports ExportPolicy, err e
 		return exports, &apiError{1, err.Error()}
 	}
 
-	var resp ExportPolicy
+	var resp ExportResponse
 	err = json.Unmarshal(data, &resp)
 	if err != nil {
 		return resp, &apiError{2, err.Error()}
@@ -140,13 +141,13 @@ func (c *Client) CreateNfsExport(jsonPayload []byte) (err error) {
 	return nil
 }
 
-func (c *Client) PatchNfsExport(uuid string, jsonPayload []byte) (err error) {
-	uri := "/api/protocols/nfs/export-policies/" + uuid
+func (c *Client) PatchNfsExport(id int, jsonPayload []byte) (err error) {
+	uri := "/api/protocols/nfs/export-policies/" + strconv.Itoa(id)
 
 	_, err = c.clientPatch(uri, jsonPayload)
 	if err != nil {
 		if strings.Contains(err.Error(), "404") {
-			return &apiError{404, fmt.Sprintf("Export with UUID \"%s\" not found", uuid)}
+			return &apiError{404, fmt.Sprintf("Export with ID \"%s\" not found", strconv.Itoa(id))}
 		}
 		if strings.Contains(err.Error(), "Failed to rename") {
 			return &apiError{1703950, err.Error()}
@@ -161,8 +162,8 @@ func (c *Client) PatchNfsExport(uuid string, jsonPayload []byte) (err error) {
 	return nil
 }
 
-func (c *Client) DeleteNfsExport(uuid string) (err error) {
-	uri := "/api/protocols/nfs/export-policies/" + uuid
+func (c *Client) DeleteNfsExport(id int) (err error) {
+	uri := "/api/protocols/nfs/export-policies/" + strconv.Itoa(id)
 
 	_, err = c.clientDelete(uri)
 	if err != nil {

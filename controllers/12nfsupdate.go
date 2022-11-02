@@ -44,7 +44,7 @@ func (r *StorageVirtualMachineReconciler) reconcileNFSUpdate(ctx context.Context
 
 	if create {
 
-		upsertNfsService.Enabled = &svmCR.Spec.NfsConfig.NfsEnabled
+		upsertNfsService.Enabled = &svmCR.Spec.NfsConfig.Enabled
 		upsertNfsService.Protocol.V3Enable = &svmCR.Spec.NfsConfig.Nfsv3
 		upsertNfsService.Protocol.V4Enable = &svmCR.Spec.NfsConfig.Nfsv4
 		upsertNfsService.Protocol.V41Enable = &svmCR.Spec.NfsConfig.Nfsv41
@@ -68,9 +68,9 @@ func (r *StorageVirtualMachineReconciler) reconcileNFSUpdate(ctx context.Context
 	} else {
 
 		// Compare enabled to custom resource enabled
-		if nfsService.Enabled != &svmCR.Spec.NfsConfig.NfsEnabled {
+		if nfsService.Enabled != &svmCR.Spec.NfsConfig.Enabled {
 			updateNfsService = true
-			upsertNfsService.Enabled = &svmCR.Spec.NfsConfig.NfsEnabled
+			upsertNfsService.Enabled = &svmCR.Spec.NfsConfig.Enabled
 		}
 
 		if nfsService.Protocol.V3Enable != &svmCR.Spec.NfsConfig.Nfsv3 {
@@ -117,7 +117,7 @@ func (r *StorageVirtualMachineReconciler) reconcileNFSUpdate(ctx context.Context
 	}
 
 	// Check to see if NFS interfaces are defined in custom resource
-	if svmCR.Spec.NfsConfig.NfsLifs == nil {
+	if svmCR.Spec.NfsConfig.Lifs == nil {
 		// If not, exit with no error
 		log.Info("No NFS LIFs defined - skipping updates")
 	} else {
@@ -141,7 +141,7 @@ func (r *StorageVirtualMachineReconciler) reconcileNFSUpdate(ctx context.Context
 
 		if lifsCreate {
 			//creating lifs
-			for _, val := range svmCR.Spec.NfsConfig.NfsLifs {
+			for _, val := range svmCR.Spec.NfsConfig.Lifs {
 				err = CreateLIF(val, uuid, oc, log)
 				if err != nil {
 					return err
@@ -150,7 +150,7 @@ func (r *StorageVirtualMachineReconciler) reconcileNFSUpdate(ctx context.Context
 
 		} else {
 			// update LIFs
-			for index, val := range svmCR.Spec.NfsConfig.NfsLifs {
+			for index, val := range svmCR.Spec.NfsConfig.Lifs {
 
 				// Check to see if lifs.Records[index] is out of index - if so, need to create LIF
 				if index > lifs.NumRecords-1 {
@@ -200,7 +200,7 @@ func (r *StorageVirtualMachineReconciler) reconcileNFSUpdate(ctx context.Context
 			} // Need looping through NFS LIF definitions in custom resource
 
 			// Delete all SVM data LIFs that are not defined in the custom resource
-			for i := len(svmCR.Spec.NfsConfig.NfsLifs); i < lifs.NumRecords; i++ {
+			for i := len(svmCR.Spec.NfsConfig.Lifs); i < lifs.NumRecords; i++ {
 				log.Info("NFS LIF delete attempt: " + lifs.Records[i].Name)
 				oc.DeleteIpInterface(lifs.Records[i].Uuid)
 				if err != nil {
@@ -217,13 +217,128 @@ func (r *StorageVirtualMachineReconciler) reconcileNFSUpdate(ctx context.Context
 	} // LIFs defined in custom resource
 
 	// Check to see if NFS rules are defined in custom resources
-	if svmCR.Spec.NfsConfig.NfsRules == nil {
+	if svmCR.Spec.NfsConfig.Export == nil {
 		// If not, exit with no error
-		log.Info("No NFS export rules - skipping")
+		log.Info("No NFS export rules defined - skipping")
 	} else {
-		// If so, GET /protocols/nfs/export-policies compare rules with result based upon index/id
-		// PATCH /protocols/nfs/export-policies/id if needed
-		// If rule missing in ONTAP, POST /protocols/nfs/export-policies/
+		exportsCreate := false
+
+		// Check to see if NFS interfaces defined and compare to custom resource's definitions
+		exportRetrieved, err := oc.GetNfsExportBySvmUuid(uuid)
+		if err != nil {
+			//error creating the json body
+			log.Error(err, "Error getting NFS export rules for SVM: "+uuid)
+			//TODO: _ = r.setConditionManagementLIFUpdate(ctx, svmCR, CONDITION_STATUS_FALSE)
+			return err
+		}
+
+		if exportRetrieved.NumRecords == 0 {
+			// no data LIFs for the SVM provided in UUID
+			// create new LIF(s)
+			log.Info("No LIFs defined for SVM: " + uuid + " - creating NFS Lif(s)")
+			exportsCreate = true
+		}
+
+		if exportsCreate {
+			// creating export
+			err = CreateExport(*svmCR.Spec.NfsConfig.Export, uuid, oc, log)
+			if err != nil {
+				return err
+			}
+
+		} else {
+
+			// if more than one export, delete anything after the first one
+			for i := 1; i < exportRetrieved.NumRecords; i++ {
+				log.Info("NFS export delete attempt: " + exportRetrieved.Records[i].Name)
+				oc.DeleteNfsExport(exportRetrieved.Records[i].Id)
+				if err != nil {
+					log.Error(err, "Error occurred when deleting NFS export: "+exportRetrieved.Records[i].Name)
+					//TODO: _ = r.setConditionManagementLIFCreation(ctx, svmCR, CONDITION_STATUS_FALSE)
+					// don't requeue on failed delete request
+					// return err
+				} else {
+					log.Info("NFS LIF delete successful: " + exportRetrieved.Records[i].Name)
+				}
+			}
+
+			// check for updating export
+			exportUpdate := false
+
+			if exportRetrieved.Records[0].Name != svmCR.Spec.NfsConfig.Export.Name {
+				//need to update it
+				exportUpdate = true
+			}
+
+			for indx, val := range svmCR.Spec.NfsConfig.Export.Rules {
+
+				if val.Anon != exportRetrieved.Records[0].Rules[indx].Anonuser {
+					exportUpdate = true
+				}
+
+				if val.Client != exportRetrieved.Records[0].Rules[indx].Anonuser {
+					exportUpdate = true
+				}
+				if val.Protocols != exportRetrieved.Records[0].Rules[indx].Protocols {
+					exportUpdate = true
+				}
+
+				if val.Ro != exportRetrieved.Records[0].Rules[indx].RoRule {
+					exportUpdate = true
+				}
+				if val.Rw != exportRetrieved.Records[0].Rules[indx].RwRule {
+					exportUpdate = true
+				}
+				if val.Superuser != exportRetrieved.Records[0].Rules[indx].Superuser {
+					exportUpdate = true
+				}
+
+			}
+
+			if exportUpdate {
+				// Build out complete export if there is any change
+				idToReplace := exportRetrieved.Records[0].Id // get the id
+				var exportUpdateVal ontap.ExportPolicy
+				exportUpdateVal.Name = svmCR.Spec.NfsConfig.Export.Name
+
+				for _, val := range svmCR.Spec.NfsConfig.Export.Rules {
+					var exportRuleToAdd ontap.ExportRule
+					exportRuleToAdd.Anonuser = val.Anon
+					exportRuleToAdd.Protocols = val.Protocols
+					exportRuleToAdd.RwRule = val.Rw
+					exportRuleToAdd.Superuser = val.Superuser
+					exportUpdateVal.Rules = append(exportUpdateVal.Rules, exportRuleToAdd)
+				}
+
+				// otherwise changes need to be implemented
+				if oc.Debug {
+					log.Info("[DEBUG] NFS export update payload: " + fmt.Sprintf("%#v\n", exportUpdateVal))
+				}
+
+				jsonPayload, err := json.Marshal(exportUpdateVal)
+				if err != nil {
+					//error creating the json body
+					log.Error(err, "Error creating the json payload for NFS export update")
+					//ToDO: _ = r.setConditionManagementLIFUpdate(ctx, svmCR, CONDITION_STATUS_FALSE)
+					return err
+				}
+				err = oc.PatchNfsExport(idToReplace, jsonPayload)
+				if err != nil {
+					log.Error(err, "Error occurred when updating NFS export")
+					//Todo: _ = r.setConditionManagementLIFUpdate(ctx, svmCR, CONDITION_STATUS_FALSE)
+					return err
+				}
+				log.Info("NFS export updated successful")
+				// err = r.setConditionManagementLIFUpdate(ctx, svmCR, CONDITION_STATUS_TRUE)
+				// if err != nil {
+				// 	return nil //even though condition not create, don't reconcile again
+				// }
+
+			} else {
+				log.Info("No NFS export rules changed detected - skipping")
+			}
+
+		} //Check for NFS export updates or deletion of none conforming exports
 
 	} // NFS exports rules defined in custom resource
 
@@ -256,6 +371,45 @@ func CreateLIF(lifToCreate gatewayv1alpha1.LIF, uuid string, oc *ontap.Client, l
 		return err
 	}
 	log.Info("NFS LIF creation successful: " + lifToCreate.Name)
+	// err = r.setConditionManagementLIFCreation(ctx, svmCR, CONDITION_STATUS_TRUE)
+	// if err != nil {
+	// 	return nil //even though condition not create, don't reconcile again
+	// }
+
+	return nil
+}
+
+func CreateExport(exportToCreate gatewayv1alpha1.NfsExport, uuid string, oc *ontap.Client, log logr.Logger) (err error) {
+	var newExport ontap.ExportPolicy
+	newExport.Name = exportToCreate.Name
+
+	for _, val := range exportToCreate.Rules {
+		var newRule ontap.ExportRule
+		newRule.Protocols = val.Protocols
+		newRule.RwRule = val.Rw
+		newRule.RoRule = val.Ro
+		newRule.Anonuser = val.Anon
+		newRule.Superuser = val.Superuser
+		newExport.Rules = append(newExport.Rules, newRule)
+	}
+
+	newExport.Svm.Uuid = uuid
+
+	jsonPayload, err := json.Marshal(newExport)
+	if err != nil {
+		//error creating the json body
+		log.Error(err, "Error creating the json payload for NFS export creation: "+exportToCreate.Name)
+		//TODO: _ = r.setConditionManagementLIFUpdate(ctx, svmCR, CONDITION_STATUS_FALSE)
+		return err
+	}
+	log.Info("NFS export creation attempt: " + exportToCreate.Name)
+	err = oc.CreateIpInterface(jsonPayload)
+	if err != nil {
+		log.Error(err, "Error occurred when creating NFS export: "+exportToCreate.Name)
+		//TODO: _ = r.setConditionManagementLIFCreation(ctx, svmCR, CONDITION_STATUS_FALSE)
+		return err
+	}
+	log.Info("NFS export creation successful: " + exportToCreate.Name)
 	// err = r.setConditionManagementLIFCreation(ctx, svmCR, CONDITION_STATUS_TRUE)
 	// if err != nil {
 	// 	return nil //even though condition not create, don't reconcile again

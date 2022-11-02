@@ -50,10 +50,12 @@ spec:
       netmask: 255.255.255.0
       broadcastDomain: Default
       homeNode: Cluster2-01
-    rules:
-    - client: 0.0.0.0/0
-      protocol: any
-      rw: any
-      ro: any
-      superuser: any
-      anon: 65534
+    export:
+      name: export1
+      rules:
+      - client: 0.0.0.0/0
+        protocols: any
+        rw: any
+        ro: any
+        superuser: any
+        anon: "65534"
