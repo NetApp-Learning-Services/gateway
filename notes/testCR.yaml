@@ -51,7 +51,7 @@ spec:
       broadcastDomain: Default
       homeNode: Cluster2-01
     export:
-      name: default
+      name: exports1
       #simplified rules 
       rules:
       - clients: 0.0.0.0/0
