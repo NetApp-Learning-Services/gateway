@@ -173,7 +173,7 @@ func (r *StorageVirtualMachineReconciler) reconcileNFSUpdate(ctx context.Context
 			for index, val := range svmCR.Spec.NfsConfig.NfsLifs {
 				if val.IPAddress != lifs.Records[index].Ip.Address || val.Name != lifs.Records[index].Name {
 					//reset value
-					var updateLif ontap.IpInterface = lifs.Records[index]
+					var updateLif ontap.IpInterface
 					updateLif.Name = val.Name
 					updateLif.Ip.Address = val.IPAddress
 					updateLif.Ip.Netmask = val.Netmask
