@@ -177,8 +177,8 @@ func (r *StorageVirtualMachineReconciler) reconcileNFSUpdate(ctx context.Context
 					updateLif.Name = val.Name
 					updateLif.Ip.Address = val.IPAddress
 					updateLif.Ip.Netmask = val.Netmask
-					updateLif.Location.BroadcastDomain.Name = val.BroacastDomain
-					updateLif.Location.HomeNode.Name = val.HomeNode
+					//updateLif.Location.BroadcastDomain.Name = val.BroacastDomain
+					//updateLif.Location.HomeNode.Name = val.HomeNode
 					updateLif.ServicePolicy.Name = "default-data-files" //special word
 					updateLif.Enabled = true
 
