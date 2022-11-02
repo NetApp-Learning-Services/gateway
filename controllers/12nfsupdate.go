@@ -141,43 +141,22 @@ func (r *StorageVirtualMachineReconciler) reconcileNFSUpdate(ctx context.Context
 		if lifsCreate {
 			//creating lifs
 			for _, val := range svmCR.Spec.NfsConfig.NfsLifs {
-				var newLif ontap.IpInterface
-				newLif.Name = val.Name
-				newLif.Ip.Address = val.IPAddress
-				newLif.Ip.Netmask = val.Netmask
-				newLif.Location.BroadcastDomain.Name = val.BroacastDomain
-				newLif.Location.HomeNode.Name = val.HomeNode
-				newLif.ServicePolicy.Name = NfsLifType
-				newLif.Scope = NfsLifScope
-				newLif.Svm.Uuid = uuid
-
-				jsonPayload, err := json.Marshal(newLif)
+				err = CreateLIF(val, uuid, oc, log)
 				if err != nil {
-					//error creating the json body
-					log.Error(err, "Error creating the json payload for NFS LIF creation: "+val.Name)
-					//TODO: _ = r.setConditionManagementLIFUpdate(ctx, svmCR, CONDITION_STATUS_FALSE)
 					return err
 				}
-				log.Info("NFS LIF creation attempt: " + val.Name)
-				err = oc.CreateIpInterface(jsonPayload)
-				if err != nil {
-					log.Error(err, "Error occurred when creating NFS LIF: "+val.Name)
-					//TODO: _ = r.setConditionManagementLIFCreation(ctx, svmCR, CONDITION_STATUS_FALSE)
-					return err
-				}
-				log.Info("NFS LIF creation successful: " + val.Name)
-				// err = r.setConditionManagementLIFCreation(ctx, svmCR, CONDITION_STATUS_TRUE)
-				// if err != nil {
-				// 	return nil //even though condition not create, don't reconcile again
-				// }
 			}
 
 		} else {
 			for index, val := range svmCR.Spec.NfsConfig.NfsLifs {
 
-				//TODO: need to check to see if lifs.Records[index] is out of index - if so, need to create LIF
+				// Check to see if lifs.Records[index] is out of index - if so, need to create LIF
 				if index > lifs.NumRecords {
-					//need to create LIF for val
+					// Need to create LIF for val
+					err = CreateLIF(val, uuid, oc, log)
+					if err != nil {
+						return err
+					}
 				} else {
 					if lifs.Records[index].Ip.Address != val.IPAddress ||
 						lifs.Records[index].Name != val.Name ||
@@ -240,6 +219,40 @@ func (r *StorageVirtualMachineReconciler) reconcileNFSUpdate(ctx context.Context
 		// If rule missing in ONTAP, POST /protocols/nfs/export-policies/
 
 	} // NFS exports rules defined in custom resource
+
+	return nil
+}
+
+func CreateLIF(lifToCreate gatewayv1alpha1.LIF, uuid string, oc *ontap.Client, log logr.Logger) (err error) {
+	var newLif ontap.IpInterface
+	newLif.Name = lifToCreate.Name
+	newLif.Ip.Address = lifToCreate.IPAddress
+	newLif.Ip.Netmask = lifToCreate.Netmask
+	newLif.Location.BroadcastDomain.Name = lifToCreate.BroacastDomain
+	newLif.Location.HomeNode.Name = lifToCreate.HomeNode
+	newLif.ServicePolicy.Name = NfsLifType
+	newLif.Scope = NfsLifScope
+	newLif.Svm.Uuid = uuid
+
+	jsonPayload, err := json.Marshal(newLif)
+	if err != nil {
+		//error creating the json body
+		log.Error(err, "Error creating the json payload for NFS LIF creation: "+lifToCreate.Name)
+		//TODO: _ = r.setConditionManagementLIFUpdate(ctx, svmCR, CONDITION_STATUS_FALSE)
+		return err
+	}
+	log.Info("NFS LIF creation attempt: " + lifToCreate.Name)
+	err = oc.CreateIpInterface(jsonPayload)
+	if err != nil {
+		log.Error(err, "Error occurred when creating NFS LIF: "+lifToCreate.Name)
+		//TODO: _ = r.setConditionManagementLIFCreation(ctx, svmCR, CONDITION_STATUS_FALSE)
+		return err
+	}
+	log.Info("NFS LIF creation successful: " + lifToCreate.Name)
+	// err = r.setConditionManagementLIFCreation(ctx, svmCR, CONDITION_STATUS_TRUE)
+	// if err != nil {
+	// 	return nil //even though condition not create, don't reconcile again
+	// }
 
 	return nil
 }
