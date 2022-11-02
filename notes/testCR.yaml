@@ -46,7 +46,7 @@ spec:
     v41: true
     interfaces:
     - name: nfs1
-      ip: 192.168.0.30
+      ip: 192.168.0.31
       netmask: 255.255.255.0
       broadcastDomain: Default
       homeNode: Cluster2-01
