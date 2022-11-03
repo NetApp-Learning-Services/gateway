@@ -59,6 +59,8 @@ type ExportResponse struct {
 	Records []ExportPolicy `json:"records,omitempty"`
 }
 
+const qs string = "?return_timeout=120&max_records=40&fields=*"
+
 func (c *Client) GetNfsServiceBySvmUuid(uuid string) (nfsService NFSService, err error) {
 	uri := "/api/protocols/nfs/services/" + uuid
 
@@ -120,7 +122,7 @@ func (c *Client) DeleteNfsService(uuid string) (err error) {
 }
 
 func (c *Client) GetNfsExportBySvmUuid(uuid string) (exports ExportResponse, err error) {
-	uri := "/api/protocols/nfs/export-policies?svm.uuid=" + uuid
+	uri := "/api/protocols/nfs/export-policies" + qs + "&svm.uuid=" + uuid
 
 	data, err := c.clientGet(uri)
 	if err != nil {
@@ -179,7 +181,7 @@ func (c *Client) DeleteNfsExport(id int) (err error) {
 }
 
 func (c *Client) GetNfsInterfacesBySvmUuid(uuid string) (lifs IpInterfacesResponse, err error) {
-	uri := "/api/network/ip/interfaces?service_policy.name=default-data-files&fields=enabled,ip.address,ip.netmask&svm.uuid=" + uuid
+	uri := "/api/network/ip/interfaces" + qs + "&service_policy.name=default-data-files&svm.uuid=" + uuid
 
 	data, err := c.clientGet(uri)
 	if err != nil {

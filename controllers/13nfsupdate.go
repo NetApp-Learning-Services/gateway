@@ -68,22 +68,26 @@ func (r *StorageVirtualMachineReconciler) reconcileNFSUpdate(ctx context.Context
 	} else {
 
 		// Compare enabled to custom resource enabled
-		if nfsService.Enabled != &svmCR.Spec.NfsConfig.Enabled {
+		if *nfsService.Enabled != svmCR.Spec.NfsConfig.Enabled {
+			log.Info("NFS service enabled update")
 			updateNfsService = true
 			upsertNfsService.Enabled = &svmCR.Spec.NfsConfig.Enabled
 		}
 
-		if nfsService.Protocol.V3Enable != &svmCR.Spec.NfsConfig.Nfsv3 {
+		if *nfsService.Protocol.V3Enable != svmCR.Spec.NfsConfig.Nfsv3 {
+			log.Info("NFS v3 enabled update")
 			updateNfsService = true
 			upsertNfsService.Protocol.V3Enable = &svmCR.Spec.NfsConfig.Nfsv3
 		}
 
-		if nfsService.Protocol.V4Enable != &svmCR.Spec.NfsConfig.Nfsv4 {
+		if *nfsService.Protocol.V4Enable != svmCR.Spec.NfsConfig.Nfsv4 {
+			log.Info("NFS v4 enabled update")
 			updateNfsService = true
 			upsertNfsService.Protocol.V4Enable = &svmCR.Spec.NfsConfig.Nfsv4
 		}
 
-		if nfsService.Protocol.V41Enable != &svmCR.Spec.NfsConfig.Nfsv41 {
+		if *nfsService.Protocol.V41Enable != svmCR.Spec.NfsConfig.Nfsv41 {
+			log.Info("NFS v41 enabled update")
 			updateNfsService = true
 			upsertNfsService.Protocol.V41Enable = &svmCR.Spec.NfsConfig.Nfsv41
 		}
