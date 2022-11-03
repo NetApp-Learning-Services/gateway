@@ -15,31 +15,10 @@ import (
 
 const finalizer = "gateway.netapp.com" //special word
 
-func (r *StorageVirtualMachineReconciler) finalizeSVM(ctx context.Context,
-	svmCR *gatewayv1alpha1.StorageVirtualMachine, oc *ontap.Client) error {
-
-	err := oc.DeleteStorageVM(svmCR.Spec.SvmUuid)
-	if err != nil {
-		return fmt.Errorf("SVM not deleted yet")
-	}
-	return nil
-}
-
-func (r *StorageVirtualMachineReconciler) addFinalizer(ctx context.Context, svmCR *gatewayv1alpha1.StorageVirtualMachine) (ctrl.Result, error) {
-	if !controllerutil.ContainsFinalizer(svmCR, finalizer) {
-		controllerutil.AddFinalizer(svmCR, finalizer)
-		err := r.Update(ctx, svmCR)
-		if err != nil {
-			return ctrl.Result{}, err
-		}
-	}
-	return ctrl.Result{}, nil
-}
-
 func (r *StorageVirtualMachineReconciler) tryDeletions(ctx context.Context,
 	svmCR *gatewayv1alpha1.StorageVirtualMachine, oc *ontap.Client, log logr.Logger) (ctrl.Result, error) {
 
-	log.Info("STEP 5: Delete SVM in ONTAP and in K8s")
+	log.Info("STEP 5: Delete SVM in ONTAP and remove custom resource")
 
 	isSMVMarkedToBeDeleted := svmCR.GetDeletionTimestamp() != nil
 	if isSMVMarkedToBeDeleted {
@@ -61,5 +40,26 @@ func (r *StorageVirtualMachineReconciler) tryDeletions(ctx context.Context,
 		return ctrl.Result{}, nil
 	}
 	// Not deleting
+	return ctrl.Result{}, nil
+}
+
+func (r *StorageVirtualMachineReconciler) finalizeSVM(ctx context.Context,
+	svmCR *gatewayv1alpha1.StorageVirtualMachine, oc *ontap.Client) error {
+
+	err := oc.DeleteStorageVM(svmCR.Spec.SvmUuid)
+	if err != nil {
+		return fmt.Errorf("SVM not deleted yet")
+	}
+	return nil
+}
+
+func (r *StorageVirtualMachineReconciler) addFinalizer(ctx context.Context, svmCR *gatewayv1alpha1.StorageVirtualMachine) (ctrl.Result, error) {
+	if !controllerutil.ContainsFinalizer(svmCR, finalizer) {
+		controllerutil.AddFinalizer(svmCR, finalizer)
+		err := r.Update(ctx, svmCR)
+		if err != nil {
+			return ctrl.Result{}, err
+		}
+	}
 	return ctrl.Result{}, nil
 }

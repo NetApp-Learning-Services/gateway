@@ -14,7 +14,7 @@ import (
 func (r *StorageVirtualMachineReconciler) reconcileClusterHost(ctx context.Context,
 	svmCR *gatewayv1alpha1.StorageVirtualMachine, log logr.Logger) (string, error) {
 
-	log.Info("STEP 2: Identify Cluster Host")
+	log.Info("STEP 2: Identify cluster host")
 
 	// Get cluster management url
 	host := svmCR.Spec.ClusterManagementHost
