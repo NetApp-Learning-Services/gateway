@@ -9,6 +9,7 @@ import (
 
 	gatewayv1alpha1 "gateway/api/v1alpha1"
 	"gateway/ontap"
+	defaultLog "log"
 
 	"github.com/go-logr/logr"
 	corev1 "k8s.io/api/core/v1"
@@ -69,7 +70,9 @@ func (r *StorageVirtualMachineReconciler) reconcileSecurityAccount(ctx context.C
 		var a bool = false
 		payload.Locked = &a // always unlock
 
-		log.Info("Security account payload: " + fmt.Sprintf("%#v\n", payload))
+		if oc.Debug {
+			defaultLog.Printf("[DEBUG] Security account payload: " + fmt.Sprintf("%#v\n", payload))
+		}
 
 		jsonPayload, err := json.Marshal(payload)
 		if err != nil {
@@ -122,7 +125,9 @@ func (r *StorageVirtualMachineReconciler) reconcileSecurityAccount(ctx context.C
 		payload.Role = ontap.Vsadmin
 		payload.Password = string(credentials.Data["password"])
 
-		log.Info("Security account payload: " + fmt.Sprintf("%#v\n", payload))
+		if oc.Debug {
+			defaultLog.Printf("[DEBUG] Security account payload: " + fmt.Sprintf("%#v\n", payload))
+		}
 
 		jsonPayload, err := json.Marshal(payload)
 		if err != nil {

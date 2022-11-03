@@ -6,6 +6,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	defaultLog "log"
 
 	gatewayv1alpha1 "gateway/api/v1alpha1"
 	"gateway/ontap"
@@ -37,8 +38,10 @@ func (r *StorageVirtualMachineReconciler) reconcileSvmCreation(ctx context.Conte
 		ifpayload.Location = locpayload
 		payload.IpInterfaces = append(payload.IpInterfaces, ifpayload)
 	}
-	//log.Info("SVM creation payload", "payload:", payload)
-	log.Info("SVM creation payload: " + fmt.Sprintf("%#v\n", payload))
+
+	if oc.Debug {
+		defaultLog.Printf("[DEBUG] SVM creation payload: " + fmt.Sprintf("%#v\n", payload))
+	}
 
 	jsonPayload, err := json.Marshal(payload)
 	if err != nil {
