@@ -156,47 +156,47 @@ func (r *StorageVirtualMachineReconciler) Reconcile(ctx context.Context, req ctr
 	}
 
 	// // Check whether we need to update the SVM
-	// if !create {
+	if !create {
 
-	// STEP 10
-	// reconcile SVM update
-	err = r.reconcileSvmUpdate(ctx, svmCR, svmRetrieved, oc, log)
-	if err != nil {
-		log.Error(err, "Error during reconciling SVM update - requeuing")
-		return ctrl.Result{Requeue: true}, err
-	}
-
-	if svmRetrieved.Uuid != "" {
-		// STEP 11
-		// Reconcile Management LIF information
-		err = r.reconcileManagementLifUpdate(ctx, svmCR, svmRetrieved.Uuid, oc, log)
+		// STEP 10
+		// reconcile SVM update
+		err = r.reconcileSvmUpdate(ctx, svmCR, svmRetrieved, oc, log)
 		if err != nil {
-			if strings.Contains(err.Error(), "Duplicate IP") {
-				log.Error(err, "Duplicated IP Address - stop reconcile")
-				return ctrl.Result{Requeue: false}, nil
+			log.Error(err, "Error during reconciling SVM update - requeuing")
+			return ctrl.Result{Requeue: true}, err
+		}
+
+		if svmRetrieved.Uuid != "" {
+			// STEP 11
+			// Reconcile Management LIF information
+			err = r.reconcileManagementLifUpdate(ctx, svmCR, svmRetrieved.Uuid, oc, log)
+			if err != nil {
+				if strings.Contains(err.Error(), "Duplicate IP") {
+					log.Error(err, "Duplicated IP Address - stop reconcile")
+					return ctrl.Result{Requeue: false}, nil
+				}
+				log.Error(err, "Error during reconciling management LIF - requeuing")
+				return ctrl.Result{Requeue: true}, err
 			}
-			log.Error(err, "Error during reconciling management LIF - requeuing")
-			return ctrl.Result{Requeue: true}, err
+
+			// STEP 12
+			// Reconcile Aggregates
+			err = r.reconcileAggregates(ctx, svmCR, svmRetrieved, oc, log)
+			if err != nil {
+				log.Error(err, "Error during reconciling SVM aggregates - requeuing")
+				return ctrl.Result{Requeue: true}, err
+			}
+
+			// STEP 13
+			// Reconcile NFS information
+			err = r.reconcileNFSUpdate(ctx, svmCR, svmRetrieved.Uuid, oc, log)
+			if err != nil {
+				log.Error(err, "Error during reconciling NFS update - requeuing")
+				return ctrl.Result{Requeue: true}, err
+			}
 		}
 
-		// STEP 12
-		// Reconcile Aggregates
-		err = r.reconcileAggregates(ctx, svmCR, svmRetrieved, oc, log)
-		if err != nil {
-			log.Error(err, "Error during reconciling SVM aggregates - requeuing")
-			return ctrl.Result{Requeue: true}, err
-		}
-
-		// STEP 13
-		// Reconcile NFS information
-		err = r.reconcileNFSUpdate(ctx, svmCR, svmRetrieved.Uuid, oc, log)
-		if err != nil {
-			log.Error(err, "Error during reconciling NFS update - requeuing")
-			return ctrl.Result{Requeue: true}, err
-		}
 	}
-
-	//}
 
 	log.Info("RECONCILE END")
 	return ctrl.Result{Requeue: false}, nil //no error - end reconcile
