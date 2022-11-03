@@ -6,6 +6,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	defaultLog "log"
 
 	gatewayv1alpha1 "gateway/api/v1alpha1"
 	"gateway/ontap"
@@ -38,7 +39,9 @@ func (r *StorageVirtualMachineReconciler) reconcileSvmUpdate(ctx context.Context
 		log.Info("No changes for SVM - skipping STEP 10")
 		return nil
 	}
-	log.Info("SVM update payload: " + fmt.Sprintf("%#v\n", patchSVM))
+	if oc.Debug {
+		defaultLog.Printf("[DEBUG] SVM update payload: " + fmt.Sprintf("%#v\n", patchSVM))
+	}
 
 	jsonPayload, err := json.Marshal(patchSVM)
 	if err != nil {
