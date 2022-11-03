@@ -49,7 +49,7 @@ type StorageVirtualMachineSpec struct {
 	SvmDebug bool `json:"debug,omitempty"`
 
 	// Stores optional aggregate list
-	// +kubebuilder:default:=false
+	// +kubebuilder:validation:Optional
 	Aggregates []Aggregate `json:"aggregates,omitempty"`
 
 	// Provides optional SVM managment LIF

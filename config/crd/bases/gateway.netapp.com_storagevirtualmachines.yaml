@@ -39,7 +39,6 @@ spec:
             description: StorageVirtualMachineSpec defines the desired state of StorageVirtualMachine
             properties:
               aggregates:
-                default: false
                 description: Stores optional aggregate list
                 items:
                   properties:
