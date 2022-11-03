@@ -1,7 +1,7 @@
 #!/bin/bash
 # A simple bash script to reset and test the application
 
-kubectl -n gateway-system delete svm storagevirtualmachine-sample
+kubectl -n gateway-system delete svm storagevirtualmachine-testcase
 kubectl -n gateway-system delete secret ontap-cluster-admin
 kubectl -n gateway-system delete secret ontap-svm-admin
 kubectl delete namespace gateway-system 
