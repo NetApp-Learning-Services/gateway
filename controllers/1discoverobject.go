@@ -17,7 +17,7 @@ func (r *StorageVirtualMachineReconciler) reconcileDiscoverObject(ctx context.Co
 
 	err := r.Get(ctx, req.NamespacedName, svmCR)
 	if err != nil && errors.IsNotFound(err) {
-		log.Info("StorageVirtualMachine custom resource not found, ignoring since object must be deleted")
+		log.Info("StorageVirtualMachine custom resource not found, ignoring since object must be deleted - stopping reconcile")
 		return nil, err
 	} else if err != nil {
 		log.Error(err, "Failed to get StorageVirtualMachine custom resource, re-running reconcile")
