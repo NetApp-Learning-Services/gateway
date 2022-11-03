@@ -149,21 +149,20 @@ func (r *StorageVirtualMachineReconciler) Reconcile(ctx context.Context, req ctr
 			// Create or update SVM management credentials
 			err = r.reconcileSecurityAccount(ctx, svmCR, oc, vsAdminSecret, log)
 			if err != nil {
-				return ctrl.Result{Requeue: true}, err
+				return ctrl.Result{RequeueAfter: 30 * time.Second}, err
 			}
 
 		}
 	}
 
-	// // Check whether we need to update the SVM
+	// Check whether we need to update the SVM
 	if !create {
 
 		// STEP 10
-		// reconcile SVM update
+		// Reconcile SVM update
 		err = r.reconcileSvmUpdate(ctx, svmCR, svmRetrieved, oc, log)
 		if err != nil {
-			log.Error(err, "Error during reconciling SVM update - requeuing")
-			return ctrl.Result{Requeue: true}, err
+			return ctrl.Result{RequeueAfter: 30 * time.Second}, err
 		}
 
 		if svmRetrieved.Uuid != "" {
@@ -176,23 +175,21 @@ func (r *StorageVirtualMachineReconciler) Reconcile(ctx context.Context, req ctr
 					return ctrl.Result{Requeue: false}, nil
 				}
 				log.Error(err, "Error during reconciling management LIF - requeuing")
-				return ctrl.Result{Requeue: true}, err
+				return ctrl.Result{RequeueAfter: 30 * time.Second}, err
 			}
 
 			// STEP 12
 			// Reconcile Aggregates
 			err = r.reconcileAggregates(ctx, svmCR, svmRetrieved, oc, log)
 			if err != nil {
-				log.Error(err, "Error during reconciling SVM aggregates - requeuing")
-				return ctrl.Result{Requeue: true}, err
+				return ctrl.Result{RequeueAfter: 30 * time.Second}, err
 			}
 
 			// STEP 13
 			// Reconcile NFS information
 			err = r.reconcileNFSUpdate(ctx, svmCR, svmRetrieved.Uuid, oc, log)
 			if err != nil {
-				log.Error(err, "Error during reconciling NFS update - requeuing")
-				return ctrl.Result{Requeue: true}, err
+				return ctrl.Result{RequeueAfter: 30 * time.Second}, err
 			}
 		}
 

@@ -42,7 +42,7 @@ func (r *StorageVirtualMachineReconciler) reconcileAggregates(ctx context.Contex
 			jsonPayload, err := json.Marshal(patchSVM)
 			if err != nil {
 				//error creating the json body
-				log.Error(err, "Error creating the json payload for SVM aggregates update")
+				log.Error(err, "Error creating the json payload for SVM aggregates update - requeuing")
 				//Todo: _ = r.setConditionSVMUpdate(ctx, svmCR, CONDITION_STATUS_FALSE)
 				return err
 			}
@@ -51,7 +51,7 @@ func (r *StorageVirtualMachineReconciler) reconcileAggregates(ctx context.Contex
 			log.Info("SVM aggregates update attempt for SVM: " + svmRetrieved.Uuid)
 			err = oc.PatchStorageVM(svmRetrieved.Uuid, jsonPayload)
 			if err != nil {
-				log.Error(err, "Error occurred when updating SVM aggregates")
+				log.Error(err, "Error occurred when updating SVM aggregates - requeuing")
 				//Todo: _ = r.setConditionSVMUpdate(ctx, svmCR, CONDITION_STATUS_FALSE)
 				return err
 			}

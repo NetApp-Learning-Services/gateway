@@ -6,6 +6,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	defaultLog "log"
 	"strconv"
 
 	gatewayv1alpha1 "gateway/api/v1alpha1"
@@ -49,7 +50,7 @@ func (r *StorageVirtualMachineReconciler) reconcileManagementLifUpdate(ctx conte
 	nameIndex := slices.IndexFunc(lifs.Records, func(i ontap.IpInterface) bool { return i.Name == svmCR.Spec.ManagementLIF.Name })
 
 	if oc.Debug {
-		log.Info("[DEBUG] nameIndex: " + fmt.Sprintf("%v", nameIndex))
+		defaultLog.Printf("[DEBUG] nameIndex: " + fmt.Sprintf("%v", nameIndex))
 	}
 
 	//IP not returned at least in 9.9.1 vsims - can only check the Name
@@ -75,9 +76,10 @@ func (r *StorageVirtualMachineReconciler) reconcileManagementLifUpdate(ctx conte
 
 		netmaskAsInt, _ := strconv.Atoi(lifRetrieved.Ip.Netmask)
 		netmaskAsIP := NetmaskToString(netmaskAsInt)
+
 		if oc.Debug {
-			log.Info("[DEBUG] netmaskAsInt: " + fmt.Sprintf("%v", netmaskAsInt))
-			log.Info("[DEBUG] netmaskAsIP: " + fmt.Sprintf("%v", netmaskAsIP))
+			defaultLog.Printf("[DEBUG] netmaskAsInt: " + fmt.Sprintf("%v", netmaskAsInt))
+			defaultLog.Printf("[DEBUG] netmaskAsIP: " + fmt.Sprintf("%v", netmaskAsIP))
 		}
 
 		if netmaskAsIP != svmCR.Spec.ManagementLIF.Netmask {
@@ -107,7 +109,7 @@ func (r *StorageVirtualMachineReconciler) reconcileManagementLifUpdate(ctx conte
 
 	// otherwise changes need to be implemented
 	if oc.Debug {
-		log.Info("[DEBUG] SVM management LIF update payload: " + fmt.Sprintf("%#v\n", upsertManagementLif))
+		defaultLog.Printf("[DEBUG] SVM management LIF update payload: " + fmt.Sprintf("%#v\n", upsertManagementLif))
 	}
 
 	jsonPayload, err := json.Marshal(upsertManagementLif)

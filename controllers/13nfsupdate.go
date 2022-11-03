@@ -36,7 +36,7 @@ func (r *StorageVirtualMachineReconciler) reconcileNFSUpdate(ctx context.Context
 		create = true
 	} else if err != nil {
 		// some other error
-		log.Error(err, "Error retrieving NFS service for SVM by UUID")
+		log.Error(err, "Error retrieving NFS service for SVM by UUID - requeuing")
 		return err
 	}
 
@@ -53,14 +53,14 @@ func (r *StorageVirtualMachineReconciler) reconcileNFSUpdate(ctx context.Context
 		jsonPayload, err := json.Marshal(upsertNfsService)
 		if err != nil {
 			//error creating the json body
-			log.Error(err, "Error creating the json payload for NFS service creation")
+			log.Error(err, "Error creating the json payload for NFS service creation - requeuing")
 			//TODO: _ = r.setConditionManagementLIFUpdate(ctx, svmCR, CONDITION_STATUS_FALSE)
 			return err
 		}
 
 		err = oc.CreateNfsService(jsonPayload)
 		if err != nil {
-			log.Error(err, "Error creating the NFS service")
+			log.Error(err, "Error creating the NFS service - requeuing")
 			//TODO: _ = r.setConditionManagementLIFUpdate(ctx, svmCR, CONDITION_STATUS_FALSE)
 			return err
 		}
@@ -97,7 +97,7 @@ func (r *StorageVirtualMachineReconciler) reconcileNFSUpdate(ctx context.Context
 			jsonPayload, err := json.Marshal(upsertNfsService)
 			if err != nil {
 				//error creating the json body
-				log.Error(err, "Error creating the json payload for NFS service update")
+				log.Error(err, "Error creating the json payload for NFS service update - requeuing")
 				//TODO: _ = r.setConditionManagementLIFUpdate(ctx, svmCR, CONDITION_STATUS_FALSE)
 				return err
 			}
@@ -106,7 +106,7 @@ func (r *StorageVirtualMachineReconciler) reconcileNFSUpdate(ctx context.Context
 			log.Info("NFS service update attempt for SVM: " + uuid)
 			err = oc.PatchNfsService(uuid, jsonPayload)
 			if err != nil {
-				log.Error(err, "Error updating the NFS service")
+				log.Error(err, "Error updating the NFS service - requeuing")
 				//TODO: _ = r.setConditionManagementLIFUpdate(ctx, svmCR, CONDITION_STATUS_FALSE)
 				return err
 			}
@@ -180,14 +180,14 @@ func (r *StorageVirtualMachineReconciler) reconcileNFSUpdate(ctx context.Context
 						jsonPayload, err := json.Marshal(updateLif)
 						if err != nil {
 							//error creating the json body
-							log.Error(err, "Error creating the json payload for NFS LIF update: "+val.Name)
+							log.Error(err, "Error creating the json payload for NFS LIF update: "+val.Name+" - requeuing")
 							//TODO: _ = r.setConditionManagementLIFUpdate(ctx, svmCR, CONDITION_STATUS_FALSE)
 							return err
 						}
 						log.Info("NFS LIF update attempt: " + val.Name)
 						err = oc.PatchIpInterface(lifs.Records[index].Uuid, jsonPayload)
 						if err != nil {
-							log.Error(err, "Error occurred when updating NFS LIF: "+val.Name)
+							log.Error(err, "Error occurred when updating NFS LIF: "+val.Name+" - requeuing")
 							//TODO: _ = r.setConditionManagementLIFCreation(ctx, svmCR, CONDITION_STATUS_FALSE)
 							return err
 						}
@@ -227,7 +227,7 @@ func (r *StorageVirtualMachineReconciler) reconcileNFSUpdate(ctx context.Context
 		exportRetrieved, err := oc.GetNfsExportBySvmUuid(uuid)
 		if err != nil {
 			//error creating the json body
-			log.Error(err, "Error getting NFS export rules for SVM: "+uuid)
+			log.Error(err, "Error getting NFS export rules for SVM: "+uuid+" - requeuing")
 			//TODO: _ = r.setConditionManagementLIFUpdate(ctx, svmCR, CONDITION_STATUS_FALSE)
 			return err
 		}
@@ -255,7 +255,7 @@ func (r *StorageVirtualMachineReconciler) reconcileNFSUpdate(ctx context.Context
 				log.Info("NFS export delete attempt: " + exportRetrieved.Records[i].Name)
 				oc.DeleteNfsExport(exportRetrieved.Records[i].Id)
 				if err != nil {
-					log.Error(err, "Error occurred when deleting NFS export: "+exportRetrieved.Records[i].Name)
+					log.Error(err, "Error occurred when deleting NFS export: "+exportRetrieved.Records[i].Name+" - requeuing")
 					//TODO: _ = r.setConditionManagementLIFCreation(ctx, svmCR, CONDITION_STATUS_FALSE)
 					// don't requeue on failed delete request
 					// return err
@@ -331,7 +331,7 @@ func (r *StorageVirtualMachineReconciler) reconcileNFSUpdate(ctx context.Context
 				jsonPayload, err := json.Marshal(newExport)
 				if err != nil {
 					//error creating the json body
-					log.Error(err, "Error creating the json payload for NFS export update")
+					log.Error(err, "Error creating the json payload for NFS export update - requeuing")
 					//ToDO: _ = r.setConditionManagementLIFUpdate(ctx, svmCR, CONDITION_STATUS_FALSE)
 					return err
 				}
@@ -351,7 +351,7 @@ func (r *StorageVirtualMachineReconciler) reconcileNFSUpdate(ctx context.Context
 				err = oc.PatchNfsExport(idToReplace, jsonPayload)
 				//err = oc.CreateNfsExport(jsonPayload)
 				if err != nil {
-					log.Error(err, "Error occurred when updating NFS export")
+					log.Error(err, "Error occurred when updating NFS export - requeuing")
 					//Todo: _ = r.setConditionManagementLIFUpdate(ctx, svmCR, CONDITION_STATUS_FALSE)
 					return err
 				}

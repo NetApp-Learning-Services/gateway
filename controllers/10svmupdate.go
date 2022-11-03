@@ -46,7 +46,7 @@ func (r *StorageVirtualMachineReconciler) reconcileSvmUpdate(ctx context.Context
 	jsonPayload, err := json.Marshal(patchSVM)
 	if err != nil {
 		//error creating the json body
-		log.Error(err, "Error creating the json payload for SVM update")
+		log.Error(err, "Error creating the json payload for SVM update - requeuing")
 		_ = r.setConditionSVMUpdate(ctx, svmCR, CONDITION_STATUS_FALSE)
 		return err
 	}
@@ -55,7 +55,7 @@ func (r *StorageVirtualMachineReconciler) reconcileSvmUpdate(ctx context.Context
 	log.Info("SVM update attempt for SVM: " + svmRetrieved.Uuid)
 	err = oc.PatchStorageVM(svmRetrieved.Uuid, jsonPayload)
 	if err != nil {
-		log.Error(err, "Error occurred when updating SVM")
+		log.Error(err, "Error occurred when updating SVM - requeuing")
 		_ = r.setConditionSVMUpdate(ctx, svmCR, CONDITION_STATUS_FALSE)
 		return err
 	}
