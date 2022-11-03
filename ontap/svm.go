@@ -179,18 +179,20 @@ type Svm struct {
 	IpInterfaces           []IpInterface `json:"ip_interfaces,omitempty"`
 }
 
+type Aggregate struct {
+	Name string `json:"name"`
+	UUID string `json:"uuid"`
+}
+
 type SvmByUUID struct {
-	Uuid       string `json:"uuid"`
-	Name       string `json:"name"`
-	Subtype    string `json:"subtype"`
-	Language   string `json:"language"`
-	Aggregates []struct {
-		Name string `json:"name"`
-		UUID string `json:"uuid"`
-	} `json:"aggregates"`
-	State   string `json:"state"`
-	Comment string `json:"comment"`
-	Ipspace struct {
+	Uuid       string      `json:"uuid"`
+	Name       string      `json:"name"`
+	Subtype    string      `json:"subtype"`
+	Language   string      `json:"language"`
+	Aggregates []Aggregate `json:"aggregates"`
+	State      string      `json:"state"`
+	Comment    string      `json:"comment"`
+	Ipspace    struct {
 		Name  string `json:"name"`
 		Uuid  string `json:"uuid"`
 		Links struct {
