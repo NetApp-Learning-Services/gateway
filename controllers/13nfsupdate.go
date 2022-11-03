@@ -18,7 +18,7 @@ const NfsLifScope = "svm"               //special word
 func (r *StorageVirtualMachineReconciler) reconcileNFSUpdate(ctx context.Context, svmCR *gatewayv1alpha1.StorageVirtualMachine,
 	uuid string, oc *ontap.Client, log logr.Logger) error {
 
-	log.Info("Step 13: Update NFS service")
+	log.Info("STEP 13: Update NFS service")
 
 	create := false
 	updateNfsService := false
@@ -26,7 +26,7 @@ func (r *StorageVirtualMachineReconciler) reconcileNFSUpdate(ctx context.Context
 	// Check to see if nfs configuration is provided in custom resource
 	if svmCR.Spec.NfsConfig == nil {
 		// If not, exit with no error
-		log.Info("No NFS service defined - skipping Step 13")
+		log.Info("No NFS service defined - skipping STEP 13")
 		return nil
 	}
 

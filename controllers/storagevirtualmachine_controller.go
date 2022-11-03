@@ -144,7 +144,7 @@ func (r *StorageVirtualMachineReconciler) Reconcile(ctx context.Context, req ctr
 			log.Info("SVM created")
 		}
 	} else {
-		log.Info("Step 7: Create SVM - skipped because already created")
+		log.Info("STEP 7: Create SVM - skipped because already created")
 	}
 
 	// STEP 8

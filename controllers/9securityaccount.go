@@ -23,7 +23,7 @@ const (
 func (r *StorageVirtualMachineReconciler) reconcileSecurityAccount(ctx context.Context,
 	svmCR *gatewayv1alpha1.StorageVirtualMachine, oc *ontap.Client, credentials *corev1.Secret, log logr.Logger) error {
 
-	log.Info("Step 9: Verify SVM management account is update to date")
+	log.Info("STEP 9: Verify SVM management account is update to date")
 
 	userNameToModify := string(credentials.Data["username"])
 
@@ -92,7 +92,7 @@ func (r *StorageVirtualMachineReconciler) reconcileSecurityAccount(ctx context.C
 			_ = r.setConditionVsadminSecretUpdate(ctx, svmCR, CONDITION_STATUS_TRUE)
 		}
 	} else {
-		log.Info("Nothing to do - skipping Step 9")
+		log.Info("Nothing to do - skipping STEP 9")
 		return nil //do nothing
 	}
 

@@ -19,14 +19,14 @@ import (
 func (r *StorageVirtualMachineReconciler) reconcileManagementLifUpdate(ctx context.Context, svmCR *gatewayv1alpha1.StorageVirtualMachine,
 	uuid string, oc *ontap.Client, log logr.Logger) error {
 
-	log.Info("Step 11: Update management LIF")
+	log.Info("STEP 11: Update management LIF")
 
 	execute := false
 	create := false
 	lifUuid := ""
 
 	if svmCR.Spec.ManagementLIF == nil {
-		log.Info("No management LIF defined - skipping Step 11")
+		log.Info("No management LIF defined - skipping STEP 11")
 		return nil
 	}
 
@@ -101,7 +101,7 @@ func (r *StorageVirtualMachineReconciler) reconcileManagementLifUpdate(ctx conte
 	}
 
 	if !execute {
-		log.Info("No changes detected - skipping Step 11")
+		log.Info("No changes detected - skipping STEP 11")
 		return nil
 	}
 

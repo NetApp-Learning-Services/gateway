@@ -14,7 +14,7 @@ import (
 func (r *StorageVirtualMachineReconciler) reconcileAggregates(ctx context.Context, svmCR *gatewayv1alpha1.StorageVirtualMachine,
 	svmRetrieved ontap.SvmByUUID, oc *ontap.Client, log logr.Logger) error {
 
-	log.Info("Step 12: Update SVM aggregates")
+	log.Info("STEP 12: Update SVM aggregates")
 	var patchSVM ontap.SvmPatch
 	needToUpdate := false
 
@@ -62,12 +62,12 @@ func (r *StorageVirtualMachineReconciler) reconcileAggregates(ctx context.Contex
 			// }
 
 		} else {
-			log.Info("No changes detected for SVM aggregates - skipping Step 12")
+			log.Info("No changes detected for SVM aggregates - skipping STEP 12")
 			return nil
 		}
 
 	} else {
-		log.Info("No SVM aggregates defined - skipping Step 12")
+		log.Info("No SVM aggregates defined - skipping STEP 12")
 	}
 
 	return nil

@@ -19,11 +19,11 @@ func (r *StorageVirtualMachineReconciler) reconcileSecret(ctx context.Context,
 	name string, namespace string, log logr.Logger) (*corev1.Secret, error) {
 
 	if name == clusterAdmin {
-		log.Info("Step 3: Resolve cluster admin secret")
+		log.Info("STEP 3: Resolve cluster admin secret")
 	} else if name == svmAdmin {
-		log.Info("Step 8: Resolve SVM management secret")
+		log.Info("STEP 8: Resolve SVM management secret")
 	} else {
-		log.Info("Step ?: Resolve ? secret")
+		log.Info("STEP ?: Resolve ? secret")
 	}
 
 	secret := &corev1.Secret{}

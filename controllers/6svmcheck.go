@@ -17,7 +17,7 @@ import (
 func (r *StorageVirtualMachineReconciler) reconcileSvmCheck(ctx context.Context,
 	svmCR *gatewayv1alpha1.StorageVirtualMachine, oc *ontap.Client, log logr.Logger) (ontap.SvmByUUID, error) {
 
-	log.Info("Step 6: Check for a valid SVM")
+	log.Info("STEP 6: Check for a valid SVM")
 
 	var svm ontap.SvmByUUID
 

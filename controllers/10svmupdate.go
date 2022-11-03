@@ -16,7 +16,7 @@ import (
 func (r *StorageVirtualMachineReconciler) reconcileSvmUpdate(ctx context.Context, svmCR *gatewayv1alpha1.StorageVirtualMachine,
 	svmRetrieved ontap.SvmByUUID, oc *ontap.Client, log logr.Logger) error {
 
-	log.Info("Step 10: Update SVM")
+	log.Info("STEP 10: Update SVM")
 
 	execute := false
 	var patchSVM ontap.SvmPatch
@@ -35,7 +35,7 @@ func (r *StorageVirtualMachineReconciler) reconcileSvmUpdate(ctx context.Context
 	}
 
 	if !execute {
-		log.Info("No changes for SVM - skipping Step 10")
+		log.Info("No changes for SVM - skipping STEP 10")
 		return nil
 	}
 	log.Info("SVM update payload: " + fmt.Sprintf("%#v\n", patchSVM))

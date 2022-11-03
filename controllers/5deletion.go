@@ -18,7 +18,7 @@ const finalizer = "gateway.netapp.com" //special word
 func (r *StorageVirtualMachineReconciler) tryDeletions(ctx context.Context,
 	svmCR *gatewayv1alpha1.StorageVirtualMachine, oc *ontap.Client, log logr.Logger) (ctrl.Result, error) {
 
-	log.Info("Step 5: Delete SVM in ONTAP and remove custom resource")
+	log.Info("STEP 5: Delete SVM in ONTAP and remove custom resource")
 
 	isSMVMarkedToBeDeleted := svmCR.GetDeletionTimestamp() != nil
 	if isSMVMarkedToBeDeleted {

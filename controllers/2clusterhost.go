@@ -14,7 +14,7 @@ import (
 func (r *StorageVirtualMachineReconciler) reconcileClusterHost(ctx context.Context,
 	svmCR *gatewayv1alpha1.StorageVirtualMachine, log logr.Logger) (string, error) {
 
-	log.Info("Step 2: Identify cluster host")
+	log.Info("STEP 2: Identify cluster host")
 
 	// Get cluster management url
 	host := svmCR.Spec.ClusterManagementHost
@@ -47,7 +47,7 @@ func (r *StorageVirtualMachineReconciler) reconcileClusterHost(ctx context.Conte
 	if err != nil {
 
 		/*
-			1.6667198119695444e+09 INFO Step 2: Identify Cluster Host {"controller": "storagevirtualmachine", "controllerGroup": "gateway.netapp.com", "controllerKind": "StorageVirtualMachine", "storageVirtualMachine": {"name":"storagevirtualmachine-sample","namespace":"gateway-system"}, "namespace": "gateway-system", "name": "storagevirtualmachine-sample", "reconcileID": "d1369493-9ad0-4269-933d-fa7ae312a0f7", "Request.Namespace": "gateway-system", "Request.Name": "storagevirtualmachine-sample"}
+			1.6667198119695444e+09 INFO STEP 2: Identify Cluster Host {"controller": "storagevirtualmachine", "controllerGroup": "gateway.netapp.com", "controllerKind": "StorageVirtualMachine", "storageVirtualMachine": {"name":"storagevirtualmachine-sample","namespace":"gateway-system"}, "namespace": "gateway-system", "name": "storagevirtualmachine-sample", "reconcileID": "d1369493-9ad0-4269-933d-fa7ae312a0f7", "Request.Namespace": "gateway-system", "Request.Name": "storagevirtualmachine-sample"}
 			1.666719811969549e+09 INFO Using cluster management host: 192.168.0.102 {"controller": "storagevirtualmachine", "controllerGroup": "gateway.netapp.com", "controllerKind": "StorageVirtualMachine", "storageVirtualMachine": {"name":"storagevirtualmachine-sample","namespace":"gateway-system"}, "namespace": "gateway-system", "name": "storagevirtualmachine-sample", "reconcileID": "d1369493-9ad0-4269-933d-fa7ae312a0f7", "Request.Namespace": "gateway-system", "Request.Name": "storagevirtualmachine-sample"}
 			1.6667198119721894e+09 ERROR Custom resource status update failed {"controller": "storagevirtualmachine", "controllerGroup": "gateway.netapp.com", "controllerKind": "StorageVirtualMachine", "storageVirtualMachine": {"name":"storagevirtualmachine-sample","namespace":"gateway-system"}, "namespace": "gateway-system", "name": "storagevirtualmachine-sample", "reconcileID": "d1369493-9ad0-4269-933d-fa7ae312a0f7", "error": "Operation cannot be fulfilled on storagevirtualmachines.gateway.netapp.com \"storagevirtualmachine-sample\": the object has been modified; please apply your changes to the latest version and try again"}
 			gateway/controllers.(*StorageVirtualMachineReconciler).setConditionHostFound
