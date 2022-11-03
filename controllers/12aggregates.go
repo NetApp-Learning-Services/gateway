@@ -16,6 +16,7 @@ func (r *StorageVirtualMachineReconciler) reconcileAggregates(ctx context.Contex
 
 	log.Info("Step 12: Update SVM aggregates")
 	var patchSVM ontap.SvmPatch
+	needToUpdate := false
 
 	// interate over custom resoource svmCR and look for differences in retrieved SVM
 	if svmCR.Spec.Aggregates != nil {
@@ -24,13 +25,18 @@ func (r *StorageVirtualMachineReconciler) reconcileAggregates(ctx context.Contex
 		for _, val := range svmCR.Spec.Aggregates {
 			r := doesElementExist(svmRetrieved.Aggregates, val.Name)
 			if !r {
+				needToUpdate = true
+			}
+		}
+
+		if needToUpdate {
+			//Add all aggregates to the patch request to prevent any aggregates missing
+			for _, val := range svmCR.Spec.Aggregates {
 				var res ontap.Resource
 				res.Name = val.Name
 				patchSVM.Aggregates = append(patchSVM.Aggregates, res)
 			}
-		}
 
-		if len(patchSVM.Aggregates) > 0 {
 			log.Info("SVM aggregates payload: " + fmt.Sprintf("%#v\n", patchSVM))
 
 			jsonPayload, err := json.Marshal(patchSVM)
