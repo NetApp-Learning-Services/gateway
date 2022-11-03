@@ -17,6 +17,8 @@ import (
 	"github.com/go-logr/logr"
 )
 
+const svmScope = "svm" //magic word
+
 func (r *StorageVirtualMachineReconciler) reconcileManagementLifUpdate(ctx context.Context, svmCR *gatewayv1alpha1.StorageVirtualMachine,
 	uuid string, oc *ontap.Client, log logr.Logger) error {
 
@@ -97,8 +99,8 @@ func (r *StorageVirtualMachineReconciler) reconcileManagementLifUpdate(ctx conte
 		upsertManagementLif.Ip.Netmask = svmCR.Spec.ManagementLIF.Netmask
 		upsertManagementLif.Location.BroadcastDomain.Name = svmCR.Spec.ManagementLIF.BroacastDomain
 		upsertManagementLif.Location.HomeNode.Name = svmCR.Spec.ManagementLIF.HomeNode
-		upsertManagementLif.ServicePolicy.Name = "default-management" // magic word
-		upsertManagementLif.Scope = "svm"                             //magic word
+		upsertManagementLif.ServicePolicy.Name = managementLIFServicePolicy
+		upsertManagementLif.Scope = svmScope
 		upsertManagementLif.Svm.Uuid = uuid
 	}
 
