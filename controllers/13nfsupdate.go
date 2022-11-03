@@ -12,8 +12,8 @@ import (
 	"k8s.io/apimachinery/pkg/api/errors"
 )
 
-const NfsLifType = "default-data-files" //special word
-const NfsLifScope = "svm"               //special word
+const NfsLifType = "default-data-files" //magic word
+const NfsLifScope = "svm"               //magic word
 
 func (r *StorageVirtualMachineReconciler) reconcileNFSUpdate(ctx context.Context, svmCR *gatewayv1alpha1.StorageVirtualMachine,
 	uuid string, oc *ontap.Client, log logr.Logger) error {

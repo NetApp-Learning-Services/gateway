@@ -34,9 +34,9 @@ func (r *StorageVirtualMachineReconciler) reconcileSvmCheck(ctx context.Context,
 		// Check to see if SVM exists
 		svm, err := oc.GetStorageVMByUUID(uuid)
 		if err != nil {
-			log.Error(err, "SVM uuid in the custom resource is invalid")
+			log.Error(err, "SVM uuid in the custom resource is invalid - not requeuing")
 			_ = r.setConditionSVMFound(ctx, svmCR, CONDITION_STATUS_UNKNOWN)
-			return svm, err
+			return svm, nil
 		}
 		log.Info("SVM uuid in the custom resource is valid", "svm retrieved: ", svm)
 		_ = r.setConditionSVMFound(ctx, svmCR, CONDITION_STATUS_TRUE)

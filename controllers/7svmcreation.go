@@ -14,7 +14,11 @@ import (
 	"github.com/go-logr/logr"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 )
+
+const defaultComment = "Created by Astra Gateway"       //magic word
+const managementLIFServicePolicy = "default-management" //magic word
 
 func (r *StorageVirtualMachineReconciler) reconcileSvmCreation(ctx context.Context,
 	svmCR *gatewayv1alpha1.StorageVirtualMachine, oc *ontap.Client, log logr.Logger) (ctrl.Result, error) {
@@ -23,14 +27,13 @@ func (r *StorageVirtualMachineReconciler) reconcileSvmCreation(ctx context.Conte
 
 	var payload ontap.SVMCreationPayload
 	payload.Name = svmCR.Spec.SvmName
-	payload.Comment = "Created by Astra Gateway"
+	payload.Comment = defaultComment
 	if svmCR.Spec.ManagementLIF != nil {
 		var ifpayload ontap.IpInterfaceCreation
 		ifpayload.Name = svmCR.Spec.ManagementLIF.Name
 		ifpayload.Ip.Address = svmCR.Spec.ManagementLIF.IPAddress
 		ifpayload.Ip.Netmask = svmCR.Spec.ManagementLIF.Netmask
-		ifpayload.ServicePolicy = "default-management" // special word
-		//ifpayload.Scope = "svm"                        //special word
+		ifpayload.ServicePolicy = managementLIFServicePolicy
 
 		var locpayload ontap.Location
 		locpayload.BroadcastDomain.Name = svmCR.Spec.ManagementLIF.BroacastDomain
@@ -46,7 +49,7 @@ func (r *StorageVirtualMachineReconciler) reconcileSvmCreation(ctx context.Conte
 	jsonPayload, err := json.Marshal(payload)
 	if err != nil {
 		//error creating the json body
-		log.Error(err, "Error creating the json payload for SVM creation")
+		log.Error(err, "Error creating the json payload for SVM creation - requeuing")
 		_ = r.setConditionSVMCreation(ctx, svmCR, CONDITION_STATUS_FALSE)
 		return ctrl.Result{}, err
 	}
@@ -55,17 +58,10 @@ func (r *StorageVirtualMachineReconciler) reconcileSvmCreation(ctx context.Conte
 	uuid, err := oc.CreateStorageVM(jsonPayload)
 	if err != nil {
 		log.Info("Uuid received was: " + uuid)
-		log.Error(err, "Error occurred when creating SVM")
+		log.Error(err, "Error occurred when creating SVM - requeuing")
 		_ = r.setConditionSVMCreation(ctx, svmCR, CONDITION_STATUS_FALSE)
 		return ctrl.Result{}, err
 	}
-
-	// log.Info("Looking up UUID for the new SVM")
-	// uuid, err := oc.GetStorageVmUUIDByName(svmCR.Spec.SvmName)
-	// if err != nil {
-	// 	log.Error(err, "Error occurred when creating SVM")
-	// 	return ctrl.Result{}, err
-	// }
 
 	log.Info("SVM new uuid: " + uuid)
 	//patch the new uuid on the custom resource
@@ -73,22 +69,32 @@ func (r *StorageVirtualMachineReconciler) reconcileSvmCreation(ctx context.Conte
 	svmCR.Spec.SvmUuid = uuid
 	err = r.Patch(ctx, svmCR, patch)
 	if err != nil {
-		log.Error(err, "Error patching the new uuid in the custom resource")
+		log.Error(err, "Error patching the new uuid in the custom resource - requeuing")
 		_ = r.setConditionSVMCreation(ctx, svmCR, CONDITION_STATUS_FALSE)
 		return ctrl.Result{}, err
 	}
 
 	//Set condition for SVM create
-	err = r.setConditionSVMCreation(ctx, svmCR, CONDITION_STATUS_TRUE)
-	if err != nil {
-		return ctrl.Result{}, nil //even though condition not create, don't reconcile again
-	}
+	_ = r.setConditionSVMCreation(ctx, svmCR, CONDITION_STATUS_TRUE)
 
 	// Set finalizer
 	_, err = r.addFinalizer(ctx, svmCR)
 	if err != nil {
+		log.Error(err, "Error adding the finalizer to the custom resource - requeuing")
 		return ctrl.Result{}, err //got another error - re-reconcile
 	}
 
+	log.Info("SVM created")
+	return ctrl.Result{}, nil
+}
+
+func (r *StorageVirtualMachineReconciler) addFinalizer(ctx context.Context, svmCR *gatewayv1alpha1.StorageVirtualMachine) (ctrl.Result, error) {
+	if !controllerutil.ContainsFinalizer(svmCR, finalizerName) {
+		controllerutil.AddFinalizer(svmCR, finalizerName)
+		err := r.Update(ctx, svmCR)
+		if err != nil {
+			return ctrl.Result{}, err
+		}
+	}
 	return ctrl.Result{}, nil
 }

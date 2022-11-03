@@ -95,8 +95,8 @@ func (r *StorageVirtualMachineReconciler) reconcileManagementLifUpdate(ctx conte
 		upsertManagementLif.Ip.Netmask = svmCR.Spec.ManagementLIF.Netmask
 		upsertManagementLif.Location.BroadcastDomain.Name = svmCR.Spec.ManagementLIF.BroacastDomain
 		upsertManagementLif.Location.HomeNode.Name = svmCR.Spec.ManagementLIF.HomeNode
-		upsertManagementLif.ServicePolicy.Name = "default-management" // special word
-		upsertManagementLif.Scope = "svm"                             //special word
+		upsertManagementLif.ServicePolicy.Name = "default-management" // magic word
+		upsertManagementLif.Scope = "svm"                             //magic word
 		upsertManagementLif.Svm.Uuid = uuid
 	}
 

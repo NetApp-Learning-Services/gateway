@@ -16,9 +16,7 @@ import (
 	"k8s.io/apimachinery/pkg/api/errors"
 )
 
-const (
-	secondAuthMethod = "none" // Special word
-)
+const secondAuthMethod = "none" // magic word
 
 func (r *StorageVirtualMachineReconciler) reconcileSecurityAccount(ctx context.Context,
 	svmCR *gatewayv1alpha1.StorageVirtualMachine, oc *ontap.Client, credentials *corev1.Secret, log logr.Logger) error {
@@ -29,13 +27,15 @@ func (r *StorageVirtualMachineReconciler) reconcileSecurityAccount(ctx context.C
 
 	// Check to see if we have a uuid
 	if svmCR.Spec.SvmUuid == "" {
-		return errors.NewBadRequest("No SVM uuid during security account update")
+		err := errors.NewBadRequest("No SVM uuid during security account update")
+		log.Error(err, "Error while updating SVM management credentials - requeuing")
+		return err
 	}
 
 	// Check to see if username exists
 	user, err := oc.GetSecurityAccount(svmCR.Spec.SvmUuid, userNameToModify)
 	if err != nil {
-		log.Error(err, "Error checking to see if username exists")
+		log.Error(err, "Error checking to see if username exists - requeuing")
 	}
 
 	//log.Info("User: " + user.Name + " locked: " + fmt.Sprintf("%v", user.Locked))
@@ -77,14 +77,14 @@ func (r *StorageVirtualMachineReconciler) reconcileSecurityAccount(ctx context.C
 		jsonPayload, err := json.Marshal(payload)
 		if err != nil {
 			//error creating the json body
-			log.Error(err, "Error creating the json payload for security account patch")
+			log.Error(err, "Error creating the json payload for security account patch - requeuing")
 			return err
 		}
 
 		log.Info("Security account patch attempt")
 		err = oc.PatchSecurityAccount(jsonPayload, svmCR.Spec.SvmUuid, userNameToModify)
 		if err != nil {
-			log.Error(err, "Error occurred when patching security account")
+			log.Error(err, "Error occurred when patching security account - requeuing")
 			_ = r.setConditionVsadminSecretUpdate(ctx, svmCR, CONDITION_STATUS_FALSE)
 			return err
 		} else {
@@ -132,14 +132,14 @@ func (r *StorageVirtualMachineReconciler) reconcileSecurityAccount(ctx context.C
 		jsonPayload, err := json.Marshal(payload)
 		if err != nil {
 			//error creating the json body
-			log.Error(err, "Error creating the json payload for security account creation")
+			log.Error(err, "Error creating the json payload for security account creation - requeuing")
 			return err
 		}
 
 		log.Info("Security account creation attempt")
 		err = oc.CreateSecurityAccount(jsonPayload)
 		if err != nil {
-			log.Error(err, "Error occurred when creating security account")
+			log.Error(err, "Error occurred when creating security account - requeuing")
 			_ = r.setConditionVsadminSecretUpdate(ctx, svmCR, CONDITION_STATUS_FALSE)
 			return err
 		} else {

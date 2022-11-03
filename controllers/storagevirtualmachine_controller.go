@@ -70,7 +70,6 @@ func (r *StorageVirtualMachineReconciler) Reconcile(ctx context.Context, req ctr
 	if err != nil && errors.IsNotFound(err) {
 		return ctrl.Result{Requeue: false}, nil
 	} else if err != nil {
-		log.Error(err, "Error during custom resource discovery - requeuing")
 		return ctrl.Result{RequeueAfter: 30 * time.Second}, err //re-reconcile
 	}
 
@@ -83,67 +82,55 @@ func (r *StorageVirtualMachineReconciler) Reconcile(ctx context.Context, req ctr
 
 	// STEP 3
 	// Look up cluster admin secret
-	adminSecret, err := r.reconcileSecret(ctx,
+	adminSecret, err := r.reconcileSecret(ctx, clusterAdminRequest,
 		svmCR.Spec.ClusterCredentialSecret.Name,
-		svmCR.Spec.ClusterCredentialSecret.Namespace, log)
+		svmCR.Spec.ClusterCredentialSecret.Namespace, svmCR, log)
 	if err != nil {
-		log.Info("Cluster admin credentials NOT available")
-		_ = r.setConditionClusterSecretLookup(ctx, svmCR, CONDITION_STATUS_FALSE)
 		return ctrl.Result{Requeue: false}, nil // not a valid secret - stop reconcile
-	} else {
-		log.Info("Cluster admin credentials available")
-		_ = r.setConditionClusterSecretLookup(ctx, svmCR, CONDITION_STATUS_TRUE)
 	}
 
 	// STEP 4
-	//create ONTAP client
+	// Create ONTAP client
 	oc, err := r.reconcileGetClient(ctx, svmCR, adminSecret, host, trustSSL, log)
 	if err != nil {
-		log.Error(err, "Error during creation of ONTAP client - requeuing")
 		return ctrl.Result{RequeueAfter: 30 * time.Second}, err //got another error - re-reconcile
-	} else {
-		log.Info("ONTAP client created")
 	}
 
 	// STEP 5
 	// Check to see if deleting custom resource and handle the deletion
 	isSMVMarkedToBeDeleted := svmCR.GetDeletionTimestamp() != nil
 	if isSMVMarkedToBeDeleted {
-		_, err = r.tryDeletions(ctx, svmCR, oc, log)
+		_, err = r.reconcileDeletions(ctx, svmCR, oc, log)
 		if err != nil {
-			log.Error(err, "Error during custom resource deletion - requeuing")
 			return ctrl.Result{RequeueAfter: 30 * time.Second}, err //got another error - re-reconcile
 		} else {
-			log.Info("SVM deleted, removed finalizer, cleaning up custom resource")
 			return ctrl.Result{Requeue: false}, nil //stop reconcile
 		}
 	}
 
+	create := false // Define variable whether to create svm or update it - default to false
+
 	// STEP 6
 	// Check to see if svmCR has uuid and then check if svm can be looked up on that uuid
-	create := false // Define variable whether to create svm or update it - default to false
 	svmRetrieved, err := r.reconcileSvmCheck(ctx, svmCR, oc, log)
 	if err != nil {
 		if errors.IsNotFound(err) {
 			create = true
 		} else {
 			// some other error
-			log.Error(err, "Some other error while trying to retrieve SVM, other then SVM not created - requeuing")
 			return ctrl.Result{RequeueAfter: 30 * time.Second}, err // got another error - re-reconcile
 		}
 	}
 
 	if create {
 		// STEP 7
-		// reconcile SVM creation
+		// Reconcile SVM creation
 		_, err = r.reconcileSvmCreation(ctx, svmCR, oc, log)
 		if err != nil {
-			log.Error(err, "Error during reconciling SVM creation - requeuing")
 			return ctrl.Result{RequeueAfter: 30 * time.Second}, err //got another error - re-reconcile
-		} else {
-			log.Info("SVM created")
 		}
 	} else {
+		// SVM already created
 		log.Info("STEP 7: Create SVM - skipped because already created")
 	}
 
@@ -151,67 +138,65 @@ func (r *StorageVirtualMachineReconciler) Reconcile(ctx context.Context, req ctr
 	// Check to see if SVM management credentials is available
 	if svmCR.Spec.VsadminCredentialSecret.Name != "" {
 		// Look up SVM management credentials secret
-		vsAdminSecret, err := r.reconcileSecret(ctx,
+		vsAdminSecret, err := r.reconcileSecret(ctx, svmAdminRequest,
 			svmCR.Spec.VsadminCredentialSecret.Name,
-			svmCR.Spec.VsadminCredentialSecret.Namespace, log)
+			svmCR.Spec.VsadminCredentialSecret.Namespace, svmCR, log)
 		if err != nil {
-			r.setConditionVsadminSecretLookup(ctx, svmCR, CONDITION_STATUS_FALSE)
-			log.Info("SVM managment credentials NOT available")
 			return ctrl.Result{Requeue: false}, nil // not a valid secret - ignore
 		} else {
-			log.Info("SVM managment credentials available")
-			r.setConditionVsadminSecretLookup(ctx, svmCR, CONDITION_STATUS_TRUE)
+
 			// STEP 9
 			// Create or update SVM management credentials
 			err = r.reconcileSecurityAccount(ctx, svmCR, oc, vsAdminSecret, log)
 			if err != nil {
-				log.Error(err, "Error while updating SVM management credentials - requeuing")
 				return ctrl.Result{Requeue: true}, err
 			}
+
 		}
 	}
 
-	// Check whether we need to update the SVM
-	if !create {
-		// STEP 10
-		// reconcile SVM update
-		err = r.reconcileSvmUpdate(ctx, svmCR, svmRetrieved, oc, log)
+	// // Check whether we need to update the SVM
+	// if !create {
+
+	// STEP 10
+	// reconcile SVM update
+	err = r.reconcileSvmUpdate(ctx, svmCR, svmRetrieved, oc, log)
+	if err != nil {
+		log.Error(err, "Error during reconciling SVM update - requeuing")
+		return ctrl.Result{Requeue: true}, err
+	}
+
+	if svmRetrieved.Uuid != "" {
+		// STEP 11
+		// Reconcile Management LIF information
+		err = r.reconcileManagementLifUpdate(ctx, svmCR, svmRetrieved.Uuid, oc, log)
 		if err != nil {
-			log.Error(err, "Error during reconciling SVM update - requeuing")
+			if strings.Contains(err.Error(), "Duplicate IP") {
+				log.Error(err, "Duplicated IP Address - stop reconcile")
+				return ctrl.Result{Requeue: false}, nil
+			}
+			log.Error(err, "Error during reconciling management LIF - requeuing")
 			return ctrl.Result{Requeue: true}, err
 		}
 
-		if svmRetrieved.Uuid != "" {
-			// STEP 11
-			// Reconcile Management LIF information
-			err = r.reconcileManagementLifUpdate(ctx, svmCR, svmRetrieved.Uuid, oc, log)
-			if err != nil {
-				if strings.Contains(err.Error(), "Duplicate IP") {
-					log.Error(err, "Duplicated IP Address - stop reconcile")
-					return ctrl.Result{Requeue: false}, nil
-				}
-				log.Error(err, "Error during reconciling management LIF - requeuing")
-				return ctrl.Result{Requeue: true}, err
-			}
-
-			// STEP 12
-			// Reconcile Aggregates
-			err = r.reconcileAggregates(ctx, svmCR, svmRetrieved, oc, log)
-			if err != nil {
-				log.Error(err, "Error during reconciling SVM aggregates - requeuing")
-				return ctrl.Result{Requeue: true}, err
-			}
-
-			// STEP 13
-			// Reconcile NFS information
-			err = r.reconcileNFSUpdate(ctx, svmCR, svmRetrieved.Uuid, oc, log)
-			if err != nil {
-				log.Error(err, "Error during reconciling NFS update - requeuing")
-				return ctrl.Result{Requeue: true}, err
-			}
+		// STEP 12
+		// Reconcile Aggregates
+		err = r.reconcileAggregates(ctx, svmCR, svmRetrieved, oc, log)
+		if err != nil {
+			log.Error(err, "Error during reconciling SVM aggregates - requeuing")
+			return ctrl.Result{Requeue: true}, err
 		}
 
+		// STEP 13
+		// Reconcile NFS information
+		err = r.reconcileNFSUpdate(ctx, svmCR, svmRetrieved.Uuid, oc, log)
+		if err != nil {
+			log.Error(err, "Error during reconciling NFS update - requeuing")
+			return ctrl.Result{Requeue: true}, err
+		}
 	}
+
+	//}
 
 	log.Info("RECONCILE END")
 	return ctrl.Result{Requeue: false}, nil //no error - end reconcile
@@ -224,6 +209,5 @@ func (r *StorageVirtualMachineReconciler) Reconcile(ctx context.Context, req ctr
 func (r *StorageVirtualMachineReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&gatewayv1alpha1.StorageVirtualMachine{}, builder.WithPredicates(predicate.GenerationChangedPredicate{})).
-		// Owns(&corev1.Secret{}).
 		Complete(r)
 }

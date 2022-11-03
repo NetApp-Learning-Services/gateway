@@ -22,11 +22,12 @@ func (r *StorageVirtualMachineReconciler) reconcileGetClient(ctx context.Context
 		host, svmCR.Spec.SvmDebug, trustSSL)
 
 	if err != nil {
-		log.Error(err, "Error creating ONTAP client")
+		log.Error(err, "Error creating ONTAP client - requeueing")
 		_ = r.setConditionONTAPCreation(ctx, svmCR, CONDITION_STATUS_FALSE)
 		return oc, err
 	}
 
+	log.Info("ONTAP client created")
 	_ = r.setConditionONTAPCreation(ctx, svmCR, CONDITION_STATUS_TRUE)
 
 	return oc, nil
