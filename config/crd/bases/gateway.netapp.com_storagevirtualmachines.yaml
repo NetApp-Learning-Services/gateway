@@ -19,7 +19,7 @@ spec:
   versions:
   - additionalPrinterColumns:
     - jsonPath: .spec.svmUuid
-      name: SVM UUID
+      name: SVMUUID
       type: string
     name: v1alpha1
     schema:

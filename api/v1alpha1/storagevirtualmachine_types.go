@@ -90,7 +90,7 @@ type StorageVirtualMachineStatus struct {
 }
 
 // ADDED to make get requests provide better information
-// +kubebuilder:printcolumn:name="SVM UUID",type="string",JSONPath=`.spec.svmUuid`
+// +kubebuilder:printcolumn:name="SVMUUID",type="string",JSONPath=`.spec.svmUuid`
 // +kubebuilder:object:root=true
 // +kubebuilder:subresource:status
 // +kubebuilder:resource:path=storagevirtualmachines,shortName=svm
