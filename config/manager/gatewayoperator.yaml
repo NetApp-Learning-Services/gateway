@@ -38,7 +38,7 @@ spec:
         - /manager
         args:
         - --leader-elect
-        image: https://docker-registry:30001/astra/gateway:v0.1
+        image: https://docker-registry:30001/curtisab/gateway:v1alpha1
         name: manager
         securityContext:
           allowPrivilegeEscalation: false
