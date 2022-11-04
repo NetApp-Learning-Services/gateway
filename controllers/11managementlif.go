@@ -129,10 +129,12 @@ func (r *StorageVirtualMachineReconciler) reconcileManagementLifUpdate(ctx conte
 		if err != nil {
 			log.Error(err, "Error occurred when updating SVM management LIF")
 			_ = r.setConditionManagementLIFUpdate(ctx, svmCR, CONDITION_STATUS_FALSE)
+			r.Recorder.Event(svmCR, "Warning", "SvmUpdateLIFFailed", "Error: "+err.Error())
 			return err
 		}
 		log.Info("SVM management LIF updated successful")
 		err = r.setConditionManagementLIFUpdate(ctx, svmCR, CONDITION_STATUS_TRUE)
+		r.Recorder.Event(svmCR, "Warning", "SvmUpdateLIFSucceeded", "Updated SVM LIF successfully")
 		if err != nil {
 			return nil //even though condition not create, don't reconcile again
 		}
@@ -143,10 +145,12 @@ func (r *StorageVirtualMachineReconciler) reconcileManagementLifUpdate(ctx conte
 		if err != nil {
 			log.Error(err, "Error occurred when creating SVM management LIF")
 			_ = r.setConditionManagementLIFCreation(ctx, svmCR, CONDITION_STATUS_FALSE)
+			r.Recorder.Event(svmCR, "Warning", "SvmCreationLIFFailed", "Error: "+err.Error())
 			return err
 		}
 		log.Info("SVM management LIF creation successful")
 		err = r.setConditionManagementLIFCreation(ctx, svmCR, CONDITION_STATUS_TRUE)
+		r.Recorder.Event(svmCR, "Warning", "SVMCreationLIFSucceeded", "Created SVM LIF successfully")
 		if err != nil {
 			return nil //even though condition not create, don't reconcile again
 		}

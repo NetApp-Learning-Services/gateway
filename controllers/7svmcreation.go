@@ -50,6 +50,7 @@ func (r *StorageVirtualMachineReconciler) reconcileSvmCreation(ctx context.Conte
 	if err != nil {
 		//error creating the json body
 		log.Error(err, "Error creating the json payload for SVM creation - requeuing")
+		r.Recorder.Event(svmCR, "Warning", "SvmCreationFailed", "Error: "+err.Error())
 		_ = r.setConditionSVMCreation(ctx, svmCR, CONDITION_STATUS_FALSE)
 		return ctrl.Result{}, err
 	}
@@ -59,6 +60,8 @@ func (r *StorageVirtualMachineReconciler) reconcileSvmCreation(ctx context.Conte
 	if err != nil {
 		log.Info("Uuid received was: " + uuid)
 		log.Error(err, "Error occurred when creating SVM - requeuing")
+		r.Recorder.Event(svmCR, "Warning", "SvmCreationFailed", "Error: "+err.Error())
+		r.Recorder.Event(svmCR, "Warning", "SvmCreationFailed", "Error: "+err.Error())
 		_ = r.setConditionSVMCreation(ctx, svmCR, CONDITION_STATUS_FALSE)
 		return ctrl.Result{}, err
 	}
@@ -70,6 +73,7 @@ func (r *StorageVirtualMachineReconciler) reconcileSvmCreation(ctx context.Conte
 	err = r.Patch(ctx, svmCR, patch)
 	if err != nil {
 		log.Error(err, "Error patching the new uuid in the custom resource - requeuing")
+		r.Recorder.Event(svmCR, "Warning", "SvmCreationFailed", "Error: "+err.Error())
 		_ = r.setConditionSVMCreation(ctx, svmCR, CONDITION_STATUS_FALSE)
 		return ctrl.Result{}, err
 	}
@@ -81,9 +85,10 @@ func (r *StorageVirtualMachineReconciler) reconcileSvmCreation(ctx context.Conte
 	_, err = r.addFinalizer(ctx, svmCR)
 	if err != nil {
 		log.Error(err, "Error adding the finalizer to the custom resource - requeuing")
+		r.Recorder.Event(svmCR, "Warning", "SvmCreationFailed", "Error: "+err.Error())
 		return ctrl.Result{}, err //got another error - re-reconcile
 	}
-
+	r.Recorder.Event(svmCR, "Normal", "SvmCreationSuccesful", "SVM created with UUID: "+uuid)
 	log.Info("SVM created")
 	return ctrl.Result{}, nil
 }

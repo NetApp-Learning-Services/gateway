@@ -57,10 +57,12 @@ func (r *StorageVirtualMachineReconciler) reconcileSvmUpdate(ctx context.Context
 	if err != nil {
 		log.Error(err, "Error occurred when updating SVM ")
 		_ = r.setConditionSVMUpdate(ctx, svmCR, CONDITION_STATUS_FALSE)
+		r.Recorder.Event(svmCR, "Warning", "SvmUpdateFailed", "Error: "+err.Error())
 		return err
 	}
 	log.Info("SVM updated successful")
 	err = r.setConditionSVMUpdate(ctx, svmCR, CONDITION_STATUS_TRUE)
+	r.Recorder.Event(svmCR, "Normal", "SvmUpdateSuccessed", "Updated SVM successfully")
 	if err != nil {
 		return nil //even though condition not create, don't reconcile again
 	}

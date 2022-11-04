@@ -53,10 +53,12 @@ func (r *StorageVirtualMachineReconciler) reconcileAggregates(ctx context.Contex
 			if err != nil {
 				log.Error(err, "Error occurred when updating SVM aggregates - requeuing")
 				_ = r.setConditionAggregateAssigned(ctx, svmCR, CONDITION_STATUS_FALSE)
+				r.Recorder.Event(svmCR, "Warning", "SvmUpdateAggregateFailed", "Update SVM aggregate(s) failed")
 				return err
 			}
 			log.Info("SVM aggregates updated successful")
 			_ = r.setConditionAggregateAssigned(ctx, svmCR, CONDITION_STATUS_TRUE)
+			r.Recorder.Event(svmCR, "Normal", "SvmUpdateAggregateSucceeded", "Updated SVM aggregate(s) successfully")
 
 		} else {
 			log.Info("No changes detected for SVM aggregates - skipping STEP 12")

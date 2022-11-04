@@ -86,11 +86,14 @@ func (r *StorageVirtualMachineReconciler) reconcileSecurityAccount(ctx context.C
 		if err != nil {
 			log.Error(err, "Error occurred when patching security account - requeuing")
 			_ = r.setConditionVsadminSecretUpdate(ctx, svmCR, CONDITION_STATUS_FALSE)
+			r.Recorder.Event(svmCR, "Warning", "VsadminUpdateFailed", "Error: "+err.Error())
 			return err
 		} else {
 			log.Info("SVM managment credentials updated in ONTAP")
 			_ = r.setConditionVsadminSecretUpdate(ctx, svmCR, CONDITION_STATUS_TRUE)
+			r.Recorder.Event(svmCR, "Normal", "VsadminUpdateSuccessed", "Updated SVM admin")
 		}
+
 	} else {
 		log.Info("Nothing to do - skipping STEP 9")
 		return nil //do nothing
@@ -141,10 +144,12 @@ func (r *StorageVirtualMachineReconciler) reconcileSecurityAccount(ctx context.C
 		if err != nil {
 			log.Error(err, "Error occurred when creating security account - requeuing")
 			_ = r.setConditionVsadminSecretUpdate(ctx, svmCR, CONDITION_STATUS_FALSE)
+			r.Recorder.Event(svmCR, "Warningg", "VsadminCreationFailed", "Error: "+err.Error())
 			return err
 		} else {
 			log.Info("SVM managment credentials created in ONTAP")
 			_ = r.setConditionVsadminSecretUpdate(ctx, svmCR, CONDITION_STATUS_TRUE)
+			r.Recorder.Event(svmCR, "Normal", "VsadminCreationSuccessed", "Created SVM admin")
 		}
 	}
 

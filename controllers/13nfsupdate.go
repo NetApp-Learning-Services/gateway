@@ -20,6 +20,7 @@ func (r *StorageVirtualMachineReconciler) reconcileNFSUpdate(ctx context.Context
 
 	log.Info("STEP 13: Update NFS service")
 
+	// NFS SERVICE
 	create := false
 	updateNfsService := false
 
@@ -62,9 +63,11 @@ func (r *StorageVirtualMachineReconciler) reconcileNFSUpdate(ctx context.Context
 		if err != nil {
 			log.Error(err, "Error creating the NFS service - requeuing")
 			_ = r.setConditionNfsService(ctx, svmCR, CONDITION_STATUS_FALSE)
+			r.Recorder.Event(svmCR, "Warning", "NfsCreationFailed", "Error: "+err.Error())
 			return err
 		}
 		_ = r.setConditionNfsService(ctx, svmCR, CONDITION_STATUS_TRUE)
+		r.Recorder.Event(svmCR, "Normal", "NfsCreationSucceeded", "Created NFS service successfully")
 		log.Info("NFS service created successful")
 	} else {
 
@@ -109,15 +112,19 @@ func (r *StorageVirtualMachineReconciler) reconcileNFSUpdate(ctx context.Context
 			if err != nil {
 				log.Error(err, "Error updating the NFS service - requeuing")
 				_ = r.setConditionNfsService(ctx, svmCR, CONDITION_STATUS_FALSE)
+				r.Recorder.Event(svmCR, "Warning", "NfsUpdateFailed", "Error: "+err.Error())
 				return err
 			}
-			_ = r.setConditionNfsService(ctx, svmCR, CONDITION_STATUS_TRUE)
 			log.Info("NFS service updated successful")
+			_ = r.setConditionNfsService(ctx, svmCR, CONDITION_STATUS_TRUE)
+			r.Recorder.Event(svmCR, "Normal", "NfsUpdateSucceeded", "Updated NFS service successfully")
 		} else {
 			log.Info("No NFS service changes detected - skip updating")
 		}
 	}
+	// END NFS SERVICE
 
+	// NFS LIFS
 	// Check to see if NFS interfaces are defined in custom resource
 	if svmCR.Spec.NfsConfig.Lifs == nil {
 		// If not, exit with no error
@@ -161,8 +168,10 @@ func (r *StorageVirtualMachineReconciler) reconcileNFSUpdate(ctx context.Context
 					err = CreateLIF(val, uuid, oc, log)
 					if err != nil {
 						_ = r.setConditionNfsLif(ctx, svmCR, CONDITION_STATUS_FALSE)
+						r.Recorder.Event(svmCR, "Warning", "NfsCreationLifFailed", "Error: "+err.Error())
 						return err
 					}
+
 				} else {
 					netmaskAsInt, _ := strconv.Atoi(lifs.Records[index].Ip.Netmask)
 					netmaskAsIP := NetmaskToString(netmaskAsInt)
@@ -186,6 +195,7 @@ func (r *StorageVirtualMachineReconciler) reconcileNFSUpdate(ctx context.Context
 							//error creating the json body
 							log.Error(err, "Error creating the json payload for NFS LIF update: "+val.Name+" - requeuing")
 							_ = r.setConditionNfsLif(ctx, svmCR, CONDITION_STATUS_FALSE)
+							r.Recorder.Event(svmCR, "Warning", "NfsUpdateLifFailed", "Error: "+err.Error())
 							return err
 						}
 						log.Info("NFS LIF update attempt: " + val.Name)
@@ -193,6 +203,7 @@ func (r *StorageVirtualMachineReconciler) reconcileNFSUpdate(ctx context.Context
 						if err != nil {
 							log.Error(err, "Error occurred when updating NFS LIF: "+val.Name+" - requeuing")
 							_ = r.setConditionNfsLif(ctx, svmCR, CONDITION_STATUS_FALSE)
+							r.Recorder.Event(svmCR, "Warning", "NfsUpdateLifFailed", "Error: "+err.Error())
 							return err
 						}
 
@@ -220,8 +231,11 @@ func (r *StorageVirtualMachineReconciler) reconcileNFSUpdate(ctx context.Context
 
 		} // Checking for NFS LIFs updates
 		_ = r.setConditionNfsLif(ctx, svmCR, CONDITION_STATUS_TRUE)
+		r.Recorder.Event(svmCR, "Normal", "NfsUpsertLifSucceeded", "Upserted NFS LIF(s) successfully")
 	} // LIFs defined in custom resource
+	// END NFS LIFS
 
+	// NFS EXPORTS
 	// Check to see if NFS rules are defined in custom resources
 	if svmCR.Spec.NfsConfig.Export == nil {
 		// If not, exit with no error
@@ -239,9 +253,9 @@ func (r *StorageVirtualMachineReconciler) reconcileNFSUpdate(ctx context.Context
 		}
 
 		if exportRetrieved.NumRecords == 0 {
-			// no data LIFs for the SVM provided in UUID
-			// create new LIF(s)
-			log.Info("No LIFs defined for SVM: " + uuid + " - creating NFS Lif(s)")
+			// No exports for the SVM provided in UUID
+			// create new export(s)
+			log.Info("No exports defined for SVM: " + uuid + " - creating NFS export(s)")
 			exportsCreate = true
 		}
 
@@ -267,7 +281,7 @@ func (r *StorageVirtualMachineReconciler) reconcileNFSUpdate(ctx context.Context
 					// don't requeue on failed delete request
 					// return err
 				} else {
-					log.Info("NFS LIF delete successful: " + exportRetrieved.Records[i].Name)
+					log.Info("NFS export delete successful: " + exportRetrieved.Records[i].Name)
 				}
 			}
 
@@ -340,6 +354,7 @@ func (r *StorageVirtualMachineReconciler) reconcileNFSUpdate(ctx context.Context
 					//error creating the json body
 					log.Error(err, "Error creating the json payload for NFS export update - requeuing")
 					_ = r.setConditionNfsExport(ctx, svmCR, CONDITION_STATUS_FALSE)
+					r.Recorder.Event(svmCR, "Warning", "NfsUpdateExportFailed", "Error: "+err.Error())
 					return err
 				}
 
@@ -347,10 +362,12 @@ func (r *StorageVirtualMachineReconciler) reconcileNFSUpdate(ctx context.Context
 				if err != nil {
 					log.Error(err, "Error occurred when updating NFS export - requeuing")
 					_ = r.setConditionNfsExport(ctx, svmCR, CONDITION_STATUS_FALSE)
+					r.Recorder.Event(svmCR, "Warning", "NfsUpdateExportFailed", "Error: "+err.Error())
 					return err
 				}
 				log.Info("NFS export updated successful")
 				_ = r.setConditionNfsExport(ctx, svmCR, CONDITION_STATUS_TRUE)
+				r.Recorder.Event(svmCR, "Normal", "NfsUpdateExportSucceeded", "Updated NFS export(s) successfully")
 			} else {
 				log.Info("No NFS export rules changed detected - skipping")
 			}
@@ -358,6 +375,7 @@ func (r *StorageVirtualMachineReconciler) reconcileNFSUpdate(ctx context.Context
 		} //Check for NFS export updates or deletion of none conforming exports
 
 	} // NFS exports rules defined in custom resource
+	// END NFS EXPORTS
 
 	return nil
 }
