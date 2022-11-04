@@ -17,11 +17,15 @@ spec:
     singular: storagevirtualmachine
   scope: Namespaced
   versions:
-  - name: v1alpha1
+  - additionalPrinterColumns:
+    - jsonPath: .spec.svmUuid
+      name: SVM UUID
+      type: string
+    name: v1alpha1
     schema:
       openAPIV3Schema:
-        description: StorageVirtualMachine is the Schema for the storagevirtualmachines
-          API
+        description: ADDED to make get requests provide better information StorageVirtualMachine
+          is the Schema for the storagevirtualmachines API
         properties:
           apiVersion:
             description: 'APIVersion defines the versioned schema of this representation

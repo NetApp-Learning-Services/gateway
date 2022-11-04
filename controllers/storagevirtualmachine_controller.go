@@ -39,9 +39,6 @@ type StorageVirtualMachineReconciler struct {
 //+kubebuilder:rbac:groups=gateway.netapp.com,resources=storagevirtualmachines/status,verbs=get;update;patch
 //+kubebuilder:rbac:groups=gateway.netapp.com,resources=storagevirtualmachines/finalizers,verbs=update
 
-// ADDED to make get requests provide better information
-//+kubebuilder:printcolumn:name="SVM UUID",type="string",JSONPath=`.spec.svmUuid`
-
 // ADDED to support events
 //+kubebuilder:rbac:groups="",resources=events,verbs=create;patch
 
