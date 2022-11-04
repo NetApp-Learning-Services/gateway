@@ -46,3 +46,7 @@ To build in go: go main.go
 To override existing files in git and pull again:
 git fetch --all
 git reset --hard origin/master
+
+
+Built deployment yaml and then edited it with:
+kustomize build config/default -o ./config/deploy/gatewayoperator.yaml
