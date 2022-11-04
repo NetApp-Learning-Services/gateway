@@ -39,6 +39,9 @@ type StorageVirtualMachineReconciler struct {
 //+kubebuilder:rbac:groups=gateway.netapp.com,resources=storagevirtualmachines/status,verbs=get;update;patch
 //+kubebuilder:rbac:groups=gateway.netapp.com,resources=storagevirtualmachines/finalizers,verbs=update
 
+// ADDED to support events
+//+kubebuilder:rbac:groups="",resources=events,verbs=create;patch
+
 // ADDED to support access to secrets
 // +kubebuilder:rbac:groups=core,resources=secrets,verbs=get;list;watch
 
