@@ -55,7 +55,7 @@ func (r *StorageVirtualMachineReconciler) reconcileSvmUpdate(ctx context.Context
 	log.Info("SVM update attempt for SVM: " + svmRetrieved.Uuid)
 	err = oc.PatchStorageVM(svmRetrieved.Uuid, jsonPayload)
 	if err != nil {
-		log.Error(err, "Error occurred when updating SVM - requeuing")
+		log.Error(err, "Error occurred when updating SVM ")
 		_ = r.setConditionSVMUpdate(ctx, svmCR, CONDITION_STATUS_FALSE)
 		return err
 	}

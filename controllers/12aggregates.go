@@ -43,7 +43,7 @@ func (r *StorageVirtualMachineReconciler) reconcileAggregates(ctx context.Contex
 			if err != nil {
 				//error creating the json body
 				log.Error(err, "Error creating the json payload for SVM aggregates update - requeuing")
-				//Todo: _ = r.setConditionSVMUpdate(ctx, svmCR, CONDITION_STATUS_FALSE)
+				_ = r.setConditionAggregateAssigned(ctx, svmCR, CONDITION_STATUS_FALSE)
 				return err
 			}
 
@@ -52,14 +52,11 @@ func (r *StorageVirtualMachineReconciler) reconcileAggregates(ctx context.Contex
 			err = oc.PatchStorageVM(svmRetrieved.Uuid, jsonPayload)
 			if err != nil {
 				log.Error(err, "Error occurred when updating SVM aggregates - requeuing")
-				//Todo: _ = r.setConditionSVMUpdate(ctx, svmCR, CONDITION_STATUS_FALSE)
+				_ = r.setConditionAggregateAssigned(ctx, svmCR, CONDITION_STATUS_FALSE)
 				return err
 			}
 			log.Info("SVM aggregates updated successful")
-			//err = r.setConditionSVMUpdate(ctx, svmCR, CONDITION_STATUS_TRUE)
-			// if err != nil {
-			// 	return nil //even though condition not create, don't reconcile again
-			// }
+			_ = r.setConditionAggregateAssigned(ctx, svmCR, CONDITION_STATUS_TRUE)
 
 		} else {
 			log.Info("No changes detected for SVM aggregates - skipping STEP 12")

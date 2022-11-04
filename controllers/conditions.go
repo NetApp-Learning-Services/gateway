@@ -298,7 +298,7 @@ func (reconciler *StorageVirtualMachineReconciler) setConditionSVMUpdate(ctx con
 
 // STEP 11
 // Management LIF Upsert
-// Note: Status of MANGEMENTLIF_UPDATED can only be true or false
+// Note: Status of MANGEMENTLIF_UPSERT can only be true or false
 const CONDITION_TYPE_MANGEMENTLIF_UPSERT = "11UpsertdManagementLIF"
 const CONDITION_REASON_MANGEMENTLIF_UPDATED = "ManagementLIFUpdate"
 const CONDITION_MESSAGE_MANGEMENTLIF_UPDATED_TRUE = "Management LIF update succeeded"
@@ -344,6 +344,110 @@ func (reconciler *StorageVirtualMachineReconciler) setConditionManagementLIFCrea
 	if status == CONDITION_STATUS_FALSE {
 		return appendCondition(ctx, reconciler.Client, svmCR, CONDITION_TYPE_MANGEMENTLIF_UPSERT, status,
 			CONDITION_REASON_MANGEMENTLIF_CREATION, CONDITION_MESSAGE_MANGEMENTLIF_CREATION_FALSE)
+	}
+	return nil
+}
+
+// STEP 12
+// Aggregate assigned
+// Note: Status of AGGREGATE_ASSIGNED can only be true or false
+const CONDITION_TYPE_AGGREGATE_ASSIGNED = "12AggregateAssigned"
+const CONDITION_REASON_AGGREGATE_ASSIGNED = "AggregateAssigned"
+const CONDITION_MESSAGE_AGGREGATE_ASSIGNED_TRUE = "Aggregate assigned to SVM succeeded"
+const CONDITION_MESSAGE_AGGREGATE_ASSIGNED_FALSE = "Aggregate assigned to SVM failed"
+
+func (reconciler *StorageVirtualMachineReconciler) setConditionAggregateAssigned(ctx context.Context,
+	svmCR *gatewayv1alpha1.StorageVirtualMachine, status metav1.ConditionStatus) error {
+
+	// I don't want to delete old references to updates to make a history
+	// if reconciler.containsCondition(ctx, svmCR, CONDITION_REASON_AGGREGATE_ASSIGNED) {
+	// 	reconciler.deleteCondition(ctx, svmCR, CONDITION_TYPE_AGGREGATE_ASSIGNED, CONDITION_REASON_AGGREGATE_ASSIGNED)
+	// }
+
+	if status == CONDITION_STATUS_TRUE {
+		return appendCondition(ctx, reconciler.Client, svmCR, CONDITION_TYPE_AGGREGATE_ASSIGNED, status,
+			CONDITION_REASON_AGGREGATE_ASSIGNED, CONDITION_MESSAGE_AGGREGATE_ASSIGNED_TRUE)
+	}
+
+	if status == CONDITION_STATUS_FALSE {
+		return appendCondition(ctx, reconciler.Client, svmCR, CONDITION_TYPE_AGGREGATE_ASSIGNED, status,
+			CONDITION_REASON_AGGREGATE_ASSIGNED, CONDITION_MESSAGE_AGGREGATE_ASSIGNED_FALSE)
+	}
+	return nil
+}
+
+// STEP 13
+// NFS update
+// Note: Status of NFS_SERVICE can only be true or false
+const CONDITION_TYPE_NFS_SERVICE = "13NFSservice"
+const CONDITION_REASON_NFS_SERVICE = "NFSservice"
+const CONDITION_MESSAGE_NFS_SERVICE_TRUE = "NFS service configuration succeeded"
+const CONDITION_MESSAGE_NFS_SERVICE_FALSE = "NFS service configuration failed"
+
+func (reconciler *StorageVirtualMachineReconciler) setConditionNfsService(ctx context.Context,
+	svmCR *gatewayv1alpha1.StorageVirtualMachine, status metav1.ConditionStatus) error {
+
+	// I don't want to delete old references to updates to make a history
+	// if reconciler.containsCondition(ctx, svmCR, CONDITION_REASON_NFS_SERVICE) {
+	// 	reconciler.deleteCondition(ctx, svmCR, CONDITION_TYPE_NFS_SERVICE, CONDITION_REASON_NFS_SERVICE)
+	// }
+
+	if status == CONDITION_STATUS_TRUE {
+		return appendCondition(ctx, reconciler.Client, svmCR, CONDITION_TYPE_NFS_SERVICE, status,
+			CONDITION_REASON_NFS_SERVICE, CONDITION_MESSAGE_NFS_SERVICE_TRUE)
+	}
+
+	if status == CONDITION_STATUS_FALSE {
+		return appendCondition(ctx, reconciler.Client, svmCR, CONDITION_TYPE_NFS_SERVICE, status,
+			CONDITION_REASON_NFS_SERVICE, CONDITION_MESSAGE_NFS_SERVICE_FALSE)
+	}
+	return nil
+}
+
+const CONDITION_REASON_NFS_LIF = "NFSlif"
+const CONDITION_MESSAGE_NFS_LIF_TRUE = "NFS LIF configuration succeeded"
+const CONDITION_MESSAGE_NFS_LIF_FALSE = "NFS LIF configuration failed"
+
+func (reconciler *StorageVirtualMachineReconciler) setConditionNfsLif(ctx context.Context,
+	svmCR *gatewayv1alpha1.StorageVirtualMachine, status metav1.ConditionStatus) error {
+
+	// I don't want to delete old references to updates to make a history
+	// if reconciler.containsCondition(ctx, svmCR, CONDITION_REASON_NFS_LIF) {
+	// 	reconciler.deleteCondition(ctx, svmCR, CONDITION_TYPE_NFS_SERVICE, CONDITION_REASON_NFS_LIF)
+	// }
+
+	if status == CONDITION_STATUS_TRUE {
+		return appendCondition(ctx, reconciler.Client, svmCR, CONDITION_TYPE_NFS_SERVICE, status,
+			CONDITION_REASON_NFS_LIF, CONDITION_MESSAGE_NFS_LIF_TRUE)
+	}
+
+	if status == CONDITION_STATUS_FALSE {
+		return appendCondition(ctx, reconciler.Client, svmCR, CONDITION_TYPE_NFS_SERVICE, status,
+			CONDITION_REASON_NFS_LIF, CONDITION_MESSAGE_NFS_LIF_FALSE)
+	}
+	return nil
+}
+
+const CONDITION_REASON_NFS_EXPORT = "NFSexport"
+const CONDITION_MESSAGE_NFS_EXPORT_TRUE = "NFS export configuration succeeded"
+const CONDITION_MESSAGE_NFS_EXPORT_FALSE = "NFS export configuration failed"
+
+func (reconciler *StorageVirtualMachineReconciler) setConditionNfsExport(ctx context.Context,
+	svmCR *gatewayv1alpha1.StorageVirtualMachine, status metav1.ConditionStatus) error {
+
+	// I don't want to delete old references to updates to make a history
+	// if reconciler.containsCondition(ctx, svmCR, CONDITION_REASON_NFS_EXPORT) {
+	// 	reconciler.deleteCondition(ctx, svmCR, CONDITION_TYPE_NFS_SERVICE, CONDITION_REASON_NFS_EXPORT)
+	// }
+
+	if status == CONDITION_STATUS_TRUE {
+		return appendCondition(ctx, reconciler.Client, svmCR, CONDITION_TYPE_NFS_SERVICE, status,
+			CONDITION_REASON_NFS_EXPORT, CONDITION_MESSAGE_NFS_EXPORT_TRUE)
+	}
+
+	if status == CONDITION_STATUS_FALSE {
+		return appendCondition(ctx, reconciler.Client, svmCR, CONDITION_TYPE_NFS_SERVICE, status,
+			CONDITION_REASON_NFS_EXPORT, CONDITION_MESSAGE_NFS_EXPORT_FALSE)
 	}
 	return nil
 }
