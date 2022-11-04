@@ -49,4 +49,5 @@ git reset --hard origin/master
 
 
 Built deployment yaml and then edited it with:
+brew install kustomize   
 kustomize build config/default -o ./config/deploy/gatewayoperator.yaml
