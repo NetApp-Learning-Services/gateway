@@ -39,10 +39,14 @@ type StorageVirtualMachineReconciler struct {
 //+kubebuilder:rbac:groups=gateway.netapp.com,resources=storagevirtualmachines/status,verbs=get;update;patch
 //+kubebuilder:rbac:groups=gateway.netapp.com,resources=storagevirtualmachines/finalizers,verbs=update
 
+// ADDED to make get requests provide better information
+//+kubebuilder:printcolumn:name="SVM UUID",type="string",JSONPath=`.spec.svmUuid`
+
 // ADDED to support events
 //+kubebuilder:rbac:groups="",resources=events,verbs=create;patch
 
 // ADDED to support access to secrets
+// This helped:  https://github.com/kubernetes-sigs/kubebuilder/issues/549
 // +kubebuilder:rbac:groups=core,resources=secrets,verbs=get;list;watch
 
 // Reconcile is part of the main kubernetes reconciliation loop which aims to
