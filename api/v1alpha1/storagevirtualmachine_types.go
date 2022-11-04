@@ -89,8 +89,9 @@ type StorageVirtualMachineStatus struct {
 	Conditions []metav1.Condition `json:"conditions"`
 }
 
-// ADDED to make get requests provide better information
-// +kubebuilder:printcolumn:name="SVMUUID",type="string",JSONPath=`.spec.svmUuid`
+// CHECK OUT THIS:  https://www.brendanp.com/pretty-printing-with-kubebuilder/
+// +kubebuilder:printcolumn:name="Age",type="date",JSONPath=".metadata.creationTimestamp"
+// +kubebuilder:printcolumn:name="SVM UUID",type="string",JSONPath=`.spec.svmUuid`
 // +kubebuilder:object:root=true
 // +kubebuilder:subresource:status
 // +kubebuilder:resource:path=storagevirtualmachines,shortName=svm
