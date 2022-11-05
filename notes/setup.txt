@@ -31,7 +31,7 @@ export PATH=$PATH:/usr/local/go/bin
 wget https://dl.google.com/go/go1.19.2.linux-amd64.tar.gz
 sudo tar -C /usr/local/ -xzf go1.19.2.linux-amd64.tar.gz
 
-Copy to kubwor2-1:  git clone https://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@github.com/NetApp-Learning-Services/gateway/
+Copy to kubwor2-1:  git clone https://[totken]@github.com/NetApp-Learning-Services/gateway/
 
 setup kubectl config on kubwor2-1
 
@@ -51,3 +51,6 @@ git reset --hard origin/master
 Built deployment yaml and then edited it with:
 brew install kustomize   
 kustomize build config/default -o ./config/deploy/gatewayoperator.yaml
+
+To prune all unused docker images:
+docker system prune --all
