@@ -10,13 +10,26 @@ jobs:
     - name: Checkout repo
       uses: actions/checkout@v3
     - name: Create output
-      run: echo $(echo $GITHUB_REF | cut -d'/' -f 3)  >> $DOCKER_VERSION
-
+      run : echo $(echo $GITHUB_REF | cut -d'/' -f 3)  >> $DOCKER_VERSION
     - name: Login to DockerHub Registry
-      run: echo ${{ secrets.DOCKERHUB_PASSWORD }} | docker login -u ${{ secrets.DOCKERHUB_USERNAME }} --password-stdin
-   # - name: Docker build    
+      run : echo ${{ secrets.DOCKERHUB_PASSWORD }} | docker login -u ${{ secrets.DOCKERHUB_USERNAME }} --password-stdin
+   #- name: Docker build with version tag   
     #   run: |
-    #     docker build . --Dockerfile --tag secrets.DOCKERHUB_USERNAME/PROJECTNAME:${github.event.pull_request.head.ref}
-    # - name: Docker push
+    #     docker build . --Dockerfile --tag $DOCKER_ACCOUNT/$DOCKER_PROJECT:${github.event.pull_request.head.ref}
+    #- name: Docker push
     #   run: |
-    #     docker push 
+    #     docker push $DOCKER_ACCOUNT/$DOCKER_PROJECT:${github.event.pull_request.head.ref}
+    
+    - name: Docker build with version tag   
+      run: |
+        docker build . --Dockerfile --tag $DOCKER_ACCOUNT/$DOCKER_PROJECT:$DOCKER_VERSION
+    - name: Docker push
+      run: |
+        docker push $DOCKER_ACCOUNT/$DOCKER_PROJECT:$DOCKER_VERSION
+
+    - name: Docker build with latest tag
+      run : |
+            docker build . --file Dockerfile --tag $DOCKER_ACCOUNT/$DOCKER_PROJECT:latest
+    - name: Push the latest Docker image
+      run : |
+            docker push $DOCKER_ACCOUNT/$DOCKER_PROJECT:latest
