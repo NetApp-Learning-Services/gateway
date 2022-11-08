@@ -1,20 +1,22 @@
 name: CI for Gateway
 on: workflow_dispatch
 jobs:
-  test:
+  build:
     runs-on: ubuntu-latest
     steps:
-
-    - name: Get code
+    - name: Checkout repo
       uses: actions/checkout@v3
+    - name: Create output
+      run: echo "REF=$(echo $GITHUB_REF | cut -d'/' -f 3)" # >> $GITHUB_ENV
 
-    - name: Set up Go
-      uses: actions/setup-go@v3
-      with:
-        go-version: 1.19.1
+    # - name: Login to DockerHub Registry
+    #   run: echo ${{ secrets.DOCKERHUB_PASSWORD }} | docker login -u ${{ secrets.DOCKERHUB_USERNAME }} --password-stdin
+    # - name: Docker build 
+    #   env:
+    #     PROJECTNAME: 'gateway'
         
-    - name: Build
-      run: go build -v ./...
-
-    - name: Test
-      run: go test -v ./...
+    #   run: |
+    #     docker build . --Dockerfile --tag secrets.DOCKERHUB_USERNAME/PROJECTNAME:${github.event.pull_request.head.ref}
+    # - name: Docker push
+    #   run: |
+    #     docker push 
