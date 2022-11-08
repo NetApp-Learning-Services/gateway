@@ -1,5 +1,8 @@
 name: CI for Gateway
 on: workflow_dispatch
+env:
+  DOCKER_ACCOUNT: curtisab
+  DOCKER_PROJECT: gateway
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -7,14 +10,11 @@ jobs:
     - name: Checkout repo
       uses: actions/checkout@v3
     - name: Create output
-      run: echo "REF=$(echo $GITHUB_REF | cut -d'/' -f 3)" # >> $GITHUB_ENV
+      run: echo $(echo $GITHUB_REF | cut -d'/' -f 3)  >> $DOCKER_VERSION
 
-    # - name: Login to DockerHub Registry
-    #   run: echo ${{ secrets.DOCKERHUB_PASSWORD }} | docker login -u ${{ secrets.DOCKERHUB_USERNAME }} --password-stdin
-    # - name: Docker build 
-    #   env:
-    #     PROJECTNAME: 'gateway'
-        
+    - name: Login to DockerHub Registry
+      run: echo ${{ secrets.DOCKERHUB_PASSWORD }} | docker login -u ${{ secrets.DOCKERHUB_USERNAME }} --password-stdin
+   # - name: Docker build    
     #   run: |
     #     docker build . --Dockerfile --tag secrets.DOCKERHUB_USERNAME/PROJECTNAME:${github.event.pull_request.head.ref}
     # - name: Docker push
