@@ -3,7 +3,7 @@ on:
   push:
     branches: [ none ]  # [ main ]
   pull_request:
-    branches: [ none ]  # [ main ] 
+    branches: [ main ]  # [ none ] 
   workflow_dispatch:   # Allows for manual dispatching
 env:
   DOCKER_ACCOUNT: curtisab
@@ -14,23 +14,20 @@ jobs:
     steps:
     - name: Checkout source code 
       uses: actions/checkout@v3
-    - name: Create tag
-      run : echo $(echo $GITHUB_REF | cut -d'/' -f 3)  >> $DOCKER_VERSION
+    # - name: Set tag as branch name
+    #   run: echo "DOCKER_TAG=$(echo $GITHUB_REF | cut -d'/' -f 3)" >> $GITHUB_ENV
+    - name: Set tag as pull request branch
+      run: echo "DOCKER_TAG=${github.event.pull_request.head.ref}" >> $GITHUB_ENV
+    - name: Check tag
+      run: echo $DOCKER_TAG
     - name: Login to DockerHub Registry
       run : echo ${{ secrets.DOCKERHUB_PASSWORD }} | docker login -u ${{ secrets.DOCKERHUB_USERNAME }} --password-stdin
-   #- name: Docker build with version tag   
-    #   run: |
-    #     docker build . --Dockerfile --tag $DOCKER_ACCOUNT/$DOCKER_PROJECT:${github.event.pull_request.head.ref}
-    #- name: Docker push
-    #   run: |
-    #     docker push $DOCKER_ACCOUNT/$DOCKER_PROJECT:${github.event.pull_request.head.ref}
-    
     - name: Docker build with version tag   
       run: |
-        docker build . --Dockerfile --tag $DOCKER_ACCOUNT/$DOCKER_PROJECT:$DOCKER_VERSION
-    - name: Docker push
+        docker build . --file Dockerfile --tag $DOCKER_ACCOUNT/$DOCKER_PROJECT:$DOCKER_TAG
+    - name: Docker push with version tag
       run: |
-        docker push $DOCKER_ACCOUNT/$DOCKER_PROJECT:$DOCKER_VERSION
+        docker push $DOCKER_ACCOUNT/$DOCKER_PROJECT:$DOCKER_TAG
 
     - name: Docker build with latest tag
       run : |
