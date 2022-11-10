@@ -16,8 +16,7 @@ jobs:
       uses: actions/checkout@v3
     - name: Set tag
       id: vars
-      run: echo ::set-output name=short_ref::${GITHUB_REF#refs/*/}
-      #run : echo ::set-output name=DOCKER_TAG::${GITHUB_REF | cut -d'/' -f 3} 
+      run : echo "{REF} = ${GITHUB_REF | cut -d'/' -f 3}" >> $DOCKER_TAG 
     - name: Check tag
       run: echo ${{ steps.vars.outputs.DOCKER_TAG }}
     - name: Login to DockerHub Registry
