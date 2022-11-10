@@ -29,7 +29,7 @@ jobs:
     #
     - name: Docker build with version tag   
       run: |
-        docker build . --Dockerfile --tag $DOCKER_ACCOUNT/$DOCKER_PROJECT:$DOCKER_TAG
+        docker build . --file Dockerfile --tag $DOCKER_ACCOUNT/$DOCKER_PROJECT:$DOCKER_TAG
     - name: Docker push
       run: |
         docker push $DOCKER_ACCOUNT/$DOCKER_PROJECT:$DOCKER_VERSION
