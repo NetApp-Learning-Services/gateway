@@ -71,7 +71,7 @@ func (c *Client) GetNfsServiceBySvmUuid(uuid string) (nfsService NFSService, err
 		}
 		return nfsService, &apiError{1, err.Error()}
 	}
-	//added
+
 	var resp NFSService
 	err = json.Unmarshal(data, &resp)
 	if err != nil {
