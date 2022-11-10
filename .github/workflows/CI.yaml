@@ -17,7 +17,7 @@ jobs:
     # - name: Set tag as branch name
     #   run: echo "DOCKER_TAG=$(echo $GITHUB_REF | cut -d'/' -f 3)" >> $GITHUB_ENV
     - name: Set tag as pull request branch
-      run: echo "DOCKER_TAG=${github.event.pull_request.head.ref}" >> $GITHUB_ENV
+      run: echo "DOCKER_TAG=$(github.event.pull_request.head.ref)" >> $GITHUB_ENV
     - name: Check tag
       run: echo $DOCKER_TAG
     - name: Login to DockerHub Registry
