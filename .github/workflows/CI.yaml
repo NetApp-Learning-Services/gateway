@@ -15,7 +15,7 @@ jobs:
     - name: Checkout source code 
       uses: actions/checkout@v3
     - name: Check tag
-      run : echo $GITHUB_REF | cut -d'/' -f 3) > $DOCKER_TAG
+      run : $(echo $GITHUB_REF | cut -d'/' -f 3) > $DOCKER_TAG
     - name: Login to DockerHub Registry
       run : echo ${{ secrets.DOCKERHUB_PASSWORD }} | docker login -u ${{ secrets.DOCKERHUB_USERNAME }} --password-stdin
    #- name: Docker build with version tag   
@@ -27,7 +27,7 @@ jobs:
     #
     - name: Docker build with version tag   
       run: |
-        docker build . --Dockerfile --tag $DOCKER_ACCOUNT/$DOCKER_PROJECT:$DOCKER_VERSION
+        docker build . --Dockerfile --tag $DOCKER_ACCOUNT/$DOCKER_PROJECT:$DOCKER_TAG
     - name: Docker push
       run: |
         docker push $DOCKER_ACCOUNT/$DOCKER_PROJECT:$DOCKER_VERSION
