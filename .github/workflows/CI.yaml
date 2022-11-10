@@ -8,7 +8,6 @@ on:
 env:
   DOCKER_ACCOUNT: curtisab
   DOCKER_PROJECT: gateway
-  DOCKER_TAG: echo $GITHUB_REF | cut -d'/' -f 3)
 jobs:
   build-container:
     runs-on: ubuntu-latest
@@ -16,7 +15,7 @@ jobs:
     - name: Checkout source code 
       uses: actions/checkout@v3
     - name: Check tag
-      run : echo $DOCKER_TAG
+      run : echo $GITHUB_REF | cut -d'/' -f 3) > $DOCKER_TAG
     - name: Login to DockerHub Registry
       run : echo ${{ secrets.DOCKERHUB_PASSWORD }} | docker login -u ${{ secrets.DOCKERHUB_USERNAME }} --password-stdin
    #- name: Docker build with version tag   
