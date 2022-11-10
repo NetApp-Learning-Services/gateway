@@ -1,4 +1,4 @@
-name: CI for Gateway
+name: CI/CD for Gateway
 on: 
   push:
     branches: [ none ]  # [ main ]
