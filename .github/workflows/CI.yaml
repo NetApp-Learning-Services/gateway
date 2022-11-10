@@ -15,10 +15,9 @@ jobs:
     - name: Checkout source code 
       uses: actions/checkout@v3
     - name: Set tag
-      id: vars
-      run : echo "{REF} = ${GITHUB_REF | cut -d'/' -f 3}" >> $DOCKER_TAG 
+      run: echo "BRANCH=$(echo $GITHUB_REF | cut -d'/' -f 3)" >> $GITHUB_ENV
     - name: Check tag
-      run: echo ${{ steps.vars.outputs.DOCKER_TAG }}
+      run: echo env.BRANCH
     - name: Login to DockerHub Registry
       run : echo ${{ secrets.DOCKERHUB_PASSWORD }} | docker login -u ${{ secrets.DOCKERHUB_USERNAME }} --password-stdin
    #- name: Docker build with version tag   
