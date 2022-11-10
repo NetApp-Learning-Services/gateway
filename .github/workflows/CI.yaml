@@ -14,8 +14,11 @@ jobs:
     steps:
     - name: Checkout source code 
       uses: actions/checkout@v3
+    - name: Set tag
+      id: vars
+      run : echo ::set-output name=DOCKER_TAG::$GITHUB_REF | cut -d'/' -f 3} 
     - name: Check tag
-      run : $(echo $GITHUB_REF | cut -d'/' -f 3) > $DOCKER_TAG
+      run: echo ${{ steps.vars.outputs.DOCKER_TAG }}
     - name: Login to DockerHub Registry
       run : echo ${{ secrets.DOCKERHUB_PASSWORD }} | docker login -u ${{ secrets.DOCKERHUB_USERNAME }} --password-stdin
    #- name: Docker build with version tag   
