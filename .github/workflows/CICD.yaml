@@ -5,6 +5,8 @@ on:
   pull_request_review:
     types: [ submitted ] 
     #branches: [ main ]  # [ none ] 
+  #pull_request:
+  #  branches: [ main ]  # [ none ] 
   workflow_dispatch:   # Allows for manual dispatching
 env:
   DOCKER_ACCOUNT: curtisab
