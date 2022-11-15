@@ -2,18 +2,19 @@ name: CI/CD for Gateway
 on: 
   push:
     branches: [ none ]  # [ main ]
-  pull_request_review:
-    types: [ submitted ] 
-    branches: [ main ]  # [ none ] 
-  #pull_request:
-  #  branches: [ main ]  # [ none ] 
+  # pull_request_review:
+  #   types: [ submitted ] 
+  #   branches: [ main ]  # [ none ] 
+  pull_request:
+   types: [ closed ]
+   branches: [ main ]  # [ none ] 
   workflow_dispatch:   # Allows for manual dispatching
 env:
   DOCKER_ACCOUNT: curtisab
   DOCKER_PROJECT: gateway
 jobs:
   build-container:
-    if: github.event.review.state == 'approved'
+    if: ${{ github.event.pull_request.merged }}
     runs-on: ubuntu-latest
     steps:
     - name: Checkout source code 
