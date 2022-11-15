@@ -1,0 +1,39 @@
+name: CI/CD for Gateway
+on: 
+  push:
+    branches: [ none ]  # [ main ]
+  pull_request_review:
+    types: [ submitted ] 
+    #branches: [ main ]  # [ none ] 
+  workflow_dispatch:   # Allows for manual dispatching
+env:
+  DOCKER_ACCOUNT: curtisab
+  DOCKER_PROJECT: gateway
+jobs:
+  build-container:
+    if: github.event.review.state == 'approved'
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout source code 
+      uses: actions/checkout@v3
+    # - name: Set tag as branch name
+    #   run: echo "DOCKER_TAG=$(echo $GITHUB_REF | cut -d'/' -f 3)" >> $GITHUB_ENV
+    - name: Set tag as pull request branch
+      run: echo "DOCKER_TAG=$(echo $GITHUB_HEAD_REF)" >> $GITHUB_ENV
+    - name: Check tag
+      run: echo $DOCKER_TAG
+    - name: Login to DockerHub Registry
+      run : echo ${{ secrets.DOCKERHUB_PASSWORD }} | docker login -u ${{ secrets.DOCKERHUB_USERNAME }} --password-stdin
+    - name: Docker build with version tag   
+      run: |
+        docker build . --file Dockerfile --tag $DOCKER_ACCOUNT/$DOCKER_PROJECT:$DOCKER_TAG
+    - name: Docker push with version tag
+      run: |
+        docker push $DOCKER_ACCOUNT/$DOCKER_PROJECT:$DOCKER_TAG
+
+    - name: Docker build with latest tag
+      run : |
+            docker build . --file Dockerfile --tag $DOCKER_ACCOUNT/$DOCKER_PROJECT:latest
+    - name: Push the latest Docker image
+      run : |
+            docker push $DOCKER_ACCOUNT/$DOCKER_PROJECT:latest
