@@ -13,7 +13,7 @@ env:
   DOCKER_ACCOUNT: curtisab
   DOCKER_PROJECT: gateway
 jobs:
-  build-container:
+  build-push-container:
     if: ${{ github.event.pull_request.merged }}
     runs-on: ubuntu-latest
     steps:
@@ -27,15 +27,9 @@ jobs:
       run: echo $DOCKER_TAG
     - name: Login to DockerHub Registry
       run : echo ${{ secrets.DOCKERHUB_PASSWORD }} | docker login -u ${{ secrets.DOCKERHUB_USERNAME }} --password-stdin
-    - name: Docker build with version tag   
+    - name: Docker build with version and latest tags   
       run: |
-        docker build . --file Dockerfile --tag $DOCKER_ACCOUNT/$DOCKER_PROJECT:$DOCKER_TAG
-    - name: Docker push with version tag
+        docker build . --file Dockerfile --tag $DOCKER_ACCOUNT/$DOCKER_PROJECT:$DOCKER_TAG --tag $DOCKER_ACCOUNT/$DOCKER_PROJECT:latest
+    - name: Docker push with version and latest tags
       run: |
-        docker push $DOCKER_ACCOUNT/$DOCKER_PROJECT:$DOCKER_TAG
-    - name: Docker build with latest tag
-      run : |
-            docker build . --file Dockerfile --tag $DOCKER_ACCOUNT/$DOCKER_PROJECT:latest
-    - name: Push the latest Docker image
-      run : |
-            docker push $DOCKER_ACCOUNT/$DOCKER_PROJECT:latest
+        docker image push --all-tags $DOCKER_ACCOUNT/$DOCKER_PROJECT
