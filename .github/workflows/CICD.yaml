@@ -30,7 +30,6 @@ jobs:
     - name: Docker push with version tag
       run: |
         docker push $DOCKER_ACCOUNT/$DOCKER_PROJECT:$DOCKER_TAG
-
     - name: Docker build with latest tag
       run : |
             docker build . --file Dockerfile --tag $DOCKER_ACCOUNT/$DOCKER_PROJECT:latest
