@@ -4,7 +4,7 @@ on:
     branches: [ none ]  # [ main ]
   pull_request_review:
     types: [ submitted ] 
-    #branches: [ main ]  # [ none ] 
+    branches: [ main ]  # [ none ] 
   #pull_request:
   #  branches: [ main ]  # [ none ] 
   workflow_dispatch:   # Allows for manual dispatching
