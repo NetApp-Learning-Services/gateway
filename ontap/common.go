@@ -2,6 +2,11 @@ package ontap
 
 import "net/http"
 
+type Ref struct {
+	Name string `json:"name,omitempty"`
+	Uuid string `json:"uuid,omitempty"`
+}
+
 type ErrorResponse struct {
 	Error struct {
 		Message string `json:"message"`
