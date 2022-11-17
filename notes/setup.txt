@@ -31,7 +31,7 @@ export PATH=$PATH:/usr/local/go/bin
 wget https://dl.google.com/go/go1.19.2.linux-amd64.tar.gz
 sudo tar -C /usr/local/ -xzf go1.19.2.linux-amd64.tar.gz
 
-Copy to kubwor2-1:  git clone https://[totken]@github.com/NetApp-Learning-Services/gateway/
+Copy to kubwor2-1:  git clone https://[token]@github.com/NetApp-Learning-Services/gateway/
 
 setup kubectl config on kubwor2-1
 
@@ -61,3 +61,9 @@ Create Controller [y/n]
 n
 This had this error:  FATA[0013] failed to create API: unable to run post-scaffold tasks of "base.go.kubebuilder.io/v3": exit status 1 
 I had to copy a lot of the structure from v1alpha1 to v1alpha2
+
+To change branches on my local repo:
+git symbolic-ref HEAD refs/heads/v1alpha2
+
+Changed test.sh to now pull the branch:
+git pull origin v1alpha2

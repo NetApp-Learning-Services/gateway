@@ -5,7 +5,7 @@ kubectl -n gateway-system delete svm storagevirtualmachine-testcase
 kubectl -n gateway-system delete secret ontap-cluster-admin
 kubectl -n gateway-system delete secret ontap-svm-admin
 kubectl delete namespace gateway-system 
-git pull origin
+git pull origin v1alpha2
 make docker-build docker-push IMG=docker-registry:30001/curtisab/gateway:v1alpha1
 make deploy
 kubectl -n gateway-system create -f notes/testCR.yaml
