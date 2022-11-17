@@ -1,4 +1,5 @@
 ## Append samples you want in your CSV to this file as resources ##
 resources:
 - gateway_v1alpha1_storagevirtualmachine.yaml
+- gateway_v1alpha2_storagevirtualmachine.yaml
 #+kubebuilder:scaffold:manifestskustomizesamples

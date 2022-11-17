@@ -54,3 +54,10 @@ kustomize build config/default -o ./config/deploy/gatewayoperator.yaml
 
 To prune all unused docker images:
 docker system prune --all
+
+Moving from v1alpha1 to v1alpha2:
+operator-sdk create api --group gateway --version v1alpha2 --kind StorageVirtualMachine --resource 
+Create Controller [y/n]
+n
+This had this error:  FATA[0013] failed to create API: unable to run post-scaffold tasks of "base.go.kubebuilder.io/v3": exit status 1 
+I had to copy a lot of the structure from v1alpha1 to v1alpha2

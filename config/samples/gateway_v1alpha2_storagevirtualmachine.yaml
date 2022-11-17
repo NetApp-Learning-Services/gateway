@@ -1,32 +1,12 @@
-apiVersion: v1
-kind: Secret
-metadata:
-  name: ontap-cluster-admin
-  namespace: gateway-system
-type: kubernetes.io/basic-auth
-stringData:
-  username: admin
-  password: Netapp1!
----
-apiVersion: v1
-kind: Secret
-metadata:
-  name: ontap-svm-admin
-  namespace: gateway-system
-type: kubernetes.io/basic-auth
-stringData:
-  username: vsadmin
-  password: Netapp1!
----
 apiVersion: gateway.netapp.com/v1alpha2
 kind: StorageVirtualMachine
 metadata:
-  name: storagevirtualmachine-testcase
-  namespace: gateway-system
+  name: storagevirtualmachine-sample
+  namespace:  gateway-system
 spec:
   svmName: testVs
   clusterHost: 192.168.0.102
-  debug: false
+  debug: true
   aggregates:
   - name: Cluster2_01_FC_1
   management:
@@ -62,16 +42,4 @@ spec:
         ro: any
         superuser: any
         anon:  "65534"
-      #but rules should look like this:
-      # rules:
-      # - clients: 
-      #   - Match: 0.0.0.0/0
-      #   protocols: 
-      #   - any
-      #   rw: 
-      #   - any
-      #   ro: 
-      #   - any
-      #   superuser: 
-      #   - any
-      #   anon: "65534"
+
