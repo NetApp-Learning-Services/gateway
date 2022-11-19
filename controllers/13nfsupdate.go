@@ -15,7 +15,7 @@ import (
 const NfsLifType = "default-data-files" //magic word
 const NfsLifScope = "svm"               //magic word
 
-func (r *StorageVirtualMachineReconciler) reconcileNFSUpdate(ctx context.Context, svmCR *gatewayv1alpha1.StorageVirtualMachine,
+func (r *StorageVirtualMachineReconciler) reconcileNfsUpdate(ctx context.Context, svmCR *gatewayv1alpha1.StorageVirtualMachine,
 	uuid string, oc *ontap.Client, log logr.Logger) error {
 
 	log.Info("STEP 13: Update NFS service")

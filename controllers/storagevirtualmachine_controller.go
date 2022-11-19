@@ -194,7 +194,14 @@ func (r *StorageVirtualMachineReconciler) Reconcile(ctx context.Context, req ctr
 
 			// STEP 13
 			// Reconcile NFS information
-			err = r.reconcileNFSUpdate(ctx, svmCR, svmRetrieved.Uuid, oc, log)
+			err = r.reconcileNfsUpdate(ctx, svmCR, svmRetrieved.Uuid, oc, log)
+			if err != nil {
+				return ctrl.Result{RequeueAfter: 30 * time.Second}, err
+			}
+
+			// STEP 14
+			// Reconcile iSCSI information
+			err = r.reconcileIscsiUpdate(ctx, svmCR, svmRetrieved.Uuid, oc, log)
 			if err != nil {
 				return ctrl.Result{RequeueAfter: 30 * time.Second}, err
 			}
