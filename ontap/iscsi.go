@@ -10,10 +10,9 @@ import (
 )
 
 type IscsiService struct {
-	Target      IscsiTarget `json:"target,omitempty"`
-	Description string      `json:"description,omitempty"`
-	Svm         SvmRef      `json:"svm,omitempty"`
-	Enabled     *bool       `json:"enabled,omitempty"`
+	Target  IscsiTarget `json:"target,omitempty"`
+	Svm     SvmRef      `json:"svm,omitempty"`
+	Enabled *bool       `json:"enabled,omitempty"`
 }
 
 type IscsiTarget struct {

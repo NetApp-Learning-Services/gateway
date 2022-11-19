@@ -41,6 +41,15 @@ spec:
   clusterCredentials:
     name: ontap-cluster-admin
     namespace: gateway-system
+  iscsi:
+    enabled: true
+    alias: testVs
+    interfaces:
+    - name: iscsi1
+      ip: 192.168.0.51
+      netmask: 255.255.255.0
+      broadcastDomain: Default
+      homeNode: Cluster2-01
   nfs:
     enabled: true
     v3: true

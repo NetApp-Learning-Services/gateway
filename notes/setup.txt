@@ -71,3 +71,5 @@ git pull origin v1alpha2
 I had to rescreate the clone repo on kubwork2-1.  I did these commands:
 mkdir v1alpha2
 git clone -b v1alpha2 --single-branch https://[token]@github.com/NetApp-Learning-Services/gateway/
+
+Added spec changes so the api/v1alpha2 folder and ran make generate and make manifests
