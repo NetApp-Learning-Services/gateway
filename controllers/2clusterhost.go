@@ -5,14 +5,14 @@ import (
 	"net"
 	"net/url"
 
-	gatewayv1alpha1 "gateway/api/v1alpha1"
+	gatewayv1alpha2 "gateway/api/v1alpha2"
 
 	"github.com/go-logr/logr"
 	"k8s.io/apimachinery/pkg/api/errors"
 )
 
 func (r *StorageVirtualMachineReconciler) reconcileClusterHost(ctx context.Context,
-	svmCR *gatewayv1alpha1.StorageVirtualMachine, log logr.Logger) (string, error) {
+	svmCR *gatewayv1alpha2.StorageVirtualMachine, log logr.Logger) (string, error) {
 
 	log.Info("STEP 2: Identify cluster host")
 

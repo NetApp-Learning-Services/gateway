@@ -2,7 +2,7 @@ package controllers
 
 import (
 	"context"
-	gatewayv1alpha1 "gateway/api/v1alpha1"
+	gatewayv1alpha2 "gateway/api/v1alpha2"
 	"gateway/ontap"
 
 	"github.com/go-logr/logr"
@@ -10,7 +10,7 @@ import (
 )
 
 func (r *StorageVirtualMachineReconciler) reconcileGetClient(ctx context.Context,
-	svmCR *gatewayv1alpha1.StorageVirtualMachine,
+	svmCR *gatewayv1alpha2.StorageVirtualMachine,
 	adminSecret *corev1.Secret, host string, trustSSL bool,
 	log logr.Logger) (*ontap.Client, error) {
 

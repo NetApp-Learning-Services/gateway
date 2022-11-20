@@ -7,7 +7,7 @@ import (
 	"encoding/json"
 	"fmt"
 
-	gatewayv1alpha1 "gateway/api/v1alpha1"
+	gatewayv1alpha2 "gateway/api/v1alpha2"
 	"gateway/ontap"
 	defaultLog "log"
 
@@ -19,7 +19,7 @@ import (
 const secondAuthMethod = "none" // magic word
 
 func (r *StorageVirtualMachineReconciler) reconcileSecurityAccount(ctx context.Context,
-	svmCR *gatewayv1alpha1.StorageVirtualMachine, oc *ontap.Client, credentials *corev1.Secret, log logr.Logger) error {
+	svmCR *gatewayv1alpha2.StorageVirtualMachine, oc *ontap.Client, credentials *corev1.Secret, log logr.Logger) error {
 
 	log.Info("STEP 9: Verify SVM management account is update to date")
 

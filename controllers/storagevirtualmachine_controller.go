@@ -1,13 +1,14 @@
 /*
 Copyright 2022.
 Created by Curtis Burchett
-Version: v1alpha1
+Version: v1alpha2
 */
 
 package controllers
 
 import (
 	"context"
+	gatewayv1alpha2 "gateway/api/v1alpha2"
 	"strings"
 	"time"
 
@@ -20,8 +21,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
-
-	gatewayv1alpha1 "gateway/api/v1alpha1"
 )
 
 const (
@@ -219,6 +218,6 @@ func (r *StorageVirtualMachineReconciler) Reconcile(ctx context.Context, req ctr
 
 func (r *StorageVirtualMachineReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
-		For(&gatewayv1alpha1.StorageVirtualMachine{}, builder.WithPredicates(predicate.GenerationChangedPredicate{})).
+		For(&gatewayv1alpha2.StorageVirtualMachine{}, builder.WithPredicates(predicate.GenerationChangedPredicate{})).
 		Complete(r)
 }

@@ -4,7 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	gatewayv1alpha1 "gateway/api/v1alpha1"
+	gatewayv1alpha2 "gateway/api/v1alpha2"
 	"gateway/ontap"
 	"strconv"
 
@@ -15,8 +15,8 @@ import (
 const NfsLifType = "default-data-files" //magic word
 const NfsLifScope = "svm"               //magic word
 
-func (r *StorageVirtualMachineReconciler) reconcileNfsUpdate(ctx context.Context, svmCR *gatewayv1alpha1.StorageVirtualMachine,
-	uuid string, oc *ontap.Client, log logr.Logger) error {
+func (r *StorageVirtualMachineReconciler) reconcileNfsUpdate(ctx context.Context, 
+	svmCR *gatewayv1alpha2.StorageVirtualMachine, uuid string, oc *ontap.Client, log logr.Logger) error {
 
 	log.Info("STEP 13: Update NFS service")
 
@@ -380,7 +380,7 @@ func (r *StorageVirtualMachineReconciler) reconcileNfsUpdate(ctx context.Context
 	return nil
 }
 
-func CreateLIF(lifToCreate gatewayv1alpha1.LIF, uuid string, oc *ontap.Client, log logr.Logger) (err error) {
+func CreateLIF(lifToCreate gatewayv1alpha2.LIF, uuid string, oc *ontap.Client, log logr.Logger) (err error) {
 	var newLif ontap.IpInterface
 	newLif.Name = lifToCreate.Name
 	newLif.Ip.Address = lifToCreate.IPAddress
@@ -408,7 +408,7 @@ func CreateLIF(lifToCreate gatewayv1alpha1.LIF, uuid string, oc *ontap.Client, l
 	return nil
 }
 
-func CreateExport(exportToCreate gatewayv1alpha1.NfsExport, uuid string, oc *ontap.Client, log logr.Logger) (err error) {
+func CreateExport(exportToCreate gatewayv1alpha2.NfsExport, uuid string, oc *ontap.Client, log logr.Logger) (err error) {
 	var newExport ontap.ExportPolicy
 	newExport.Name = exportToCreate.Name
 
