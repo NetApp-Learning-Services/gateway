@@ -73,3 +73,6 @@ mkdir v1alpha2
 git clone -b v1alpha2 --single-branch https://[token]@github.com/NetApp-Learning-Services/gateway/
 
 Added spec changes so the api/v1alpha2 folder and ran make generate and make manifests
+
+if the kubwor2-1 is closed, need to make sure go is in the path:
+export PATH=$PATH:/usr/local/go/bin
