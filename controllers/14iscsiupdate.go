@@ -12,8 +12,13 @@ import (
 	"k8s.io/apimachinery/pkg/api/errors"
 )
 
-const IscsiLifType = "default-data-iscsi" //magic word
-const IscsiLifScope = "svm"               //magic word
+const IscsiLifType = "default-data-blocks" //magic word
+/*
+todo: check on this
+if 9.9.1 - use default-data-blocks
+if 9.11.1 - use default-data-iscsi
+*/
+const IscsiLifScope = "svm" //magic word
 
 func (r *StorageVirtualMachineReconciler) reconcileIscsiUpdate(ctx context.Context, svmCR *gatewayv1alpha2.StorageVirtualMachine,
 	uuid string, oc *ontap.Client, log logr.Logger) error {
