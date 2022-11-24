@@ -15,7 +15,7 @@ import (
 const NfsLifType = "default-data-files" //magic word
 const NfsLifScope = "svm"               //magic word
 
-func (r *StorageVirtualMachineReconciler) reconcileNfsUpdate(ctx context.Context, 
+func (r *StorageVirtualMachineReconciler) reconcileNfsUpdate(ctx context.Context,
 	svmCR *gatewayv1alpha2.StorageVirtualMachine, uuid string, oc *ontap.Client, log logr.Logger) error {
 
 	log.Info("STEP 13: Update NFS service")
@@ -44,7 +44,7 @@ func (r *StorageVirtualMachineReconciler) reconcileNfsUpdate(ctx context.Context
 	var upsertNfsService ontap.NFSService
 
 	if create {
-
+		log.Info("NFS not defined in SVM but defined in custom resource - creating NFS service")
 		upsertNfsService.Enabled = &svmCR.Spec.NfsConfig.Enabled
 		upsertNfsService.Protocol.V3Enable = &svmCR.Spec.NfsConfig.Nfsv3
 		upsertNfsService.Protocol.V4Enable = &svmCR.Spec.NfsConfig.Nfsv4
@@ -151,7 +151,7 @@ func (r *StorageVirtualMachineReconciler) reconcileNfsUpdate(ctx context.Context
 		if lifsCreate {
 			//creating lifs
 			for _, val := range svmCR.Spec.NfsConfig.Lifs {
-				err = CreateLIF(val, uuid, oc, log)
+				err = CreateNfsLif(val, uuid, oc, log)
 				if err != nil {
 					_ = r.setConditionNfsLif(ctx, svmCR, CONDITION_STATUS_FALSE)
 					return err
@@ -165,7 +165,7 @@ func (r *StorageVirtualMachineReconciler) reconcileNfsUpdate(ctx context.Context
 				// Check to see if lifs.Records[index] is out of index - if so, need to create LIF
 				if index > lifs.NumRecords-1 {
 					// Need to create LIF for val
-					err = CreateLIF(val, uuid, oc, log)
+					err = CreateNfsLif(val, uuid, oc, log)
 					if err != nil {
 						_ = r.setConditionNfsLif(ctx, svmCR, CONDITION_STATUS_FALSE)
 						r.Recorder.Event(svmCR, "Warning", "NfsCreationLifFailed", "Error: "+err.Error())
@@ -380,7 +380,7 @@ func (r *StorageVirtualMachineReconciler) reconcileNfsUpdate(ctx context.Context
 	return nil
 }
 
-func CreateLIF(lifToCreate gatewayv1alpha2.LIF, uuid string, oc *ontap.Client, log logr.Logger) (err error) {
+func CreateNfsLif(lifToCreate gatewayv1alpha2.LIF, uuid string, oc *ontap.Client, log logr.Logger) (err error) {
 	var newLif ontap.IpInterface
 	newLif.Name = lifToCreate.Name
 	newLif.Ip.Address = lifToCreate.IPAddress

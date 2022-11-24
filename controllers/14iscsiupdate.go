@@ -12,6 +12,9 @@ import (
 	"k8s.io/apimachinery/pkg/api/errors"
 )
 
+const IscsiLifType = "default-data-iscsi" //magic word
+const IscsiLifScope = "svm"               //magic word
+
 func (r *StorageVirtualMachineReconciler) reconcileIscsiUpdate(ctx context.Context, svmCR *gatewayv1alpha2.StorageVirtualMachine,
 	uuid string, oc *ontap.Client, log logr.Logger) error {
 	log.Info("STEP 14: Update iSCSI service")
@@ -39,6 +42,7 @@ func (r *StorageVirtualMachineReconciler) reconcileIscsiUpdate(ctx context.Conte
 	var upsertIscsiService ontap.IscsiService
 
 	if create {
+		log.Info("iSCSI not defined in SVM but defined in custom resource - creating iSCSI service")
 		upsertIscsiService.Enabled = &svmCR.Spec.IscsiConfig.Enabled
 		upsertIscsiService.Target.Alias = svmCR.Spec.IscsiConfig.Alias
 		upsertIscsiService.Svm.Uuid = svmCR.Spec.SvmUuid
@@ -64,7 +68,7 @@ func (r *StorageVirtualMachineReconciler) reconcileIscsiUpdate(ctx context.Conte
 		log.Info("iSCSI service created successful")
 	} else {
 		// Compare enabled to custom resource enabled
-		if *iscsiService.Enabled != svmCR.Spec.NfsConfig.Enabled {
+		if *iscsiService.Enabled != svmCR.Spec.IscsiConfig.Enabled {
 			updateIscsiService = true
 			upsertIscsiService.Enabled = &svmCR.Spec.IscsiConfig.Enabled
 		}
@@ -108,13 +112,13 @@ func (r *StorageVirtualMachineReconciler) reconcileIscsiUpdate(ctx context.Conte
 
 	// ISCSI LIFS
 	// Check to see if ISCSI interfaces are defined in custom resource
-	if svmCR.Spec.NfsConfig.Lifs == nil {
+	if svmCR.Spec.IscsiConfig.Lifs == nil {
 		// If not, exit with no error
 		log.Info("No iSCSI LIFs defined - skipping updates")
 	} else {
 		lifsCreate := false
 
-		// Check to see if NFS interfaces defined and compare to custom resource's definitions
+		// Check to see if iSCSI interfaces defined and compare to custom resource's definitions
 		lifs, err := oc.GetIscsiInterfacesBySvmUuid(uuid)
 		if err != nil {
 			//error creating the json body
@@ -133,7 +137,7 @@ func (r *StorageVirtualMachineReconciler) reconcileIscsiUpdate(ctx context.Conte
 		if lifsCreate {
 			//creating lifs
 			for _, val := range svmCR.Spec.IscsiConfig.Lifs {
-				err = CreateLIF(val, uuid, oc, log)
+				err = CreateIscsiLif(val, uuid, oc, log)
 				if err != nil {
 					_ = r.setConditionIscsiLif(ctx, svmCR, CONDITION_STATUS_FALSE)
 					return err
@@ -147,7 +151,7 @@ func (r *StorageVirtualMachineReconciler) reconcileIscsiUpdate(ctx context.Conte
 				// Check to see if lifs.Records[index] is out of index - if so, need to create LIF
 				if index > lifs.NumRecords-1 {
 					// Need to create LIF for val
-					err = CreateLIF(val, uuid, oc, log)
+					err = CreateIscsiLif(val, uuid, oc, log)
 					if err != nil {
 						_ = r.setConditionIscsiLif(ctx, svmCR, CONDITION_STATUS_FALSE)
 						r.Recorder.Event(svmCR, "Warning", "IscsiCreationLifFailed", "Error: "+err.Error())
@@ -169,7 +173,7 @@ func (r *StorageVirtualMachineReconciler) reconcileIscsiUpdate(ctx context.Conte
 						updateLif.Ip.Netmask = val.Netmask
 						//updateLif.Location.BroadcastDomain.Name = val.BroacastDomain
 						//updateLif.Location.HomeNode.Name = val.HomeNode
-						updateLif.ServicePolicy.Name = NfsLifType
+						updateLif.ServicePolicy.Name = IscsiLifType
 						updateLif.Enabled = true
 
 						jsonPayload, err := json.Marshal(updateLif)
@@ -216,6 +220,34 @@ func (r *StorageVirtualMachineReconciler) reconcileIscsiUpdate(ctx context.Conte
 		r.Recorder.Event(svmCR, "Normal", "IscsiUpsertLifSucceeded", "Upserted iSCSI LIF(s) successfully")
 	} // LIFs defined in custom resource
 	// END ISCSI LIFS
+
+	return nil
+}
+
+func CreateIscsiLif(lifToCreate gatewayv1alpha2.LIF, uuid string, oc *ontap.Client, log logr.Logger) (err error) {
+	var newLif ontap.IpInterface
+	newLif.Name = lifToCreate.Name
+	newLif.Ip.Address = lifToCreate.IPAddress
+	newLif.Ip.Netmask = lifToCreate.Netmask
+	newLif.Location.BroadcastDomain.Name = lifToCreate.BroacastDomain
+	newLif.Location.HomeNode.Name = lifToCreate.HomeNode
+	newLif.ServicePolicy.Name = IscsiLifType
+	newLif.Scope = IscsiLifScope
+	newLif.Svm.Uuid = uuid
+
+	jsonPayload, err := json.Marshal(newLif)
+	if err != nil {
+		//error creating the json body
+		log.Error(err, "Error creating the json payload for iSCSI LIF creation: "+lifToCreate.Name)
+		return err
+	}
+	log.Info("iSCSI LIF creation attempt: " + lifToCreate.Name)
+	err = oc.CreateIpInterface(jsonPayload)
+	if err != nil {
+		log.Error(err, "Error occurred when creating iSCSI LIF: "+lifToCreate.Name)
+		return err
+	}
+	log.Info("iSCSI LIF creation successful: " + lifToCreate.Name)
 
 	return nil
 }
