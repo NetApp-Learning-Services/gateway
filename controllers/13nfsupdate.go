@@ -44,7 +44,7 @@ func (r *StorageVirtualMachineReconciler) reconcileNfsUpdate(ctx context.Context
 	var upsertNfsService ontap.NFSService
 
 	if create {
-		log.Info("NFS not defined in SVM but defined in custom resource - creating NFS service")
+		log.Info("No NFS service defined for SVM: " + uuid + " - creating NFS service")
 		upsertNfsService.Enabled = &svmCR.Spec.NfsConfig.Enabled
 		upsertNfsService.Protocol.V3Enable = &svmCR.Spec.NfsConfig.Nfsv3
 		upsertNfsService.Protocol.V4Enable = &svmCR.Spec.NfsConfig.Nfsv4
@@ -262,7 +262,7 @@ func (r *StorageVirtualMachineReconciler) reconcileNfsUpdate(ctx context.Context
 		if exportsCreate {
 			// this will probably never happen because there is always a default export
 			// creating export
-			err = CreateExport(*svmCR.Spec.NfsConfig.Export, uuid, oc, log)
+			err = CreateNfsExport(*svmCR.Spec.NfsConfig.Export, uuid, oc, log)
 			if err != nil {
 				_ = r.setConditionNfsExport(ctx, svmCR, CONDITION_STATUS_FALSE)
 				return err
@@ -408,7 +408,7 @@ func CreateNfsLif(lifToCreate gatewayv1alpha2.LIF, uuid string, oc *ontap.Client
 	return nil
 }
 
-func CreateExport(exportToCreate gatewayv1alpha2.NfsExport, uuid string, oc *ontap.Client, log logr.Logger) (err error) {
+func CreateNfsExport(exportToCreate gatewayv1alpha2.NfsExport, uuid string, oc *ontap.Client, log logr.Logger) (err error) {
 	var newExport ontap.ExportPolicy
 	newExport.Name = exportToCreate.Name
 

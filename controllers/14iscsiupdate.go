@@ -47,7 +47,7 @@ func (r *StorageVirtualMachineReconciler) reconcileIscsiUpdate(ctx context.Conte
 	var upsertIscsiService ontap.IscsiService
 
 	if create {
-		log.Info("iSCSI not defined in SVM but defined in custom resource - creating iSCSI service")
+		log.Info("No iSCSI service defined for SVM: " + uuid + " - creating iSCSI service")
 		upsertIscsiService.Enabled = &svmCR.Spec.IscsiConfig.Enabled
 		upsertIscsiService.Target.Alias = svmCR.Spec.IscsiConfig.Alias
 		upsertIscsiService.Svm.Uuid = svmCR.Spec.SvmUuid
