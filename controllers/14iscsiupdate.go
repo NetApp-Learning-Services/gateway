@@ -6,7 +6,7 @@ import (
 	"fmt"
 	gatewayv1alpha2 "gateway/api/v1alpha2"
 	"gateway/ontap"
-	"strconv"
+	"reflect"
 
 	"github.com/go-logr/logr"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -25,7 +25,8 @@ func (r *StorageVirtualMachineReconciler) reconcileIscsiUpdate(ctx context.Conte
 	log.Info("STEP 14: Update iSCSI service")
 
 	// iSCSI SERVICE
-	create := false
+
+	createIscsiService := false
 	updateIscsiService := false
 
 	// Check to see if iscsi configuration is provided in custom resource
@@ -37,7 +38,7 @@ func (r *StorageVirtualMachineReconciler) reconcileIscsiUpdate(ctx context.Conte
 
 	iscsiService, err := oc.GetIscsiServiceBySvmUuid(uuid)
 	if err != nil && errors.IsNotFound(err) {
-		create = true
+		createIscsiService = true
 	} else if err != nil {
 		//some other error
 		log.Error(err, "Error retrieving iSCSI service for SVM by UUID - requeuing")
@@ -46,10 +47,14 @@ func (r *StorageVirtualMachineReconciler) reconcileIscsiUpdate(ctx context.Conte
 
 	var upsertIscsiService ontap.IscsiService
 
-	if create {
+	if createIscsiService {
 		log.Info("No iSCSI service defined for SVM: " + uuid + " - creating iSCSI service")
 		upsertIscsiService.Enabled = &svmCR.Spec.IscsiConfig.Enabled
-		upsertIscsiService.Target.Alias = svmCR.Spec.IscsiConfig.Alias
+		alias := svmCR.Spec.SvmName
+		if svmCR.Spec.IscsiConfig.Alias != "" {
+			alias = svmCR.Spec.IscsiConfig.Alias
+		}
+		upsertIscsiService.Target.Alias = alias
 		upsertIscsiService.Svm.Uuid = svmCR.Spec.SvmUuid
 
 		jsonPayload, err := json.Marshal(upsertIscsiService)
@@ -59,6 +64,10 @@ func (r *StorageVirtualMachineReconciler) reconcileIscsiUpdate(ctx context.Conte
 			_ = r.setConditionIscsiService(ctx, svmCR, CONDITION_STATUS_FALSE)
 			return err
 
+		}
+
+		if oc.Debug {
+			log.Info("[DEBUG] iSCSI service creation payload: " + fmt.Sprintf("%#v\n", upsertIscsiService))
 		}
 
 		err = oc.CreateIscsiService(jsonPayload)
@@ -76,19 +85,20 @@ func (r *StorageVirtualMachineReconciler) reconcileIscsiUpdate(ctx context.Conte
 		if *iscsiService.Enabled != svmCR.Spec.IscsiConfig.Enabled {
 			updateIscsiService = true
 			upsertIscsiService.Enabled = &svmCR.Spec.IscsiConfig.Enabled
+			upsertIscsiService.Svm.Uuid = svmCR.Spec.SvmUuid // always add the SVM UUID
 		}
 
-		if iscsiService.Target.Alias != svmCR.Spec.IscsiConfig.Alias {
+		if svmCR.Spec.IscsiConfig.Alias != "" && iscsiService.Target.Alias != svmCR.Spec.IscsiConfig.Alias {
 			updateIscsiService = true
 			upsertIscsiService.Target.Alias = svmCR.Spec.IscsiConfig.Alias
+			upsertIscsiService.Svm.Uuid = svmCR.Spec.SvmUuid // always add the SVM UUID
 		}
 
-		if oc.Debug {
+		if oc.Debug && updateIscsiService {
 			log.Info("[DEBUG] iSCSI service update payload: " + fmt.Sprintf("%#v\n", upsertIscsiService))
 		}
 
 		if updateIscsiService {
-
 			jsonPayload, err := json.Marshal(upsertIscsiService)
 			if err != nil {
 				//error creating the json body
@@ -113,146 +123,94 @@ func (r *StorageVirtualMachineReconciler) reconcileIscsiUpdate(ctx context.Conte
 			log.Info("No iSCSI service changes detected - skip updating")
 		}
 	}
+
 	// END ISCSI SERVICE
 
 	// ISCSI LIFS
+
 	// Check to see if ISCSI interfaces are defined in custom resource
 	if svmCR.Spec.IscsiConfig.Lifs == nil {
 		// If not, exit with no error
 		log.Info("No iSCSI LIFs defined - skipping updates")
-	} else {
-		lifsCreate := false
+		return nil
+	}
 
-		// Check to see if iSCSI interfaces defined and compare to custom resource's definitions
-		lifs, err := oc.GetIscsiInterfacesBySvmUuid(uuid)
-		if err != nil {
-			//error creating the json body
-			log.Error(err, "Error getting iSCSI service LIFs for SVM: "+uuid)
-			_ = r.setConditionIscsiLif(ctx, svmCR, CONDITION_STATUS_FALSE)
-			return err
-		}
+	createIscsiLifs := false
 
-		if lifs.NumRecords == 0 {
-			// no data LIFs for the SVM provided in UUID
-			// create new LIF(s)
-			log.Info("No LIFs defined for SVM: " + uuid + " - creating iSCSI Lif(s)")
-			lifsCreate = true
-		}
+	// Check to see if iSCSI interfaces defined and compare to custom resource's definitions
+	lifs, err := oc.GetIscsiInterfacesBySvmUuid(uuid)
+	if err != nil {
+		//error creating the json body
+		log.Error(err, "Error getting iSCSI service LIFs for SVM: "+uuid)
+		_ = r.setConditionIscsiLif(ctx, svmCR, CONDITION_STATUS_FALSE)
+		return err
+	}
 
-		if lifsCreate {
-			//creating lifs
-			for _, val := range svmCR.Spec.IscsiConfig.Lifs {
-				err = CreateIscsiLif(val, uuid, oc, log)
-				if err != nil {
-					_ = r.setConditionIscsiLif(ctx, svmCR, CONDITION_STATUS_FALSE)
-					return err
-				}
+	if lifs.NumRecords == 0 {
+		// no data LIFs for the SVM provided in UUID
+		// create new LIF(s)
+		log.Info("No LIFs defined for SVM: " + uuid + " - creating iSCSI Lif(s)")
+		createIscsiLifs = true
+	}
+
+	for index, val := range svmCR.Spec.IscsiConfig.Lifs {
+
+		// Check to see need to create all LIFS or
+		// if lifs.Records[index] is out of index - if so, need to create LIF
+		if createIscsiLifs || index > lifs.NumRecords-1 {
+			// Need to create LIF for val
+			err = CreateLif(val, IscsiLifType, uuid, oc, log)
+			if err != nil {
+				_ = r.setConditionIscsiLif(ctx, svmCR, CONDITION_STATUS_FALSE)
+				r.Recorder.Event(svmCR, "Warning", "IscsiCreationLifFailed", "Error: "+err.Error())
+				return err
 			}
 
 		} else {
-			// update LIFs
-			for index, val := range svmCR.Spec.IscsiConfig.Lifs {
+			//check to see if we need to update the LIF
 
-				// Check to see if lifs.Records[index] is out of index - if so, need to create LIF
-				if index > lifs.NumRecords-1 {
-					// Need to create LIF for val
-					err = CreateIscsiLif(val, uuid, oc, log)
-					if err != nil {
-						_ = r.setConditionIscsiLif(ctx, svmCR, CONDITION_STATUS_FALSE)
-						r.Recorder.Event(svmCR, "Warning", "IscsiCreationLifFailed", "Error: "+err.Error())
-						return err
-					}
-
-				} else {
-					netmaskAsInt, _ := strconv.Atoi(lifs.Records[index].Ip.Netmask)
-					netmaskAsIP := NetmaskToString(netmaskAsInt)
-					if lifs.Records[index].Ip.Address != val.IPAddress ||
-						lifs.Records[index].Name != val.Name ||
-						netmaskAsIP != val.Netmask ||
-						lifs.Records[index].ServicePolicy.Name != NfsLifType ||
-						!lifs.Records[index].Enabled {
-						//reset value
-						var updateLif ontap.IpInterface
-						updateLif.Name = val.Name
-						updateLif.Ip.Address = val.IPAddress
-						updateLif.Ip.Netmask = val.Netmask
-						//updateLif.Location.BroadcastDomain.Name = val.BroacastDomain
-						//updateLif.Location.HomeNode.Name = val.HomeNode
-						updateLif.ServicePolicy.Name = IscsiLifType
-						updateLif.Enabled = true
-
-						jsonPayload, err := json.Marshal(updateLif)
-						if err != nil {
-							//error creating the json body
-							log.Error(err, "Error creating the json payload for iSCSI LIF update: "+val.Name+" - requeuing")
-							_ = r.setConditionIscsiLif(ctx, svmCR, CONDITION_STATUS_FALSE)
-							r.Recorder.Event(svmCR, "Warning", "IscsiUpdateLifFailed", "Error: "+err.Error())
-							return err
-						}
-						log.Info("iSCSI LIF update attempt: " + val.Name)
-						err = oc.PatchIpInterface(lifs.Records[index].Uuid, jsonPayload)
-						if err != nil {
-							log.Error(err, "Error occurred when updating iSCSI LIF: "+val.Name+" - requeuing")
-							_ = r.setConditionIscsiLif(ctx, svmCR, CONDITION_STATUS_FALSE)
-							r.Recorder.Event(svmCR, "Warning", "IscsiUpdateLifFailed", "Error: "+err.Error())
-							return err
-						}
-
-						log.Info("iSCSI LIF update successful: " + val.Name)
-					} else {
-						log.Info("No changes detected for iSCSI LIf: " + val.Name)
-					}
-				}
-
-			} // Need looping through iSCSI LIF definitions in custom resource
-
-			// Delete all SVM data LIFs that are not defined in the custom resource
-			for i := len(svmCR.Spec.IscsiConfig.Lifs); i < lifs.NumRecords; i++ {
-				log.Info("iSCSI LIF delete attempt: " + lifs.Records[i].Name)
-				oc.DeleteIpInterface(lifs.Records[i].Uuid)
-				if err != nil {
-					log.Error(err, "Error occurred when deleting iSCSI LIF: "+lifs.Records[i].Name)
-					// don't requeue on failed delete request
-					// no condition error
-					// return err
-				} else {
-					log.Info("iSCSI LIF delete successful: " + lifs.Records[i].Name)
-				}
+			//do I need this? checking to see if I have valid LIF returned
+			if reflect.ValueOf(lifs.Records[index]).IsZero() {
+				break
 			}
 
-		} // Checking for iSCSI LIFs updates
+			err = UpdateLif(val, lifs.Records[index], IscsiLifType, oc, log)
+			if err != nil {
+				_ = r.setConditionIscsiLif(ctx, svmCR, CONDITION_STATUS_FALSE)
+				r.Recorder.Event(svmCR, "Warning", "IscsiUpdateLifFailed", "Error: "+err.Error())
+				// e := err.(*apiError)
+				// if e.errorCode == 1 {
+				// // Json parsing error
+				// 	return err
+				// } else if e.errorCode == 2 {
+				// // Patch error
+				// 	return err
+				// } else {
+				// 	return err
+				// }
+				return err
+			}
+		}
+
+		// Delete all SVM data LIFs that are not defined in the custom resource
+		for i := len(svmCR.Spec.IscsiConfig.Lifs); i < lifs.NumRecords; i++ {
+			log.Info("iSCSI LIF delete attempt: " + lifs.Records[i].Name)
+			oc.DeleteIpInterface(lifs.Records[i].Uuid)
+			if err != nil {
+				log.Error(err, "Error occurred when deleting iSCSI LIF: "+lifs.Records[i].Name)
+				// don't requeue on failed delete request
+				// no condition error
+				// return err
+			} else {
+				log.Info("iSCSI LIF delete successful: " + lifs.Records[i].Name)
+			}
+		}
+
 		_ = r.setConditionIscsiLif(ctx, svmCR, CONDITION_STATUS_TRUE)
 		r.Recorder.Event(svmCR, "Normal", "IscsiUpsertLifSucceeded", "Upserted iSCSI LIF(s) successfully")
-	} // LIFs defined in custom resource
+	} // End looping through iSCSI LIF definitions in custom resource
+
 	// END ISCSI LIFS
-
-	return nil
-}
-
-func CreateIscsiLif(lifToCreate gatewayv1alpha2.LIF, uuid string, oc *ontap.Client, log logr.Logger) (err error) {
-	var newLif ontap.IpInterface
-	newLif.Name = lifToCreate.Name
-	newLif.Ip.Address = lifToCreate.IPAddress
-	newLif.Ip.Netmask = lifToCreate.Netmask
-	newLif.Location.BroadcastDomain.Name = lifToCreate.BroacastDomain
-	newLif.Location.HomeNode.Name = lifToCreate.HomeNode
-	newLif.ServicePolicy.Name = IscsiLifType
-	newLif.Scope = IscsiLifScope
-	newLif.Svm.Uuid = uuid
-
-	jsonPayload, err := json.Marshal(newLif)
-	if err != nil {
-		//error creating the json body
-		log.Error(err, "Error creating the json payload for iSCSI LIF creation: "+lifToCreate.Name)
-		return err
-	}
-	log.Info("iSCSI LIF creation attempt: " + lifToCreate.Name)
-	err = oc.CreateIpInterface(jsonPayload)
-	if err != nil {
-		log.Error(err, "Error occurred when creating iSCSI LIF: "+lifToCreate.Name)
-		return err
-	}
-	log.Info("iSCSI LIF creation successful: " + lifToCreate.Name)
 
 	return nil
 }

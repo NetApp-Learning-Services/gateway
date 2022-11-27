@@ -1,10 +1,6 @@
-Initialized Project: 
+Initialized Project: curtis@NetApp-MacBook-Pro gateway % operator-sdk init --domain netapp.com --repo github.com/NetApp-Learning-Services/gateway
 
-curtis@NetApp-MacBook-Pro gateway % operator-sdk init --domain netapp.com --repo github.com/NetApp-Learning-Services/gateway
-
-Created API and Controller:
-
-curtis@NetApp-MacBook-Pro gateway % operator-sdk create api --group gateway --version v1alpha1 --kind StorageVirtualMachine --resource --controller
+Created API and Controller: curtis@NetApp-MacBook-Pro gateway % operator-sdk create api --group gateway --version v1alpha1 --kind StorageVirtualMachine --resource --controller
 
 Updated storagevirtualmachine_types.go
 
@@ -50,7 +46,7 @@ git reset --hard origin/master
 
 Built deployment yaml and then edited it with:
 brew install kustomize   
-kustomize build config/default -o ./config/deploy/gatewayoperator.yaml
+kustomize build config/default -o ./config/deploy/v1alpha1/gatewayoperator.yaml
 
 To prune all unused docker images:
 docker system prune --all
@@ -76,3 +72,8 @@ Added spec changes so the api/v1alpha2 folder and ran make generate and make man
 
 if the kubwor2-1 is closed, need to make sure go is in the path:
 export PATH=$PATH:/usr/local/go/bin
+
+Built deployment yaml and then edited it with: 
+kustomize build config/default -o ./config/deploy/v1alpha2/gatewayoperator.yaml
+
+Updated README.md with new notes
