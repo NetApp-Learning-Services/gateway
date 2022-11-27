@@ -95,20 +95,20 @@ func UpdateLif(lifDefinition gatewayv1alpha2.LIF, lifToUpdate ontap.IpInterface,
 		jsonPayload, err := json.Marshal(updateLif)
 		if err != nil {
 			//error creating the json body
-			log.Error(err, "Error creating json payload occurred when updating LIF: %v of type %v", lifToUpdate.Name, lifType)
+			log.Error(err, fmt.Sprintf("Error creating json payload occurred when updating LIF: %v of type %v", lifToUpdate.Name, lifType))
 			return &apiError{1, err.Error()}
 		}
-		log.Info("LIF update attempt:  %v of type %v", lifToUpdate.Name, lifType)
+		log.Info(fmt.Sprintf("LIF update attempt:  %v of type %v", lifToUpdate.Name, lifType))
 		err = oc.PatchIpInterface(lifToUpdate.Uuid, jsonPayload)
 		if err != nil {
-			log.Error(err, "Error occurred when updating LIF: %v of type %v", lifToUpdate.Name, lifType)
+			log.Error(err, fmt.Sprintf("Error occurred when updating LIF: %v of type %v", lifToUpdate.Name, lifType))
 			return &apiError{2, err.Error()}
 		}
 
-		log.Info("LIF update successful: %v of type %v", lifToUpdate.Name, lifType)
+		log.Info(fmt.Sprintf("LIF update successful: %v of type %v", lifToUpdate.Name, lifType))
 
 	} else {
-		log.Info("No changes detected for LIf: %v of type %v", lifToUpdate.Name, lifType)
+		log.Info(fmt.Sprintf("No changes detected for LIf: %v of type %v", lifToUpdate.Name, lifType))
 	}
 	return nil
 }
