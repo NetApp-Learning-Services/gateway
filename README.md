@@ -11,9 +11,7 @@ It currently creates and updates:
 * an SVM, 
 * an optional SVM management LIF, 
 * an optional SVM administrator management credentials (vsadmin), 
-* an optional NFS configuration with:
-- NFS interfaces
-- and NFS exports, 
+* an optional NFS configuration with NFS interfaces and NFS exports, 
 * and an optional iSCSI configuration with iSCSI interfaces.
 
 
