@@ -4,18 +4,16 @@ A simple Kubernetes operator that creates, configures, and deletes NetApp ONTAP 
 ## Description
 This operator uses Red Hat's [Operator-SDK](https://sdk.operatorframework.io) to scaffold a controller that manages an Storage Virtual Machines (SVMs) resources in an NetApp ONTAP cluster. 
 
-There are two versions of the operator:
-* v1alpha1
-* v1alpha2
+The current version of the operator is v1alpha2.
 
 It currently creates and updates:
-* (all versions) an SVM, 
-* (all versions) an optional SVM management LIF, 
-* (all versions) an optional SVM administrator management credentials (vsadmin), 
-* (all versions) an optional NFS configuration with:
-- (all versions) NFS interfaces
-- (all versions) and NFS exports, 
-* (only v1aplha2) and an optional iSCSI configuration with iSCSI interfaces.
+* an SVM, 
+* an optional SVM management LIF, 
+* an optional SVM administrator management credentials (vsadmin), 
+* an optional NFS configuration with:
+- NFS interfaces
+- and NFS exports, 
+* and an optional iSCSI configuration with iSCSI interfaces.
 
 When the custom resource (CR) is delete, the operator uses a finalizer (called gateway.netapp.com) to delete the SVM and all it configuration when the CR is deleted.  
 
@@ -23,12 +21,6 @@ When the custom resource (CR) is delete, the operator uses a finalizer (called g
 
 ### 1. Install a version of the operator: 
 
-#### vlalpha1 version:
-```
-kubectl create -f https://raw.githubusercontent.com/NetApp-Learning-Services/gateway/main/config/deploy/vlalpha1/gatewayoperator.yaml
-```
-
-#### vlalpha2 version:
 ```
 kubectl create -f https://raw.githubusercontent.com/NetApp-Learning-Services/gateway/main/config/deploy/vlalpha2/gatewayoperator.yaml
 ```
