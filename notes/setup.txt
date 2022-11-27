@@ -1,10 +1,6 @@
-Initialized Project: 
+Initialized Project: curtis@NetApp-MacBook-Pro gateway % operator-sdk init --domain netapp.com --repo github.com/NetApp-Learning-Services/gateway
 
-curtis@NetApp-MacBook-Pro gateway % operator-sdk init --domain netapp.com --repo github.com/NetApp-Learning-Services/gateway
-
-Created API and Controller:
-
-curtis@NetApp-MacBook-Pro gateway % operator-sdk create api --group gateway --version v1alpha1 --kind StorageVirtualMachine --resource --controller
+Created API and Controller: curtis@NetApp-MacBook-Pro gateway % operator-sdk create api --group gateway --version v1alpha1 --kind StorageVirtualMachine --resource --controller
 
 Updated storagevirtualmachine_types.go
 
@@ -31,7 +27,7 @@ export PATH=$PATH:/usr/local/go/bin
 wget https://dl.google.com/go/go1.19.2.linux-amd64.tar.gz
 sudo tar -C /usr/local/ -xzf go1.19.2.linux-amd64.tar.gz
 
-Copy to kubwor2-1:  git clone https://[totken]@github.com/NetApp-Learning-Services/gateway/
+Copy to kubwor2-1:  git clone https://[token]@github.com/NetApp-Learning-Services/gateway/
 
 setup kubectl config on kubwor2-1
 
@@ -50,7 +46,34 @@ git reset --hard origin/master
 
 Built deployment yaml and then edited it with:
 brew install kustomize   
-kustomize build config/default -o ./config/deploy/gatewayoperator.yaml
+kustomize build config/default -o ./config/deploy/v1alpha1/gatewayoperator.yaml
 
 To prune all unused docker images:
 docker system prune --all
+
+Moving from v1alpha1 to v1alpha2:
+operator-sdk create api --group gateway --version v1alpha2 --kind StorageVirtualMachine --resource 
+Create Controller [y/n]
+n
+This had this error:  FATA[0013] failed to create API: unable to run post-scaffold tasks of "base.go.kubebuilder.io/v3": exit status 1 
+I had to copy a lot of the structure from v1alpha1 to v1alpha2
+
+To change branches on my local repo:
+git symbolic-ref HEAD refs/heads/v1alpha2
+
+Changed test.sh to now pull the branch:
+git pull origin v1alpha2
+
+I had to rescreate the clone repo on kubwork2-1.  I did these commands:
+mkdir v1alpha2
+git clone -b v1alpha2 --single-branch https://[token]@github.com/NetApp-Learning-Services/gateway/
+
+Added spec changes so the api/v1alpha2 folder and ran make generate and make manifests
+
+if the kubwor2-1 is closed, need to make sure go is in the path:
+export PATH=$PATH:/usr/local/go/bin
+
+Built deployment yaml and then edited it with: 
+kustomize build config/default -o ./config/deploy/v1alpha2/gatewayoperator.yaml
+
+Updated README.md with new notes

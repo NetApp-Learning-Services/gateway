@@ -213,7 +213,7 @@ func (c *Client) doRequest(req *http.Request) ([]byte, error) {
 			if jec.Error.Code == "4" {
 				return nil, fmt.Errorf("error-%s %s %s", jec.Error.Code, jec.Error.Target, jec.Error.Message)
 			}
-			fmt.Println(string(body))
+			//fmt.Println(string(body)) // todo: don't seem to need this
 			return nil, fmt.Errorf("%s", jec.Error.Message)
 		}
 		return nil, fmt.Errorf("%s", body)

@@ -128,6 +128,11 @@ type SVMCreationPayload struct {
 	IpInterfaces []IpInterfaceCreation `json:"ip_interfaces,omitempty"`
 }
 
+type SvmRef struct {
+	Name string `json:"name,omitempty"`
+	Uuid string `json:"uuid,omitempty"`
+}
+
 // type SvmResponse struct {
 // 	Records []struct {
 // 		Name  string `json:"name"`

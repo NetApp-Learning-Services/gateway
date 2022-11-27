@@ -4,16 +4,18 @@ A simple Kubernetes operator that creates, configures, and deletes NetApp ONTAP 
 ## Description
 This operator uses Red Hat's [Operator-SDK](https://sdk.operatorframework.io) to scaffold a controller that manages an Storage Virtual Machines (SVMs) resources in an NetApp ONTAP cluster. 
 
-There is one version of the operator:
-* v1alpha1
+
+The current version of the operator is v1alpha2.
 
 It currently creates and updates:
-* (all versions) an SVM, 
-* (all versions) an optional SVM management LIF, 
-* (all versions) an optional SVM administrator management credentials (vsadmin), 
-* (all versions) and an optional NFS configuration with:
-- (all versions) NFS interfaces
-- (all versions) and NFS exports.
+* an SVM, 
+* an optional SVM management LIF, 
+* an optional SVM administrator management credentials (vsadmin), 
+* an optional NFS configuration with:
+- NFS interfaces
+- and NFS exports, 
+* and an optional iSCSI configuration with iSCSI interfaces.
+
 
 When the custom resource (CR) is delete, the operator uses a finalizer (called gateway.netapp.com) to delete the SVM and all it configuration when the CR is deleted.  
 
@@ -21,12 +23,15 @@ When the custom resource (CR) is delete, the operator uses a finalizer (called g
 
 ### 1. Install a version of the operator: 
 
-#### vlalpha1 version:
+
 ```
-kubectl create -f https://raw.githubusercontent.com/NetApp-Learning-Services/gateway/main/config/deploy/gatewayoperator.yaml
+kubectl create -f https://raw.githubusercontent.com/NetApp-Learning-Services/gateway/main/config/deploy/vlalpha2/gatewayoperator.yaml
 ```
 
-### 2. Create a secret for the ONTAP cluster administrator's credentials (NOTE: This example is deployed in the gateway namesspaces that gets created when deploying the operator): 
+### 2. Create a secret for the ONTAP cluster administrator's credentials:
+
+(NOTE: This example is deployed in the gateway namesspaces that gets created when deploying the operator)
+
 	
 ```
 apiVersion: v1
@@ -40,8 +45,10 @@ stringData:
   password: Netapp1!
 ```
 	
-### 3. Create an optional secret for the SVM administrator's credentials (NOTE: This example is deployed in the gateway namesspaces that gets created when deploying the operator): 
 
+### 3. Create an optional secret for the SVM administrator's credentials: 
+
+(NOTE: This example is deployed in the gateway namesspaces that gets created when deploying the operator)
 ```
 apiVersion: v1
 kind: Secret
@@ -54,7 +61,11 @@ stringData:
   password: Netapp1!
 ```
 
-### 4. Create a custom resource with your SVM settings (make sure you provide the required Cluster administrator's credentials created in step 2 and ```clusterHost``` with the NetApp ONTAP cluster management LIF):  
+### 4. Create a custom resource with your SVM settings:
+
+
+(NOTE: Make sure you provide the required Cluster administrator's credentials created in step 2 and ```clusterHost``` with the NetApp ONTAP cluster management LIF. Also, the ```debug``` setting in the spec provides additional logging information in the operator's ```manager``` container logs. ) 
+
 	
 ```
 apiVersion: gateway.netapp.com/v1alpha2
@@ -80,6 +91,15 @@ spec:
   clusterCredentials:
     name: ontap-cluster-admin
     namespace: gateway-system
+  iscsi:
+    enabled: true
+    alias: testVs
+    interfaces:
+    - name: iscsi1
+      ip: 192.168.0.51
+      netmask: 255.255.255.0
+      broadcastDomain: Default
+      homeNode: Cluster2-01
   nfs:
     enabled: true
     v3: true
@@ -100,9 +120,7 @@ spec:
         ro: any
         superuser: any
         anon:  "65534"
-```
-
-NOTE: The ```debug``` setting in the spec provides additional logging information in the operator's ```manager``` container logs.  
+``` 
 
 ### 5. Deploy NetApp [Astra Trident](https://github.com/NetApp/trident) to manage the SVM resources created by this operator.
 

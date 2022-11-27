@@ -9,7 +9,7 @@ import (
 	defaultLog "log"
 	"strconv"
 
-	gatewayv1alpha1 "gateway/api/v1alpha1"
+	gatewayv1alpha2 "gateway/api/v1alpha2"
 	"gateway/ontap"
 
 	"golang.org/x/exp/slices"
@@ -19,8 +19,8 @@ import (
 
 const svmScope = "svm" //magic word
 
-func (r *StorageVirtualMachineReconciler) reconcileManagementLifUpdate(ctx context.Context, svmCR *gatewayv1alpha1.StorageVirtualMachine,
-	uuid string, oc *ontap.Client, log logr.Logger) error {
+func (r *StorageVirtualMachineReconciler) reconcileManagementLifUpdate(ctx context.Context,
+	svmCR *gatewayv1alpha2.StorageVirtualMachine, uuid string, oc *ontap.Client, log logr.Logger) error {
 
 	log.Info("STEP 11: Update management LIF")
 
@@ -77,7 +77,7 @@ func (r *StorageVirtualMachineReconciler) reconcileManagementLifUpdate(ctx conte
 		}
 
 		netmaskAsInt, _ := strconv.Atoi(lifRetrieved.Ip.Netmask)
-		netmaskAsIP := NetmaskToString(netmaskAsInt)
+		netmaskAsIP := NetmaskIntToString(netmaskAsInt)
 
 		if oc.Debug {
 			defaultLog.Printf("[DEBUG] netmaskAsInt: " + fmt.Sprintf("%v", netmaskAsInt))
@@ -157,26 +157,4 @@ func (r *StorageVirtualMachineReconciler) reconcileManagementLifUpdate(ctx conte
 	}
 
 	return nil
-}
-
-func NetmaskToString(mask int) (netmaskstring string) {
-	var binarystring string
-
-	for ii := 1; ii <= mask; ii++ {
-		binarystring = binarystring + "1"
-	}
-	for ii := 1; ii <= (32 - mask); ii++ {
-		binarystring = binarystring + "0"
-	}
-	oct1 := binarystring[0:8]
-	oct2 := binarystring[8:16]
-	oct3 := binarystring[16:24]
-	oct4 := binarystring[24:]
-
-	ii1, _ := strconv.ParseInt(oct1, 2, 64)
-	ii2, _ := strconv.ParseInt(oct2, 2, 64)
-	ii3, _ := strconv.ParseInt(oct3, 2, 64)
-	ii4, _ := strconv.ParseInt(oct4, 2, 64)
-	netmaskstring = strconv.Itoa(int(ii1)) + "." + strconv.Itoa(int(ii2)) + "." + strconv.Itoa(int(ii3)) + "." + strconv.Itoa(int(ii4))
-	return
 }

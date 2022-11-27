@@ -13,7 +13,7 @@ import (
 type NFSService struct {
 	Enabled  *bool       `json:"enabled,omitempty"`
 	Protocol NFSProtocol `json:"protocol,omitempty"`
-	Svm      NfsSvm      `json:"svm,omitempty"`
+	Svm      SvmRef      `json:"svm,omitempty"`
 }
 
 type NFSProtocol struct {
@@ -22,20 +22,15 @@ type NFSProtocol struct {
 	V41Enable *bool `json:"v41_enabled,omitempty"`
 }
 
-type NfsSvm struct {
-	Name string `json:"name,omitempty"`
-	Uuid string `json:"uuid,omitempty"`
-}
-
 type ExportPolicyUpsert struct {
 	Name  string       `json:"name,omitempty"`
-	Svm   NfsSvm       `json:"svm,omitempty"`
+	Svm   SvmRef       `json:"svm,omitempty"`
 	Rules []ExportRule `json:"rules,omitempty"`
 }
 
 type ExportPolicy struct {
 	Name  string       `json:"name,omitempty"`
-	Svm   NfsSvm       `json:"svm,omitempty"`
+	Svm   SvmRef       `json:"svm,omitempty"`
 	Rules []ExportRule `json:"rules,omitempty"`
 	Id    int          `json:"id,omitempty"`
 }

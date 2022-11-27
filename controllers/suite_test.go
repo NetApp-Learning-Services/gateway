@@ -32,6 +32,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
 	gatewayv1alpha1 "gateway/api/v1alpha1"
+	gatewayv1alpha2 "gateway/api/v1alpha2"
 	//+kubebuilder:scaffold:imports
 )
 
@@ -66,6 +67,9 @@ var _ = BeforeSuite(func() {
 	Expect(cfg).NotTo(BeNil())
 
 	err = gatewayv1alpha1.AddToScheme(scheme.Scheme)
+	Expect(err).NotTo(HaveOccurred())
+
+	err = gatewayv1alpha2.AddToScheme(scheme.Scheme)
 	Expect(err).NotTo(HaveOccurred())
 
 	//+kubebuilder:scaffold:scheme

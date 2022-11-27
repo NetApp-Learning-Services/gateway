@@ -8,7 +8,7 @@ import (
 	"fmt"
 	defaultLog "log"
 
-	gatewayv1alpha1 "gateway/api/v1alpha1"
+	gatewayv1alpha2 "gateway/api/v1alpha2"
 	"gateway/ontap"
 
 	"github.com/go-logr/logr"
@@ -21,7 +21,7 @@ const defaultComment = "Created by Astra Gateway"       //magic word
 const managementLIFServicePolicy = "default-management" //magic word
 
 func (r *StorageVirtualMachineReconciler) reconcileSvmCreation(ctx context.Context,
-	svmCR *gatewayv1alpha1.StorageVirtualMachine, oc *ontap.Client, log logr.Logger) (ctrl.Result, error) {
+	svmCR *gatewayv1alpha2.StorageVirtualMachine, oc *ontap.Client, log logr.Logger) (ctrl.Result, error) {
 
 	log.Info("STEP 7: Create SVM")
 
@@ -93,7 +93,8 @@ func (r *StorageVirtualMachineReconciler) reconcileSvmCreation(ctx context.Conte
 	return ctrl.Result{}, nil
 }
 
-func (r *StorageVirtualMachineReconciler) addFinalizer(ctx context.Context, svmCR *gatewayv1alpha1.StorageVirtualMachine) (ctrl.Result, error) {
+func (r *StorageVirtualMachineReconciler) addFinalizer(ctx context.Context,
+	svmCR *gatewayv1alpha2.StorageVirtualMachine) (ctrl.Result, error) {
 	if !controllerutil.ContainsFinalizer(svmCR, finalizerName) {
 		controllerutil.AddFinalizer(svmCR, finalizerName)
 		err := r.Update(ctx, svmCR)

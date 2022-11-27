@@ -5,7 +5,7 @@ package controllers
 import (
 	"context"
 
-	gatewayv1alpha1 "gateway/api/v1alpha1"
+	gatewayv1alpha2 "gateway/api/v1alpha2"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -22,7 +22,7 @@ const CONDITION_REASON_RESOURCE_FOUND = "ResourceFound"
 const CONDITION_MESSAGE_RESOURCE_FOUND = "Resource discovered"
 
 func (reconciler *StorageVirtualMachineReconciler) setConditionResourceFound(ctx context.Context,
-	svmCR *gatewayv1alpha1.StorageVirtualMachine) error {
+	svmCR *gatewayv1alpha2.StorageVirtualMachine) error {
 
 	if !reconciler.containsCondition(ctx, svmCR, CONDITION_REASON_RESOURCE_FOUND) {
 		return appendCondition(ctx, reconciler.Client, svmCR, CONDITION_TYPE_RESOURCE_FOUND, CONDITION_STATUS_TRUE,
@@ -40,7 +40,7 @@ const CONDITION_MESSAGE_HOST_FOUND_TRUE = "A valid host found"
 const CONDITION_MESSAGE_HOST_FOUND_FALSE = "A valid host was not found"
 
 func (reconciler *StorageVirtualMachineReconciler) setConditionHostFound(ctx context.Context,
-	svmCR *gatewayv1alpha1.StorageVirtualMachine, status metav1.ConditionStatus) error {
+	svmCR *gatewayv1alpha2.StorageVirtualMachine, status metav1.ConditionStatus) error {
 
 	if reconciler.containsCondition(ctx, svmCR, CONDITION_REASON_HOST_FOUND) {
 		reconciler.deleteCondition(ctx, svmCR, CONDITION_TYPE_HOST_FOUND, CONDITION_REASON_HOST_FOUND)
@@ -73,7 +73,7 @@ const CONDITION_MESSAGE_CLUSTER_SECRET_LOOKUP_TRUE = "Cluster Admin credentials 
 const CONDITION_MESSAGE_CLUSTER_SECRET_LOOKUP_FALSE = "Cluster Admin credentials NOT available"
 
 func (reconciler *StorageVirtualMachineReconciler) setConditionClusterSecretLookup(ctx context.Context,
-	svmCR *gatewayv1alpha1.StorageVirtualMachine, status metav1.ConditionStatus) error {
+	svmCR *gatewayv1alpha2.StorageVirtualMachine, status metav1.ConditionStatus) error {
 
 	if reconciler.containsCondition(ctx, svmCR, CONDITION_REASON_CLUSTER_SECRET_LOOKUP) {
 		reconciler.deleteCondition(ctx, svmCR, CONDITION_TYPE_CLUSTER_SECRET_LOOKUP, CONDITION_REASON_CLUSTER_SECRET_LOOKUP)
@@ -100,7 +100,7 @@ const CONDITION_MESSAGE_ONTAP_CREATED_TRUE = "ONTAP client created"
 const CONDITION_MESSAGE_ONTAP_CREATED_FALSE = "ONTAP client failed"
 
 func (reconciler *StorageVirtualMachineReconciler) setConditionONTAPCreation(ctx context.Context,
-	svmCR *gatewayv1alpha1.StorageVirtualMachine, status metav1.ConditionStatus) error {
+	svmCR *gatewayv1alpha2.StorageVirtualMachine, status metav1.ConditionStatus) error {
 
 	if reconciler.containsCondition(ctx, svmCR, CONDITION_REASON_ONTAP_CREATED) {
 		reconciler.deleteCondition(ctx, svmCR, CONDITION_TYPE_ONTAP_CREATED, CONDITION_REASON_ONTAP_CREATED)
@@ -131,7 +131,7 @@ const CONDITION_MESSAGE_SVM_DELETION_FALSE = "SVM NOT deleted - finalizer remain
 const CONDITION_MESSAGE_SVM_DELETION_UNKNOWN = "SVM deletion in unknown state"
 
 func (reconciler *StorageVirtualMachineReconciler) setConditionSVMDeleted(ctx context.Context,
-	svmCR *gatewayv1alpha1.StorageVirtualMachine, status metav1.ConditionStatus) error {
+	svmCR *gatewayv1alpha2.StorageVirtualMachine, status metav1.ConditionStatus) error {
 
 	if reconciler.containsCondition(ctx, svmCR, CONDITION_REASON_SVM_DELETION) {
 		reconciler.deleteCondition(ctx, svmCR, CONDITION_TYPE_SVM_DELETION, CONDITION_REASON_SVM_DELETION)
@@ -164,7 +164,7 @@ const CONDITION_MESSAGE_SVM_FOUND_FALSE = "NO UUID"
 const CONDITION_MESSAGE_SVM_FOUND_UNKNOWN = "UUID does NOT map to SVM"
 
 func (reconciler *StorageVirtualMachineReconciler) setConditionSVMFound(ctx context.Context,
-	svmCR *gatewayv1alpha1.StorageVirtualMachine, status metav1.ConditionStatus) error {
+	svmCR *gatewayv1alpha2.StorageVirtualMachine, status metav1.ConditionStatus) error {
 
 	if reconciler.containsCondition(ctx, svmCR, CONDITION_REASON_SVM_FOUND) {
 		reconciler.deleteCondition(ctx, svmCR, CONDITION_TYPE_SVM_FOUND, CONDITION_REASON_SVM_FOUND)
@@ -196,7 +196,7 @@ const CONDITION_MESSAGE_SVM_CREATED_TRUE = "SVM creation succeeded"
 const CONDITION_MESSAGE_SVM_CREATED_FALSE = "SVM creation failed"
 
 func (reconciler *StorageVirtualMachineReconciler) setConditionSVMCreation(ctx context.Context,
-	svmCR *gatewayv1alpha1.StorageVirtualMachine, status metav1.ConditionStatus) error {
+	svmCR *gatewayv1alpha2.StorageVirtualMachine, status metav1.ConditionStatus) error {
 
 	if reconciler.containsCondition(ctx, svmCR, CONDITION_REASON_SVM_CREATED) {
 		reconciler.deleteCondition(ctx, svmCR, CONDITION_TYPE_SVM_CREATED, CONDITION_REASON_SVM_CREATED)
@@ -223,7 +223,7 @@ const CONDITION_MESSAGE_VSADMIN_SECRET_LOOKUP_TRUE = "SVM Admin credentials avai
 const CONDITION_MESSAGE_VSADMIN_SECRET_LOOKUP_FALSE = "SVM Admin credentials NOT available"
 
 func (reconciler *StorageVirtualMachineReconciler) setConditionVsadminSecretLookup(ctx context.Context,
-	svmCR *gatewayv1alpha1.StorageVirtualMachine, status metav1.ConditionStatus) error {
+	svmCR *gatewayv1alpha2.StorageVirtualMachine, status metav1.ConditionStatus) error {
 
 	if reconciler.containsCondition(ctx, svmCR, CONDITION_REASON_VSADMIN_SECRET_LOOKUP) {
 		reconciler.deleteCondition(ctx, svmCR, CONDITION_TYPE_VSADMIN_SECRET_LOOKUP, CONDITION_REASON_VSADMIN_SECRET_LOOKUP)
@@ -250,7 +250,7 @@ const CONDITION_MESSAGE_VSADMIN_SECRET_UPDATE_TRUE = "SVM Admin credentials upda
 const CONDITION_MESSAGE_VSADMIN_SECRET_UPDATE_FALSE = "SVM Admin credentials NOT updated in ONTAP"
 
 func (reconciler *StorageVirtualMachineReconciler) setConditionVsadminSecretUpdate(ctx context.Context,
-	svmCR *gatewayv1alpha1.StorageVirtualMachine, status metav1.ConditionStatus) error {
+	svmCR *gatewayv1alpha2.StorageVirtualMachine, status metav1.ConditionStatus) error {
 
 	if reconciler.containsCondition(ctx, svmCR, CONDITION_REASON_VSADMIN_SECRET_UPDATE) {
 		reconciler.deleteCondition(ctx, svmCR, CONDITION_TYPE_VSADMIN_SECRET_UPDATE, CONDITION_REASON_VSADMIN_SECRET_UPDATE)
@@ -277,7 +277,7 @@ const CONDITION_MESSAGE_SVM_UPDATED_TRUE = "SVM update succeeded"
 const CONDITION_MESSAGE_SVM_UPDATED_FALSE = "SVM update failed"
 
 func (reconciler *StorageVirtualMachineReconciler) setConditionSVMUpdate(ctx context.Context,
-	svmCR *gatewayv1alpha1.StorageVirtualMachine, status metav1.ConditionStatus) error {
+	svmCR *gatewayv1alpha2.StorageVirtualMachine, status metav1.ConditionStatus) error {
 
 	// I don't want to delete old references to updates to make a history
 	// if reconciler.containsCondition(ctx, svmCR, CONDITION_REASON_SVM_UPDATED) {
@@ -305,7 +305,7 @@ const CONDITION_MESSAGE_MANGEMENTLIF_UPDATED_TRUE = "Management LIF update succe
 const CONDITION_MESSAGE_MANGEMENTLIF_UPDATED_FALSE = "Management LIF update failed"
 
 func (reconciler *StorageVirtualMachineReconciler) setConditionManagementLIFUpdate(ctx context.Context,
-	svmCR *gatewayv1alpha1.StorageVirtualMachine, status metav1.ConditionStatus) error {
+	svmCR *gatewayv1alpha2.StorageVirtualMachine, status metav1.ConditionStatus) error {
 
 	// I don't want to delete old references to updates to make a history
 	// if reconciler.containsCondition(ctx, svmCR, CONDITION_REASON_MANGEMENTLIF_UPSERT) {
@@ -329,7 +329,7 @@ const CONDITION_MESSAGE_MANGEMENTLIF_CREATION_TRUE = "Management LIF creation su
 const CONDITION_MESSAGE_MANGEMENTLIF_CREATION_FALSE = "Management LIF creation failed"
 
 func (reconciler *StorageVirtualMachineReconciler) setConditionManagementLIFCreation(ctx context.Context,
-	svmCR *gatewayv1alpha1.StorageVirtualMachine, status metav1.ConditionStatus) error {
+	svmCR *gatewayv1alpha2.StorageVirtualMachine, status metav1.ConditionStatus) error {
 
 	// I don't want to delete old references to updates to make a history
 	// if reconciler.containsCondition(ctx, svmCR, CONDITION_REASON_MANGEMENTLIF_CREATION) {
@@ -357,7 +357,7 @@ const CONDITION_MESSAGE_AGGREGATE_ASSIGNED_TRUE = "Aggregate assigned to SVM suc
 const CONDITION_MESSAGE_AGGREGATE_ASSIGNED_FALSE = "Aggregate assigned to SVM failed"
 
 func (reconciler *StorageVirtualMachineReconciler) setConditionAggregateAssigned(ctx context.Context,
-	svmCR *gatewayv1alpha1.StorageVirtualMachine, status metav1.ConditionStatus) error {
+	svmCR *gatewayv1alpha2.StorageVirtualMachine, status metav1.ConditionStatus) error {
 
 	// I don't want to delete old references to updates to make a history
 	// if reconciler.containsCondition(ctx, svmCR, CONDITION_REASON_AGGREGATE_ASSIGNED) {
@@ -385,7 +385,7 @@ const CONDITION_MESSAGE_NFS_SERVICE_TRUE = "NFS service configuration succeeded"
 const CONDITION_MESSAGE_NFS_SERVICE_FALSE = "NFS service configuration failed"
 
 func (reconciler *StorageVirtualMachineReconciler) setConditionNfsService(ctx context.Context,
-	svmCR *gatewayv1alpha1.StorageVirtualMachine, status metav1.ConditionStatus) error {
+	svmCR *gatewayv1alpha2.StorageVirtualMachine, status metav1.ConditionStatus) error {
 
 	// I don't want to delete old references to updates to make a history
 	// if reconciler.containsCondition(ctx, svmCR, CONDITION_REASON_NFS_SERVICE) {
@@ -409,7 +409,7 @@ const CONDITION_MESSAGE_NFS_LIF_TRUE = "NFS LIF configuration succeeded"
 const CONDITION_MESSAGE_NFS_LIF_FALSE = "NFS LIF configuration failed"
 
 func (reconciler *StorageVirtualMachineReconciler) setConditionNfsLif(ctx context.Context,
-	svmCR *gatewayv1alpha1.StorageVirtualMachine, status metav1.ConditionStatus) error {
+	svmCR *gatewayv1alpha2.StorageVirtualMachine, status metav1.ConditionStatus) error {
 
 	// I don't want to delete old references to updates to make a history
 	// if reconciler.containsCondition(ctx, svmCR, CONDITION_REASON_NFS_LIF) {
@@ -433,7 +433,7 @@ const CONDITION_MESSAGE_NFS_EXPORT_TRUE = "NFS export configuration succeeded"
 const CONDITION_MESSAGE_NFS_EXPORT_FALSE = "NFS export configuration failed"
 
 func (reconciler *StorageVirtualMachineReconciler) setConditionNfsExport(ctx context.Context,
-	svmCR *gatewayv1alpha1.StorageVirtualMachine, status metav1.ConditionStatus) error {
+	svmCR *gatewayv1alpha2.StorageVirtualMachine, status metav1.ConditionStatus) error {
 
 	// I don't want to delete old references to updates to make a history
 	// if reconciler.containsCondition(ctx, svmCR, CONDITION_REASON_NFS_EXPORT) {
@@ -448,6 +448,58 @@ func (reconciler *StorageVirtualMachineReconciler) setConditionNfsExport(ctx con
 	if status == CONDITION_STATUS_FALSE {
 		return appendCondition(ctx, reconciler.Client, svmCR, CONDITION_TYPE_NFS_SERVICE, status,
 			CONDITION_REASON_NFS_EXPORT, CONDITION_MESSAGE_NFS_EXPORT_FALSE)
+	}
+	return nil
+}
+
+// STEP 14
+// iSCSI update
+// Note: Status of ISCSI_SERVICE can only be true or false
+const CONDITION_TYPE_ISCSI_SERVICE = "14iSCSIservice"
+const CONDITION_REASON_ISCSI_SERVICE = "iSCSIservice"
+const CONDITION_MESSAGE_ISCSI_SERVICE_TRUE = "iSCSI service configuration succeeded"
+const CONDITION_MESSAGE_ISCSI_SERVICE_FALSE = "iSCSI service configuration failed"
+
+func (reconciler *StorageVirtualMachineReconciler) setConditionIscsiService(ctx context.Context,
+	svmCR *gatewayv1alpha2.StorageVirtualMachine, status metav1.ConditionStatus) error {
+
+	// I don't want to delete old references to updates to make a history
+	// if reconciler.containsCondition(ctx, svmCR, CONDITION_REASON_ISCSI_SERVICE) {
+	// 	reconciler.deleteCondition(ctx, svmCR, CONDITION_TYPE_ISCSI_SERVICE, CONDITION_REASON_ISCSI_SERVICE)
+	// }
+
+	if status == CONDITION_STATUS_TRUE {
+		return appendCondition(ctx, reconciler.Client, svmCR, CONDITION_TYPE_ISCSI_SERVICE, status,
+			CONDITION_REASON_ISCSI_SERVICE, CONDITION_MESSAGE_ISCSI_SERVICE_TRUE)
+	}
+
+	if status == CONDITION_STATUS_FALSE {
+		return appendCondition(ctx, reconciler.Client, svmCR, CONDITION_TYPE_ISCSI_SERVICE, status,
+			CONDITION_REASON_ISCSI_SERVICE, CONDITION_MESSAGE_ISCSI_SERVICE_FALSE)
+	}
+	return nil
+}
+
+const CONDITION_REASON_ISCSI_LIF = "iSCSIlif"
+const CONDITION_MESSAGE_ISCSI_LIF_TRUE = "iSCSI LIF configuration succeeded"
+const CONDITION_MESSAGE_ISCSI_LIF_FALSE = "iSCSI LIF configuration failed"
+
+func (reconciler *StorageVirtualMachineReconciler) setConditionIscsiLif(ctx context.Context,
+	svmCR *gatewayv1alpha2.StorageVirtualMachine, status metav1.ConditionStatus) error {
+
+	// I don't want to delete old references to updates to make a history
+	// if reconciler.containsCondition(ctx, svmCR, CONDITION_REASON_ISCSI_LIF) {
+	// 	reconciler.deleteCondition(ctx, svmCR, CONDITION_TYPE_ISCSI_SERVICE, CONDITION_REASON_ISCSI_LIF)
+	// }
+
+	if status == CONDITION_STATUS_TRUE {
+		return appendCondition(ctx, reconciler.Client, svmCR, CONDITION_TYPE_ISCSI_SERVICE, status,
+			CONDITION_REASON_ISCSI_LIF, CONDITION_MESSAGE_ISCSI_LIF_TRUE)
+	}
+
+	if status == CONDITION_STATUS_FALSE {
+		return appendCondition(ctx, reconciler.Client, svmCR, CONDITION_TYPE_ISCSI_SERVICE, status,
+			CONDITION_REASON_ISCSI_LIF, CONDITION_MESSAGE_ISCSI_LIF_FALSE)
 	}
 	return nil
 }
