@@ -4,6 +4,7 @@ A simple Kubernetes operator that creates, configures, and deletes NetApp ONTAP 
 ## Description
 This operator uses Red Hat's [Operator-SDK](https://sdk.operatorframework.io) to scaffold a controller that manages an Storage Virtual Machines (SVMs) resources in an NetApp ONTAP cluster. 
 
+
 The current version of the operator is v1alpha2.
 
 It currently creates and updates:
@@ -15,11 +16,13 @@ It currently creates and updates:
 - and NFS exports, 
 * and an optional iSCSI configuration with iSCSI interfaces.
 
+
 When the custom resource (CR) is delete, the operator uses a finalizer (called gateway.netapp.com) to delete the SVM and all it configuration when the CR is deleted.  
 
 ## Getting Started
 
 ### 1. Install a version of the operator: 
+
 
 ```
 kubectl create -f https://raw.githubusercontent.com/NetApp-Learning-Services/gateway/main/config/deploy/vlalpha2/gatewayoperator.yaml
@@ -28,6 +31,7 @@ kubectl create -f https://raw.githubusercontent.com/NetApp-Learning-Services/gat
 ### 2. Create a secret for the ONTAP cluster administrator's credentials:
 
 (NOTE: This example is deployed in the gateway namesspaces that gets created when deploying the operator)
+
 	
 ```
 apiVersion: v1
@@ -41,10 +45,10 @@ stringData:
   password: Netapp1!
 ```
 	
+
 ### 3. Create an optional secret for the SVM administrator's credentials: 
 
 (NOTE: This example is deployed in the gateway namesspaces that gets created when deploying the operator)
-
 ```
 apiVersion: v1
 kind: Secret
@@ -59,7 +63,9 @@ stringData:
 
 ### 4. Create a custom resource with your SVM settings:
 
+
 (NOTE: Make sure you provide the required Cluster administrator's credentials created in step 2 and ```clusterHost``` with the NetApp ONTAP cluster management LIF. Also, the ```debug``` setting in the spec provides additional logging information in the operator's ```manager``` container logs. ) 
+
 	
 ```
 apiVersion: gateway.netapp.com/v1alpha2
