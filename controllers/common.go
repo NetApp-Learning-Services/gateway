@@ -58,16 +58,16 @@ func CreateLif(lifToCreate gatewayv1alpha2.LIF, lifType string, uuid string, oc 
 	jsonPayload, err := json.Marshal(newLif)
 	if err != nil {
 		//error creating the json body
-		log.Error(err, "Error creating the json payload for LIF creation: %v of type %v", lifToCreate.Name, lifType)
+		log.Error(err, fmt.Sprintf("Error creating the json payload for LIF creation: %v of type %v", lifToCreate.Name, lifType))
 		return err
 	}
 	log.Info("LIF creation attempt: " + lifToCreate.Name)
 	err = oc.CreateIpInterface(jsonPayload)
 	if err != nil {
-		log.Error(err, "Error occurred when creating LIF: %v of type %v", lifToCreate.Name, lifType)
+		log.Error(err, fmt.Sprintf("Error occurred when creating LIF: %v of type %v", lifToCreate.Name, lifType))
 		return err
 	}
-	log.Info("LIF creation successful: %v of type %v", lifToCreate.Name, lifType)
+	log.Info(fmt.Sprintf("LIF creation successful: %v of type %v", lifToCreate.Name, lifType))
 
 	return nil
 }
