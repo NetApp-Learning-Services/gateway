@@ -23,7 +23,7 @@ When the custom resource (CR) is delete, the operator uses a finalizer (called g
 
 
 ```
-kubectl create -f https://raw.githubusercontent.com/NetApp-Learning-Services/gateway/main/config/deploy/vlalpha2/gatewayoperator.yaml
+kubectl create -f https://raw.githubusercontent.com/NetApp-Learning-Services/gateway/main/config/deploy/v1alpha2/gatewayoperator.yaml
 ```
 
 ### 2. Create a secret for the ONTAP cluster administrator's credentials:
