@@ -70,7 +70,7 @@ apiVersion: gateway.netapp.com/v1alpha2
 kind: StorageVirtualMachine
 metadata:
   name: storagevirtualmachine-testcase
-  namespace: gateway-system
+  namespace: gateway
 spec:
   svmName: testVs
   clusterHost: 192.168.0.102
@@ -85,10 +85,10 @@ spec:
     homeNode: Cluster2-01
   vsadminCredentials:
     name: ontap-svm-admin
-    namespace: gateway-system 
+    namespace: gateway 
   clusterCredentials:
     name: ontap-cluster-admin
-    namespace: gateway-system
+    namespace: gateway
   iscsi:
     enabled: true
     alias: testVs
