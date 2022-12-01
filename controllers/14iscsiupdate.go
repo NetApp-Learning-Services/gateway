@@ -138,7 +138,7 @@ func (r *StorageVirtualMachineReconciler) reconcileIscsiUpdate(ctx context.Conte
 	createIscsiLifs := false
 
 	// Check to see if iSCSI interfaces defined and compare to custom resource's definitions
-	lifs, err := oc.GetIscsiInterfacesBySvmUuid(uuid)
+	lifs, err := oc.GetIscsiInterfacesBySvmUuid(uuid, IscsiLifType)
 	if err != nil {
 		//error creating the json body
 		log.Error(err, "Error getting iSCSI service LIFs for SVM: "+uuid)

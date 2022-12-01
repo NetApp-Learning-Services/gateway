@@ -20,7 +20,6 @@ type IscsiTarget struct {
 }
 
 const returnQs string = "?return_records=true"
-const sanPolicy string = "gateway-san-policy"
 
 func (c *Client) GetIscsiServiceBySvmUuid(uuid string) (iscsiService IscsiService, err error) {
 	uri := "/api/protocols/san/iscsi/services/" + uuid
@@ -82,8 +81,8 @@ func (c *Client) DeleteIscsiService(uuid string) (err error) {
 	return nil
 }
 
-func (c *Client) GetIscsiInterfacesBySvmUuid(uuid string) (lifs IpInterfacesResponse, err error) {
-	uri := "/api/network/ip/interfaces" + qs + "&service_policy.name=" + sanPolicy + "&svm.uuid=" + uuid
+func (c *Client) GetIscsiInterfacesBySvmUuid(uuid string, servicePolicy string) (lifs IpInterfacesResponse, err error) {
+	uri := "/api/network/ip/interfaces" + qs + "&service_policy.name=" + servicePolicy + "&svm.uuid=" + uuid
 
 	data, err := c.clientGet(uri)
 	if err != nil {
@@ -99,8 +98,8 @@ func (c *Client) GetIscsiInterfacesBySvmUuid(uuid string) (lifs IpInterfacesResp
 	return resp, nil
 }
 
-func (c *Client) GetIpServicePolicyByName() (err error) {
-	uri := "/api/network/ip/serivce-policies?name=" + sanPolicy
+func (c *Client) GetIpServicePolicyByName(servicePolicy string) (err error) {
+	uri := "/api/network/ip/serivce-policies?name=" + servicePolicy
 
 	_, err = c.clientGet(uri)
 	if err != nil {
