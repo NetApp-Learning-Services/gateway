@@ -85,13 +85,13 @@ func (r *StorageVirtualMachineReconciler) reconcileIscsiUpdate(ctx context.Conte
 		if *iscsiService.Enabled != svmCR.Spec.IscsiConfig.Enabled {
 			updateIscsiService = true
 			upsertIscsiService.Enabled = &svmCR.Spec.IscsiConfig.Enabled
-			upsertIscsiService.Svm.Uuid = svmCR.Spec.SvmUuid // always add the SVM UUID
+			//upsertIscsiService.Svm.Uuid = svmCR.Spec.SvmUuid // always add the SVM UUID
 		}
 
 		if svmCR.Spec.IscsiConfig.Alias != "" && iscsiService.Target.Alias != svmCR.Spec.IscsiConfig.Alias {
 			updateIscsiService = true
 			upsertIscsiService.Target.Alias = svmCR.Spec.IscsiConfig.Alias
-			upsertIscsiService.Svm.Uuid = svmCR.Spec.SvmUuid // always add the SVM UUID
+			//upsertIscsiService.Svm.Uuid = svmCR.Spec.SvmUuid // always add the SVM UUID
 		}
 
 		if oc.Debug && updateIscsiService {
