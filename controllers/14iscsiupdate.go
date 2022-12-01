@@ -85,13 +85,11 @@ func (r *StorageVirtualMachineReconciler) reconcileIscsiUpdate(ctx context.Conte
 		if *iscsiService.Enabled != svmCR.Spec.IscsiConfig.Enabled {
 			updateIscsiService = true
 			upsertIscsiService.Enabled = &svmCR.Spec.IscsiConfig.Enabled
-			upsertIscsiService.Svm.Uuid = svmCR.Spec.SvmUuid // always add the SVM UUID
 		}
 
 		if svmCR.Spec.IscsiConfig.Alias != "" && iscsiService.Target.Alias != svmCR.Spec.IscsiConfig.Alias {
 			updateIscsiService = true
 			upsertIscsiService.Target.Alias = svmCR.Spec.IscsiConfig.Alias
-			upsertIscsiService.Svm.Uuid = svmCR.Spec.SvmUuid // always add the SVM UUID
 		}
 
 		if oc.Debug && updateIscsiService {
@@ -138,7 +136,7 @@ func (r *StorageVirtualMachineReconciler) reconcileIscsiUpdate(ctx context.Conte
 	createIscsiLifs := false
 
 	// Check to see if iSCSI interfaces defined and compare to custom resource's definitions
-	lifs, err := oc.GetIscsiInterfacesBySvmUuid(uuid)
+	lifs, err := oc.GetIscsiInterfacesBySvmUuid(uuid, IscsiLifType)
 	if err != nil {
 		//error creating the json body
 		log.Error(err, "Error getting iSCSI service LIFs for SVM: "+uuid)

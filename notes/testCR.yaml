@@ -46,7 +46,12 @@ spec:
     alias: testVs
     interfaces:
     - name: iscsi1
-      ip: 192.168.0.51
+      ip: 192.168.0.32
+      netmask: 255.255.255.0
+      broadcastDomain: Default
+      homeNode: Cluster2-01
+    - name: iscsi2
+      ip: 192.168.0.33
       netmask: 255.255.255.0
       broadcastDomain: Default
       homeNode: Cluster2-01
