@@ -11,12 +11,12 @@ import (
 	"github.com/go-logr/logr"
 )
 
-func (r *StorageVirtualMachineReconciler) reconcileAggregates(ctx context.Context, 
+func (r *StorageVirtualMachineReconciler) reconcileAggregates(ctx context.Context,
 	svmCR *gatewayv1alpha2.StorageVirtualMachine, svmRetrieved ontap.SvmByUUID, oc *ontap.Client, log logr.Logger) error {
 
 	log.Info("STEP 12: Update SVM aggregates")
 	var patchSVM ontap.SvmPatch
-	needToUpdate := false
+	needToUpdate := true //default to always update
 
 	// interate over custom resoource svmCR and look for differences in retrieved SVM
 	if svmCR.Spec.Aggregates != nil {
