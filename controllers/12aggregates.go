@@ -16,7 +16,7 @@ func (r *StorageVirtualMachineReconciler) reconcileAggregates(ctx context.Contex
 
 	log.Info("STEP 12: Update SVM aggregates")
 	var patchSVM ontap.SvmPatch
-	needToUpdate := true //default to always update
+	needToUpdate := true //default to always update #16
 
 	// interate over custom resoource svmCR and look for differences in retrieved SVM
 	if svmCR.Spec.Aggregates != nil {
