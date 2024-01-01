@@ -1,44 +1,12 @@
 apiVersion: gateway.netapp.com/v1alpha1
 kind: StorageVirtualMachine
 metadata:
+  labels:
+    app.kubernetes.io/name: storagevirtualmachine
+    app.kubernetes.io/instance: storagevirtualmachine-sample
+    app.kubernetes.io/part-of: gateway-migration
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/created-by: gateway-migration
   name: storagevirtualmachine-sample
-  namespace:  gateway-system
 spec:
-  svmName: testVs
-  clusterHost: 192.168.0.102
-  debug: true
-  aggregates:
-  - name: Cluster2_01_FC_1
-  management:
-    name: manage1
-    ip: 192.168.0.30
-    netmask: 255.255.255.0
-    broadcastDomain: Default
-    homeNode: Cluster2-01
-  vsadminCredentials:
-    name: ontap-svm-admin
-    namespace: gateway-system 
-  clusterCredentials:
-    name: ontap-cluster-admin
-    namespace: gateway-system
-  nfs:
-    enabled: true
-    v3: true
-    v4: true
-    v41: true
-    interfaces:
-    - name: nfs1
-      ip: 192.168.0.31
-      netmask: 255.255.255.0
-      broadcastDomain: Default
-      homeNode: Cluster2-01
-    export:
-      name: default
-      #simplified rules 
-      rules:
-      - clients: 0.0.0.0/0
-        protocols: any
-        rw: any
-        ro: any
-        superuser: any
-        anon:  "65534"
+  # TODO(user): Add fields here
