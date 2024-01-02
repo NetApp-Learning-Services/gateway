@@ -5,3 +5,9 @@ Migration to operator-sdk 1.33 which implements Kubebuilder go/v4
 3. Recreate v1alpha2 api:  operator-sdk create api --group gateway --version v1alpha2 --kind StorageVirtualMachine --resource
 4. Create v1alpha3 api:  operator-sdk create api --group gateway --version v1alpha3 --kind StorageVirtualMachine --resource
 5. Create v1beta1 api:  operator-sdk create api --group gateway --version v1beta1 --kind StorageVirtualMachine --resource
+
+
+to update go dependiences recursively:  
+
+1. go mod tidy
+2. go get -u ./...
