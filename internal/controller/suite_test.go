@@ -32,6 +32,8 @@ import (
 
 	gatewayv1alpha1 "gateway/api/v1alpha1"
 	gatewayv1alpha2 "gateway/api/v1alpha2"
+	gatewayv1alpha3 "gateway/api/v1alpha3"
+	gatewayv1beta1 "gateway/api/v1beta1"
 	//+kubebuilder:scaffold:imports
 )
 
@@ -67,6 +69,12 @@ var _ = BeforeSuite(func() {
 	Expect(err).NotTo(HaveOccurred())
 
 	err = gatewayv1alpha2.AddToScheme(scheme.Scheme)
+	Expect(err).NotTo(HaveOccurred())
+
+	err = gatewayv1alpha3.AddToScheme(scheme.Scheme)
+	Expect(err).NotTo(HaveOccurred())
+
+	err = gatewayv1beta1.AddToScheme(scheme.Scheme)
 	Expect(err).NotTo(HaveOccurred())
 
 	//+kubebuilder:scaffold:scheme

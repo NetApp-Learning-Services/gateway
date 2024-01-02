@@ -1,14 +1,14 @@
 /*
-Copyright 2022.
+Copyright 2024.
 Created by Curtis Burchett
-Version: v1alpha2
+Version: v1beta1
 */
 
 package controller
 
 import (
 	"context"
-	gatewayv1alpha2 "gateway/api/v1alpha2"
+	gateway "gateway/api/v1beta1"
 	"strings"
 	"time"
 
@@ -218,6 +218,6 @@ func (r *StorageVirtualMachineReconciler) Reconcile(ctx context.Context, req ctr
 
 func (r *StorageVirtualMachineReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
-		For(&gatewayv1alpha2.StorageVirtualMachine{}, builder.WithPredicates(predicate.GenerationChangedPredicate{})).
+		For(&gateway.StorageVirtualMachine{}, builder.WithPredicates(predicate.GenerationChangedPredicate{})).
 		Complete(r)
 }

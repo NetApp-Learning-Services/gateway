@@ -9,7 +9,7 @@ import (
 	defaultLog "log"
 	"strconv"
 
-	gatewayv1alpha2 "gateway/api/v1alpha2"
+	gateway "gateway/api/v1beta1"
 	"gateway/internal/controller/ontap"
 
 	"golang.org/x/exp/slices"
@@ -20,7 +20,7 @@ import (
 const svmScope = "svm" //magic word
 
 func (r *StorageVirtualMachineReconciler) reconcileManagementLifUpdate(ctx context.Context,
-	svmCR *gatewayv1alpha2.StorageVirtualMachine, uuid string, oc *ontap.Client, log logr.Logger) error {
+	svmCR *gateway.StorageVirtualMachine, uuid string, oc *ontap.Client, log logr.Logger) error {
 
 	log.Info("STEP 11: Update management LIF")
 

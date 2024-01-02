@@ -2,7 +2,7 @@ package controller
 
 import (
 	"context"
-	gatewayv1alpha2 "gateway/api/v1alpha2"
+	gateway "gateway/api/v1beta1"
 
 	"github.com/go-logr/logr"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -10,9 +10,9 @@ import (
 )
 
 func (r *StorageVirtualMachineReconciler) reconcileDiscoverObject(ctx context.Context,
-	req ctrl.Request, log logr.Logger) (*gatewayv1alpha2.StorageVirtualMachine, error) {
+	req ctrl.Request, log logr.Logger) (*gateway.StorageVirtualMachine, error) {
 
-	svmCR := &gatewayv1alpha2.StorageVirtualMachine{}
+	svmCR := &gateway.StorageVirtualMachine{}
 	log.Info("STEP 1: Discover Custom Resource")
 
 	err := r.Get(ctx, req.NamespacedName, svmCR)

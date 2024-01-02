@@ -5,14 +5,14 @@ import (
 	"encoding/json"
 	"fmt"
 
-	gatewayv1alpha2 "gateway/api/v1alpha2"
+	gateway "gateway/api/v1beta1"
 	"gateway/internal/controller/ontap"
 
 	"github.com/go-logr/logr"
 )
 
 func (r *StorageVirtualMachineReconciler) reconcileAggregates(ctx context.Context,
-	svmCR *gatewayv1alpha2.StorageVirtualMachine, svmRetrieved ontap.SvmByUUID, oc *ontap.Client, log logr.Logger) error {
+	svmCR *gateway.StorageVirtualMachine, svmRetrieved ontap.SvmByUUID, oc *ontap.Client, log logr.Logger) error {
 
 	log.Info("STEP 12: Update SVM aggregates")
 	var patchSVM ontap.SvmPatch

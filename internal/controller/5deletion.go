@@ -5,7 +5,7 @@ package controller
 import (
 	"context"
 	"fmt"
-	gatewayv1alpha2 "gateway/api/v1alpha2"
+	gateway "gateway/api/v1beta1"
 	"gateway/internal/controller/ontap"
 
 	"github.com/go-logr/logr"
@@ -16,7 +16,7 @@ import (
 const finalizerName = "gateway.netapp.com" //magic word
 
 func (r *StorageVirtualMachineReconciler) reconcileDeletions(ctx context.Context,
-	svmCR *gatewayv1alpha2.StorageVirtualMachine, oc *ontap.Client, log logr.Logger) (ctrl.Result, error) {
+	svmCR *gateway.StorageVirtualMachine, oc *ontap.Client, log logr.Logger) (ctrl.Result, error) {
 
 	log.Info("STEP 5: Delete SVM in ONTAP and remove custom resource")
 
@@ -47,7 +47,7 @@ func (r *StorageVirtualMachineReconciler) reconcileDeletions(ctx context.Context
 }
 
 func (r *StorageVirtualMachineReconciler) finalizeSVM(ctx context.Context,
-	svmCR *gatewayv1alpha2.StorageVirtualMachine, oc *ontap.Client) error {
+	svmCR *gateway.StorageVirtualMachine, oc *ontap.Client) error {
 
 	err := oc.DeleteStorageVM(svmCR.Spec.SvmUuid)
 	if err != nil {

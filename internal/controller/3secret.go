@@ -4,7 +4,7 @@ package controller
 
 import (
 	"context"
-	gatewayv1alpha2 "gateway/api/v1alpha2"
+	gateway "gateway/api/v1beta1"
 	"strings"
 
 	"github.com/go-logr/logr"
@@ -17,7 +17,7 @@ const clusterAdminRequest = "ontap-cluster-admin" // magic word
 const svmAdminRequest = "ontap-svm-admin"         // magic word
 
 func (r *StorageVirtualMachineReconciler) reconcileSecret(ctx context.Context, secretType string,
-	name string, namespace string, svmCR *gatewayv1alpha2.StorageVirtualMachine, log logr.Logger) (*corev1.Secret, error) {
+	name string, namespace string, svmCR *gateway.StorageVirtualMachine, log logr.Logger) (*corev1.Secret, error) {
 
 	if secretType == clusterAdminRequest {
 		log.Info("STEP 3: Resolve cluster admin secret")

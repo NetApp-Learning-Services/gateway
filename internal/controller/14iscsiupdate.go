@@ -4,7 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	gatewayv1alpha2 "gateway/api/v1alpha2"
+	gateway "gateway/api/v1beta1"
 	"gateway/internal/controller/ontap"
 	"reflect"
 
@@ -20,7 +20,7 @@ if 9.11.1 - use default-data-iscsi
 */
 const IscsiLifScope = "svm" //magic word
 
-func (r *StorageVirtualMachineReconciler) reconcileIscsiUpdate(ctx context.Context, svmCR *gatewayv1alpha2.StorageVirtualMachine,
+func (r *StorageVirtualMachineReconciler) reconcileIscsiUpdate(ctx context.Context, svmCR *gateway.StorageVirtualMachine,
 	uuid string, oc *ontap.Client, log logr.Logger) error {
 	log.Info("STEP 14: Update iSCSI service")
 

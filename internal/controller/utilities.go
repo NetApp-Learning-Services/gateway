@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"time"
 
-	gatewayv1alpha2 "gateway/api/v1alpha2"
+	gateway "gateway/api/v1beta1"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -20,7 +20,7 @@ type ConditionsAware interface {
 }
 
 func (reconciler *StorageVirtualMachineReconciler) containsCondition(ctx context.Context,
-	svmCR *gatewayv1alpha2.StorageVirtualMachine, reason string) bool {
+	svmCR *gateway.StorageVirtualMachine, reason string) bool {
 
 	output := false
 	for _, condition := range svmCR.Status.Conditions {
@@ -55,7 +55,7 @@ func appendCondition(ctx context.Context, reconcilerClient client.Client, object
 }
 
 func (reconciler *StorageVirtualMachineReconciler) deleteCondition(ctx context.Context,
-	svmCR *gatewayv1alpha2.StorageVirtualMachine,
+	svmCR *gateway.StorageVirtualMachine,
 	typeName string, reason string) error {
 
 	log := log.FromContext(ctx)

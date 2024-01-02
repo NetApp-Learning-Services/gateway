@@ -1,5 +1,5 @@
 /*
-Copyright 2023.
+Copyright 2022.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -25,22 +25,68 @@ import (
 
 // StorageVirtualMachineSpec defines the desired state of StorageVirtualMachine
 type StorageVirtualMachineSpec struct {
-	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
-	// Important: Run "make" to regenerate code after modifying this file
+	// Provides required SVM name
+	// +kubebuilder:validation:Required
+	// +kubebuilder:validation:MinLength:=3
+	// +kubebuilder:validation:MaxLength:=253
+	/// +kubebuilder:validation:Format:=hostname
+	SvmName string `json:"svmName"`
 
-	// Foo is an example field of StorageVirtualMachine. Edit storagevirtualmachine_types.go to remove/update
-	Foo string `json:"foo,omitempty"`
+	// Provides required Cluster management LIF host IP address or host name
+	// +kubebuilder:validation:Required
+	// +kubebuilder:validation:Pattern=`((^\s*((([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5]))\s*$)|(^\s*((([0-9A-Fa-f]{1,4}:){7}([0-9A-Fa-f]{1,4}|:))|(([0-9A-Fa-f]{1,4}:){6}(:[0-9A-Fa-f]{1,4}|((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3})|:))|(([0-9A-Fa-f]{1,4}:){5}(((:[0-9A-Fa-f]{1,4}){1,2})|:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3})|:))|(([0-9A-Fa-f]{1,4}:){4}(((:[0-9A-Fa-f]{1,4}){1,3})|((:[0-9A-Fa-f]{1,4})?:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){3}(((:[0-9A-Fa-f]{1,4}){1,4})|((:[0-9A-Fa-f]{1,4}){0,2}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){2}(((:[0-9A-Fa-f]{1,4}){1,5})|((:[0-9A-Fa-f]{1,4}){0,3}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){1}(((:[0-9A-Fa-f]{1,4}){1,6})|((:[0-9A-Fa-f]{1,4}){0,4}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(:(((:[0-9A-Fa-f]{1,4}){1,7})|((:[0-9A-Fa-f]{1,4}){0,5}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:)))(%.+)?\s*$))`
+	ClusterManagementHost string `json:"clusterHost"`
+
+	// Stores SVM's uuid after it is created
+	SvmUuid string `json:"svmUuid,omitempty"`
+
+	// Stores optional SVM's comment
+	// +kubebuilder:validation:Optional
+	SvmComment string `json:"svmComment,omitempty"`
+
+	// Stores optional debug
+	// +kubebuilder:default:=false
+	SvmDebug bool `json:"debug,omitempty"`
+
+	// Stores optional aggregate list
+	// +kubebuilder:validation:Optional
+	Aggregates []Aggregate `json:"aggregates,omitempty"`
+
+	// Provides optional SVM managment LIF
+	// +kubebuilder:validation:Optional
+	ManagementLIF *LIF `json:"management,omitempty"`
+
+	// Provides required ONTAP cluster administrator credentials
+	// +kubebuilder:validation:Required
+	ClusterCredentialSecret NamespacedName `json:"clusterCredentials"`
+
+	// Provides optional SVM administrator credentials
+	// +kubebuilder:validation:Optional
+	VsadminCredentialSecret NamespacedName `json:"vsadminCredentials,omitempty"`
+
+	// Provide optional NFS configuration
+	// +kubebuilder:validation:Optional
+	NfsConfig *NfsSubSpec `json:"nfs,omitempty"`
+
+	// Provide optional iSCSI configuration
+	// +kubebuilder:validation:Optional
+	IscsiConfig *IscsiSubSpec `json:"iscsi,omitempty"`
 }
 
 // StorageVirtualMachineStatus defines the observed state of StorageVirtualMachine
 type StorageVirtualMachineStatus struct {
 	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
+	Conditions []metav1.Condition `json:"conditions"`
 }
 
-//+kubebuilder:object:root=true
-//+kubebuilder:subresource:status
-
+// CHECK OUT THIS:  https://www.brendanp.com/pretty-printing-with-kubebuilder/
+// +kubebuilder:printcolumn:name="Age",type="date",JSONPath=".metadata.creationTimestamp"
+// +kubebuilder:printcolumn:name="SVM UUID",type="string",JSONPath=`.spec.svmUuid`
+// +kubebuilder:object:root=true
+// +kubebuilder:subresource:status
+// +kubebuilder:resource:path=storagevirtualmachines,shortName=svm
+// +kubebuilder:storageversion
 // StorageVirtualMachine is the Schema for the storagevirtualmachines API
 type StorageVirtualMachine struct {
 	metav1.TypeMeta   `json:",inline"`
@@ -61,4 +107,12 @@ type StorageVirtualMachineList struct {
 
 func init() {
 	SchemeBuilder.Register(&StorageVirtualMachine{}, &StorageVirtualMachineList{})
+}
+
+func (svm *StorageVirtualMachine) GetConditions() []metav1.Condition {
+	return svm.Status.Conditions
+}
+
+func (svm *StorageVirtualMachine) SetConditions(conditions []metav1.Condition) {
+	svm.Status.Conditions = conditions
 }

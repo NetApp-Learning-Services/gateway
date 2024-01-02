@@ -3,7 +3,7 @@ package controller
 import (
 	"encoding/json"
 	"fmt"
-	gatewayv1alpha2 "gateway/api/v1alpha2"
+	gateway "gateway/api/v1beta1"
 	"gateway/internal/controller/ontap"
 	"strconv"
 
@@ -44,7 +44,7 @@ func NetmaskIntToString(mask int) (netmaskstring string) {
 	return
 }
 
-func CreateLif(lifToCreate gatewayv1alpha2.LIF, lifType string, uuid string, oc *ontap.Client, log logr.Logger) (err error) {
+func CreateLif(lifToCreate gateway.LIF, lifType string, uuid string, oc *ontap.Client, log logr.Logger) (err error) {
 	var newLif ontap.IpInterface
 	newLif.Name = lifToCreate.Name
 	newLif.Ip.Address = lifToCreate.IPAddress
@@ -72,7 +72,7 @@ func CreateLif(lifToCreate gatewayv1alpha2.LIF, lifType string, uuid string, oc 
 	return nil
 }
 
-func UpdateLif(lifDefinition gatewayv1alpha2.LIF, lifToUpdate ontap.IpInterface, lifType string, oc *ontap.Client, log logr.Logger) (err error) {
+func UpdateLif(lifDefinition gateway.LIF, lifToUpdate ontap.IpInterface, lifType string, oc *ontap.Client, log logr.Logger) (err error) {
 
 	netmaskAsInt, _ := strconv.Atoi(lifToUpdate.Ip.Netmask)
 	netmaskAsIP := NetmaskIntToString(netmaskAsInt)

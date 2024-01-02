@@ -4,7 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	gatewayv1alpha2 "gateway/api/v1alpha2"
+	gateway "gateway/api/v1beta1"
 	"gateway/internal/controller/ontap"
 	"reflect"
 
@@ -16,7 +16,7 @@ const NfsLifType = "default-data-files" //magic word
 const NfsLifScope = "svm"               //magic word
 
 func (r *StorageVirtualMachineReconciler) reconcileNfsUpdate(ctx context.Context,
-	svmCR *gatewayv1alpha2.StorageVirtualMachine, uuid string, oc *ontap.Client, log logr.Logger) error {
+	svmCR *gateway.StorageVirtualMachine, uuid string, oc *ontap.Client, log logr.Logger) error {
 
 	log.Info("STEP 13: Update NFS service")
 
@@ -373,7 +373,7 @@ func (r *StorageVirtualMachineReconciler) reconcileNfsUpdate(ctx context.Context
 	return nil
 }
 
-func CreateNfsExport(exportToCreate gatewayv1alpha2.NfsExport, uuid string, oc *ontap.Client, log logr.Logger) (err error) {
+func CreateNfsExport(exportToCreate gateway.NfsExport, uuid string, oc *ontap.Client, log logr.Logger) (err error) {
 	var newExport ontap.ExportPolicy
 	newExport.Name = exportToCreate.Name
 

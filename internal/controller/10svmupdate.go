@@ -8,14 +8,14 @@ import (
 	"fmt"
 	defaultLog "log"
 
-	gatewayv1alpha2 "gateway/api/v1alpha2"
+	gateway "gateway/api/v1beta1"
 	"gateway/internal/controller/ontap"
 
 	"github.com/go-logr/logr"
 )
 
 func (r *StorageVirtualMachineReconciler) reconcileSvmUpdate(ctx context.Context,
-	svmCR *gatewayv1alpha2.StorageVirtualMachine, svmRetrieved ontap.SvmByUUID, oc *ontap.Client, log logr.Logger) error {
+	svmCR *gateway.StorageVirtualMachine, svmRetrieved ontap.SvmByUUID, oc *ontap.Client, log logr.Logger) error {
 
 	log.Info("STEP 10: Update SVM")
 
