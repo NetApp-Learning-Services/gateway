@@ -18,7 +18,7 @@ stringData:
   username: vsadmin
   password: Netapp1!
 ---
-apiVersion: gateway.netapp.com/v1alpha2
+apiVersion: gateway.netapp.com/v1beta1
 kind: StorageVirtualMachine
 metadata:
   name: storagevirtualmachine-testcase
