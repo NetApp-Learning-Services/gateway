@@ -28,3 +28,8 @@ wget https://dl.google.com/go/go1.21.5.linux-amd64.tar.gz
 sudo tar -C /usr/local/ -xzf go1.21.5.linux-amd64.tar.gz
 
 Removed kubebuilder:storage from SVM's definition for all versions except v1beta1
+
+Needed to create docker-registry for service account to access local docker registry image:
+
+kubectl create secret docker-registry myreg --docker-server=https://docker-registry:30001 --docker-username=admin --docker-password=Netapp1!
+kubectl patch sa gateway-controller-manager -p '{\"imagePullSecrets\": [{\"name\": \"myreg\"}]}'
