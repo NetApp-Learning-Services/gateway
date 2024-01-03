@@ -34,3 +34,5 @@ Can do this:
 kubectl create secret docker-registry myreg --docker-server=https://docker-registry:30001 --docker-username=admin --docker-password=Netapp1!
 kubectl patch sa gateway-controller-manager -p '{\"imagePullSecrets\": [{\"name\": \"myreg\"}]}'
 Or add to the config/rbac/kustomization.yaml to generate the reg_cred_secret.yaml  
+
+updated controllerruntime like this:  go get sigs.k8s.io/controller-runtime@v0.15.3
