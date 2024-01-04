@@ -1333,8 +1333,6 @@ spec:
       status: {}
 ---
 apiVersion: v1
-imagePullSecrets:
-- name: gateway-reg-cred-secret
 kind: ServiceAccount
 metadata:
   labels:
@@ -1345,7 +1343,7 @@ metadata:
     app.kubernetes.io/name: serviceaccount
     app.kubernetes.io/part-of: https://github.com/NetApp-Learning-Services/gateway
   name: gateway-controller-manager
-  namespace: gateway-system
+  namespace: gateway
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
@@ -1358,7 +1356,7 @@ metadata:
     app.kubernetes.io/name: role
     app.kubernetes.io/part-of: https://github.com/NetApp-Learning-Services/gateway
   name: gateway-leader-election-role
-  namespace: gateway-system
+  namespace: gateway
 rules:
 - apiGroups:
   - ""
@@ -1492,7 +1490,7 @@ metadata:
     app.kubernetes.io/name: rolebinding
     app.kubernetes.io/part-of: https://github.com/NetApp-Learning-Services/gateway
   name: gateway-leader-election-rolebinding
-  namespace: gateway-system
+  namespace: gateway
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: Role
@@ -1500,7 +1498,7 @@ roleRef:
 subjects:
 - kind: ServiceAccount
   name: gateway-controller-manager
-  namespace: gateway-system
+  namespace: gateway
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
@@ -1520,7 +1518,7 @@ roleRef:
 subjects:
 - kind: ServiceAccount
   name: gateway-controller-manager
-  namespace: gateway-system
+  namespace: gateway
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
@@ -1540,17 +1538,7 @@ roleRef:
 subjects:
 - kind: ServiceAccount
   name: gateway-controller-manager
-  namespace: gateway-system
----
-apiVersion: v1
-data:
-  .dockerconfigjson: eyJhdXRocyI6eyJodHRwczovL2RvY2tlci1yZWdpc3RyeTozMDAwMSI6eyJ1c2VybmFtZSI6ImFkbWluIiwicGFzc3dvcmQiOiJOZXRhcHAxISIsImF1dGgiOiJZV1J0YVc0NlRtVjBZWEJ3TVNFPSJ9fX0=
-kind: Secret
-metadata:
-  creationTimestamp: null
-  name: gateway-reg-cred-secret
-  namespace: gateway-system
-type: kubernetes.io/dockerconfigjson
+  namespace: gateway
 ---
 apiVersion: v1
 kind: Service
@@ -1564,7 +1552,7 @@ metadata:
     app.kubernetes.io/part-of: https://github.com/NetApp-Learning-Services/gateway
     control-plane: controller-manager
   name: gateway-controller-manager-metrics-service
-  namespace: gateway-system
+  namespace: gateway
 spec:
   ports:
   - name: https
@@ -1586,7 +1574,7 @@ metadata:
     app.kubernetes.io/part-of: https://github.com/NetApp-Learning-Services/gateway
     control-plane: controller-manager
   name: gateway-controller-manager
-  namespace: gateway-system
+  namespace: gateway
 spec:
   replicas: 1
   selector:
@@ -1629,7 +1617,7 @@ spec:
         - --leader-elect
         command:
         - /manager
-        image: controller:latest
+        image: curtisab/gateway:v1beta1
         livenessProbe:
           httpGet:
             path: /healthz
