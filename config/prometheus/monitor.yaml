@@ -8,8 +8,8 @@ metadata:
     app.kubernetes.io/name: servicemonitor
     app.kubernetes.io/instance: controller-manager-metrics-monitor
     app.kubernetes.io/component: metrics
-    app.kubernetes.io/created-by: https://github.com/NetApp-Learning-Services/gateway
-    app.kubernetes.io/part-of: https://github.com/NetApp-Learning-Services/gateway
+    app.kubernetes.io/created-by: github.com_NetApp-Learning-Services_gateway
+    app.kubernetes.io/part-of: github.com_NetApp-Learning-Services_gateway
     app.kubernetes.io/managed-by: kustomize
   name: controller-manager-metrics-monitor
   namespace: system
