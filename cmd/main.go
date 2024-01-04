@@ -102,6 +102,8 @@ func main() {
 	if err = (&controller.StorageVirtualMachineReconciler{
 		Client: mgr.GetClient(),
 		Scheme: mgr.GetScheme(),
+		// Added to support events
+		Recorder: mgr.GetEventRecorderFor("storagevirtualmachine-controller"),
 	}).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "StorageVirtualMachine")
 		os.Exit(1)
