@@ -8,7 +8,7 @@ layout:
 plugins:
   manifests.sdk.operatorframework.io/v2: {}
   scorecard.sdk.operatorframework.io/v2: {}
-projectName: gateway-migration
+projectName: gateway
 repo: github.com/NetApp-Learning-Services/gateway
 resources:
 - api:

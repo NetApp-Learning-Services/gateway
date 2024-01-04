@@ -6,8 +6,8 @@ metadata:
     app.kubernetes.io/name: clusterrole
     app.kubernetes.io/instance: storagevirtualmachine-editor-role
     app.kubernetes.io/component: rbac
-    app.kubernetes.io/created-by: gateway-migration
-    app.kubernetes.io/part-of: gateway-migration
+    app.kubernetes.io/created-by: https://github.com/NetApp-Learning-Services/gateway
+    app.kubernetes.io/part-of: https://github.com/NetApp-Learning-Services/gateway
     app.kubernetes.io/managed-by: kustomize
   name: storagevirtualmachine-editor-role
 rules:

@@ -38,3 +38,14 @@ Or add to the config/rbac/kustomization.yaml to generate the reg_cred_secret.yam
 updated controllerruntime like this:  go get sigs.k8s.io/controller-runtime@v0.15.3
 
 Made sure that an event recorder was created in the main.go.  Followed this:  https://book.kubebuilder.io/reference/raising-events.html?highlight=Event#how-to-be-able-to-raise-events
+
+
+Docker Hub update:
+1. build and test on a test machine using test.sh
+2. docker image tag docker-registry:30001/curtisab/gateway:v1beta1 curtisab/gateway:v1beta1
+3. docker image push curtisab/gateway:v1beta1
+4. docker image tag curtisab/gateway:v1beta1 curtisab/gateway:latest
+5. docker image push curtisab/gateway:latest
+
+Created and edited final released CRD yaml:
+kustomize build config/default -o  ./config/deploy/v1beta1/gatewayoperator.yaml
