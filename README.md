@@ -11,9 +11,7 @@ The operator creates and updates:
 * an SVM, 
 * an optional SVM management LIF, 
 * an optional SVM administrator management credentials (vsadmin), 
-* an optional NFS configuration with:
-- NFS interfaces
-- and NFS exports, 
+* an optional NFS configuration with NFS interfaces and NFS exports, 
 * and an optional iSCSI configuration with iSCSI interfaces.
 
 
@@ -72,7 +70,7 @@ apiVersion: gateway.netapp.com/v1beta1
 kind: StorageVirtualMachine
 metadata:
   name: storagevirtualmachine-testcase
-  namespace: gateway-system
+  namespace: gateway
 spec:
   svmName: testVs
   clusterHost: 192.168.0.102
@@ -87,10 +85,10 @@ spec:
     homeNode: Cluster2-01
   vsadminCredentials:
     name: ontap-svm-admin
-    namespace: gateway-system 
+    namespace: gateway 
   clusterCredentials:
     name: ontap-cluster-admin
-    namespace: gateway-system
+    namespace: gateway
   iscsi:
     enabled: true
     alias: testVs
@@ -130,7 +128,7 @@ Written by Curtis Burchett
 ### How it works
 This project aims to follow the Kubernetes [Operator pattern](https://kubernetes.io/docs/concepts/extend-kubernetes/operator/).
 
-It uses [Controllers](https://kubernetes.io/docs/concepts/architecture/controller/) which provides a reconcile function responsible for synchronizing resources untile the desired state is reached on the cluster. 
+It uses [Controllers](https://kubernetes.io/docs/concepts/architecture/controller/) which provides a reconcile function responsible for synchronizing resources until the desired state is reached on the cluster. 
 
 ## License
 Copyright 2024.
