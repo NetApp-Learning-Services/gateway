@@ -5,8 +5,8 @@ metadata:
     app.kubernetes.io/name: clusterrole
     app.kubernetes.io/instance: proxy-role
     app.kubernetes.io/component: kube-rbac-proxy
-    app.kubernetes.io/created-by: https://github.com/NetApp-Learning-Services/gateway
-    app.kubernetes.io/part-of: https://github.com/NetApp-Learning-Services/gateway
+    app.kubernetes.io/created-by: github.com_NetApp-Learning-Services_gateway
+    app.kubernetes.io/part-of: github.com_NetApp-Learning-Services_gateway
     app.kubernetes.io/managed-by: kustomize
   name: proxy-role
 rules:
