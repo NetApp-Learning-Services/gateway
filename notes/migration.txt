@@ -36,3 +36,5 @@ kubectl patch sa gateway-controller-manager -p '{\"imagePullSecrets\": [{\"name\
 Or add to the config/rbac/kustomization.yaml to generate the reg_cred_secret.yaml  
 
 updated controllerruntime like this:  go get sigs.k8s.io/controller-runtime@v0.15.3
+
+Made sure that an event recorder was created in the main.go.  Followed this:  https://book.kubebuilder.io/reference/raising-events.html?highlight=Event#how-to-be-able-to-raise-events
