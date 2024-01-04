@@ -5,9 +5,9 @@ A simple Kubernetes operator that creates, configures, and deletes NetApp ONTAP 
 This operator uses Red Hat's [Operator-SDK](https://sdk.operatorframework.io) to scaffold a controller that manages an Storage Virtual Machines (SVMs) resources in an NetApp ONTAP cluster. 
 
 
-The current version of the operator is v1alpha2.
+The current version of the operator is v1beta1.  V1beta1 migrated Operator-SDK to 1.33.0 and updated go dependencies to avoid critical warnings.  
 
-It currently creates and updates:
+The operator creates and updates:
 * an SVM, 
 * an optional SVM management LIF, 
 * an optional SVM administrator management credentials (vsadmin), 
@@ -23,7 +23,7 @@ When the custom resource (CR) is delete, the operator uses a finalizer (called g
 
 
 ```
-kubectl create -f https://raw.githubusercontent.com/NetApp-Learning-Services/gateway/main/config/deploy/v1alpha2/gatewayoperator.yaml
+kubectl create -f https://raw.githubusercontent.com/NetApp-Learning-Services/gateway/main/config/deploy/v1beta1/gatewayoperator.yaml
 ```
 
 ### 2. Create a secret for the ONTAP cluster administrator's credentials:
@@ -66,7 +66,7 @@ stringData:
 
 	
 ```
-apiVersion: gateway.netapp.com/v1alpha2
+apiVersion: gateway.netapp.com/v1beta1
 kind: StorageVirtualMachine
 metadata:
   name: storagevirtualmachine-testcase
@@ -131,8 +131,7 @@ This project aims to follow the Kubernetes [Operator pattern](https://kubernetes
 It uses [Controllers](https://kubernetes.io/docs/concepts/architecture/controller/) which provides a reconcile function responsible for synchronizing resources until the desired state is reached on the cluster. 
 
 ## License
-
-Copyright 2022.
+Copyright 2024.
 
 Creative Commons Legal Code, CC0 1.0 Universal
 

@@ -1,0 +1,51 @@
+Migration to operator-sdk 1.33 which implements Kubebuilder go/v4
+
+1.  Create a new project:  operator-sdk init --domain netapp.com --repo github.com/NetApp-Learning-Services/gateway --plugins=go/v4 
+2. Recreate v1alpha1 api:  operator-sdk create api --group gateway --version v1alpha1 --kind StorageVirtualMachine --resource --controller
+3. Recreate v1alpha2 api:  operator-sdk create api --group gateway --version v1alpha2 --kind StorageVirtualMachine --resource
+4. Create v1alpha3 api:  operator-sdk create api --group gateway --version v1alpha3 --kind StorageVirtualMachine --resource
+5. Create v1beta1 api:  operator-sdk create api --group gateway --version v1beta1 --kind StorageVirtualMachine --resource
+
+
+to update go dependiences recursively:  
+
+1. go mod tidy
+2. go get -u ./...
+
+Install operator-sdk on kubwor2-1: 
+
+export ARCH=$(case $(uname -m) in x86_64) echo -n amd64 ;; aarch64) echo -n arm64 ;; *) echo -n $(uname -m) ;; esac)
+export OS=$(uname | awk '{print tolower($0)}')
+export OPERATOR_SDK_DL_URL=https://github.com/operator-framework/operator-sdk/releases/download/v1.33.0
+curl -LO ${OPERATOR_SDK_DL_URL}/operator-sdk_${OS}_${ARCH}
+chmod +x operator-sdk_${OS}_${ARCH} && sudo mv operator-sdk_${OS}_${ARCH} /usr/local/bin/operator-sdk
+
+Install go on kubwor2-1:
+
+rm -rf /usr/local/go && tar -C /usr/local -xzf go1.19.2.linux-amd64.tar.gz
+export PATH=$PATH:/usr/local/go/bin
+wget https://dl.google.com/go/go1.21.5.linux-amd64.tar.gz
+sudo tar -C /usr/local/ -xzf go1.21.5.linux-amd64.tar.gz
+
+Removed kubebuilder:storage from SVM's definition for all versions except v1beta1
+
+Needed to create docker-registry for service account to access local docker registry image:
+Can do this:
+kubectl create secret docker-registry myreg --docker-server=https://docker-registry:30001 --docker-username=admin --docker-password=Netapp1!
+kubectl patch sa gateway-controller-manager -p '{\"imagePullSecrets\": [{\"name\": \"myreg\"}]}'
+Or add to the config/rbac/kustomization.yaml to generate the reg_cred_secret.yaml  
+
+updated controllerruntime like this:  go get sigs.k8s.io/controller-runtime@v0.15.3
+
+Made sure that an event recorder was created in the main.go.  Followed this:  https://book.kubebuilder.io/reference/raising-events.html?highlight=Event#how-to-be-able-to-raise-events
+
+
+Docker Hub update:
+1. build and test on a test machine using test.sh
+2. docker image tag docker-registry:30001/curtisab/gateway:v1beta1 curtisab/gateway:v1beta1
+3. docker image push curtisab/gateway:v1beta1
+4. docker image tag curtisab/gateway:v1beta1 curtisab/gateway:latest
+5. docker image push curtisab/gateway:latest
+
+Created and edited final released CRD yaml:
+kustomize build config/default -o  ./config/deploy/v1beta1/gatewayoperator.yaml
