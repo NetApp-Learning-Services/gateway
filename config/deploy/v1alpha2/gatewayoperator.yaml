@@ -656,13 +656,13 @@ apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: gateway-manager
-  namespace: gateway-system-system
+  namespace: gateway-system
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
   name: gateway-leader-election-role
-  namespace: gateway-system-system
+  namespace: gateway-system
 rules:
 - apiGroups:
   - ""
@@ -775,7 +775,7 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
   name: gateway-leader-election-rolebinding
-  namespace: gateway-system-system
+  namespace: gateway-system
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: Role
@@ -783,7 +783,7 @@ roleRef:
 subjects:
 - kind: ServiceAccount
   name: gateway-manager
-  namespace: gateway-system-system
+  namespace: gateway-system
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
@@ -796,7 +796,7 @@ roleRef:
 subjects:
 - kind: ServiceAccount
   name: gateway-manager
-  namespace: gateway-system-system
+  namespace: gateway-system
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
@@ -809,7 +809,7 @@ roleRef:
 subjects:
 - kind: ServiceAccount
   name: gateway-manager
-  namespace: gateway-system-system
+  namespace: gateway-system
 ---
 apiVersion: v1
 data:
@@ -838,7 +838,7 @@ data:
 kind: ConfigMap
 metadata:
   name: gateway-manager-config
-  namespace: gateway-system-system
+  namespace: gateway-system
 ---
 apiVersion: v1
 kind: Service
@@ -846,7 +846,7 @@ metadata:
   labels:
     control-plane: controller-manager
   name: gateway-manager-metrics-service
-  namespace: gateway-system-system
+  namespace: gateway-system
 spec:
   ports:
   - name: https
@@ -862,7 +862,7 @@ metadata:
   labels:
     control-plane: controller-manager
   name: gateway-manager
-  namespace: gateway-system-system
+  namespace: gateway-system
 spec:
   replicas: 1
   selector:
