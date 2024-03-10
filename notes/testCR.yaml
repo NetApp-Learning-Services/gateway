@@ -50,6 +50,14 @@ spec:
       netmask: 255.255.255.0
       broadcastDomain: Default
       homeNode: Cluster1-01
+  nvme:
+    enabled: true
+    interfaces:
+    - name: nvme1
+      ip: 192.168.0.83
+      netmask: 255.255.255.0
+      broadcastDomain: Default
+      homeNode: Cluster1-01
   nfs:
     enabled: true
     v3: true
