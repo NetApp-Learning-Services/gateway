@@ -29,3 +29,7 @@ VERSION ?= v1beta1
 IMAGE_TAG_BASE ?= curtisab/gateway
 OPERATOR_SDK_VERSION ?= v1.34.1
 ENVTEST_K8S_VERSION = 1.29.2
+
+6. Updated testCR.yaml
+
+7. 

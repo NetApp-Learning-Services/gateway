@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: Secret
 metadata:
-  name: ontap-cluster-admin
+  name: ontap-cluster1-admin
   namespace: gateway-system
 type: kubernetes.io/basic-auth
 stringData:
@@ -11,7 +11,7 @@ stringData:
 apiVersion: v1
 kind: Secret
 metadata:
-  name: ontap-svm-admin
+  name: ontap-svmtest-admin
   namespace: gateway-system
 type: kubernetes.io/basic-auth
 stringData:
@@ -21,40 +21,35 @@ stringData:
 apiVersion: gateway.netapp.com/v1beta1
 kind: StorageVirtualMachine
 metadata:
-  name: storagevirtualmachine-testcase
+  name: svmtest
   namespace: gateway-system
 spec:
-  svmName: testVs
-  clusterHost: 192.168.0.102
+  svmName: svmtest
+  clusterHost: 192.168.0.101
   debug: false
   aggregates:
-  - name: Cluster2_01_FC_1
+  - name: Cluster1_01_FC_1
   management:
     name: manage1
-    ip: 192.168.0.30
+    ip: 192.168.0.80
     netmask: 255.255.255.0
     broadcastDomain: Default
-    homeNode: Cluster2-01
+    homeNode: Cluster1-01
   vsadminCredentials:
-    name: ontap-svm-admin
-    namespace: gateway-system 
+    name: ontap-svmtest-admin
+    namespace: gateway-system
   clusterCredentials:
-    name: ontap-cluster-admin
+    name: ontap-cluster1-admin
     namespace: gateway-system
   iscsi:
     enabled: true
     alias: testVs
     interfaces:
     - name: iscsi1
-      ip: 192.168.0.32
+      ip: 192.168.0.82
       netmask: 255.255.255.0
       broadcastDomain: Default
-      homeNode: Cluster2-01
-    - name: iscsi2
-      ip: 192.168.0.33
-      netmask: 255.255.255.0
-      broadcastDomain: Default
-      homeNode: Cluster2-01
+      homeNode: Cluster1-01
   nfs:
     enabled: true
     v3: true
@@ -62,13 +57,12 @@ spec:
     v41: true
     interfaces:
     - name: nfs1
-      ip: 192.168.0.31
+      ip: 192.168.0.81
       netmask: 255.255.255.0
       broadcastDomain: Default
-      homeNode: Cluster2-01
+      homeNode: Cluster1-01
     export:
       name: default
-      #simplified rules 
       rules:
       - clients: 0.0.0.0/0
         protocols: any
@@ -76,16 +70,3 @@ spec:
         ro: any
         superuser: any
         anon:  "65534"
-      #but rules should look like this:
-      # rules:
-      # - clients: 
-      #   - Match: 0.0.0.0/0
-      #   protocols: 
-      #   - any
-      #   rw: 
-      #   - any
-      #   ro: 
-      #   - any
-      #   superuser: 
-      #   - any
-      #   anon: "65534"
