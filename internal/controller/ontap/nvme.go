@@ -26,8 +26,8 @@ func (c *Client) GetNvmeServiceBySvmUuid(uuid string) (nvmeService NvmeService, 
 
 	data, err := c.clientGet(uri)
 	if err != nil {
-		if strings.Contains(err.Error(), "Cannot find iSCSI service") {
-			return nvmeService, errors.NewNotFound(schema.GroupResource{Group: "gatewayv1alpha2", Resource: "StorageVirtualMachine"}, "no nvme")
+		if strings.Contains(err.Error(), "An NVMe service does not exist") {
+			return nvmeService, errors.NewNotFound(schema.GroupResource{Group: "gatewayv1beta1", Resource: "StorageVirtualMachine"}, "no nvme")
 		}
 		return nvmeService, &apiError{1, err.Error()}
 	}
