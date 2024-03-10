@@ -5,9 +5,16 @@ sudo apt install docker.io
 
 2. Install Go:
 
+Check the current go version:  sudo apt list --installed | grep golang
+Purge current go version:  sudo apt-get purge golang*
+
 export PATH=$PATH:/usr/local/go/bin
 wget https://dl.google.com/go/go1.22.1.linux-amd64.tar.gz
 sudo tar -C /usr/local/ -xzf go1.22.1.linux-amd64.tar.gz
+export GO111MODULE=on
+
+check go: go env
+check go version: go version
 
 3. Install Operator-SDK:
 
