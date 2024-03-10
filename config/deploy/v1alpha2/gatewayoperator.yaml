@@ -3,14 +3,13 @@ kind: Namespace
 metadata:
   labels:
     control-plane: controller-manager
-  name: gateway
+  name: gateway-system
 ---
 apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.9.2
-  creationTimestamp: null
   name: storagevirtualmachines.gateway.netapp.com
 spec:
   group: gateway.netapp.com
@@ -657,13 +656,13 @@ apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: gateway-manager
-  namespace: gateway
+  namespace: gateway-system
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
   name: gateway-leader-election-role
-  namespace: gateway
+  namespace: gateway-system
 rules:
 - apiGroups:
   - ""
@@ -700,7 +699,6 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  creationTimestamp: null
   name: gateway-manager-role
 rules:
 - apiGroups:
@@ -777,7 +775,7 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
   name: gateway-leader-election-rolebinding
-  namespace: gateway
+  namespace: gateway-system
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: Role
@@ -785,7 +783,7 @@ roleRef:
 subjects:
 - kind: ServiceAccount
   name: gateway-manager
-  namespace: gateway
+  namespace: gateway-system
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
@@ -798,7 +796,7 @@ roleRef:
 subjects:
 - kind: ServiceAccount
   name: gateway-manager
-  namespace: gateway
+  namespace: gateway-system
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
@@ -811,7 +809,7 @@ roleRef:
 subjects:
 - kind: ServiceAccount
   name: gateway-manager
-  namespace: gateway
+  namespace: gateway-system
 ---
 apiVersion: v1
 data:
@@ -840,7 +838,7 @@ data:
 kind: ConfigMap
 metadata:
   name: gateway-manager-config
-  namespace: gateway
+  namespace: gateway-system
 ---
 apiVersion: v1
 kind: Service
@@ -848,7 +846,7 @@ metadata:
   labels:
     control-plane: controller-manager
   name: gateway-manager-metrics-service
-  namespace: gateway
+  namespace: gateway-system
 spec:
   ports:
   - name: https
@@ -864,7 +862,7 @@ metadata:
   labels:
     control-plane: controller-manager
   name: gateway-manager
-  namespace: gateway
+  namespace: gateway-system
 spec:
   replicas: 1
   selector:
