@@ -9,6 +9,7 @@ import (
 	"gateway/internal/controller/ontap"
 
 	"github.com/go-logr/logr"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 )
@@ -23,7 +24,7 @@ func (r *StorageVirtualMachineReconciler) reconcileDeletions(ctx context.Context
 	isSMVMarkedToBeDeleted := svmCR.GetDeletionTimestamp() != nil
 	if isSMVMarkedToBeDeleted {
 		if controllerutil.ContainsFinalizer(svmCR, finalizerName) {
-			if err := r.finalizeSVM(ctx, svmCR, oc); err != nil {
+			if err := r.finalizeSVM(svmCR, oc); err != nil {
 				log.Error(err, "Error during custom resource deletion - requeuing")
 				_ = r.setConditionSVMDeleted(ctx, svmCR, CONDITION_STATUS_FALSE)
 				return ctrl.Result{}, err
@@ -46,7 +47,7 @@ func (r *StorageVirtualMachineReconciler) reconcileDeletions(ctx context.Context
 	return ctrl.Result{}, nil
 }
 
-func (r *StorageVirtualMachineReconciler) finalizeSVM(ctx context.Context,
+func (r *StorageVirtualMachineReconciler) finalizeSVM(
 	svmCR *gateway.StorageVirtualMachine, oc *ontap.Client) error {
 
 	err := oc.DeleteStorageVM(svmCR.Spec.SvmUuid)
@@ -56,14 +57,38 @@ func (r *StorageVirtualMachineReconciler) finalizeSVM(ctx context.Context,
 	return nil
 }
 
-// Moved to 7svmcreation.go because that is where it is executed
-// func (r *StorageVirtualMachineReconciler) addFinalizer(ctx context.Context, svmCR *gatewayv1alpha1.StorageVirtualMachine) (ctrl.Result, error) {
-// 	if !controllerutil.ContainsFinalizer(svmCR, finalizer) {
-// 		controllerutil.AddFinalizer(svmCR, finalizer)
-// 		err := r.Update(ctx, svmCR)
-// 		if err != nil {
-// 			return ctrl.Result{}, err
-// 		}
-// 	}
-// 	return ctrl.Result{}, nil
-// }
+// STEP 5
+// SVM Deletion
+// Note: Status of SVM_DELETION can only be false or unknown
+// Never have a true state because the custom resource is deleted if true occurs
+// and therefore can't update the condition status on the custom resource
+const CONDITION_TYPE_SVM_DELETION = "5SVMDeletion"
+const CONDITION_REASON_SVM_DELETION = "SVMDeleted"
+
+// const CONDITION_MESSAGE_SVM_DELETION_TRUE = "SVM deleted"
+const CONDITION_MESSAGE_SVM_DELETION_FALSE = "SVM NOT deleted - finalizer remains"
+const CONDITION_MESSAGE_SVM_DELETION_UNKNOWN = "SVM deletion in unknown state"
+
+func (reconciler *StorageVirtualMachineReconciler) setConditionSVMDeleted(ctx context.Context,
+	svmCR *gateway.StorageVirtualMachine, status metav1.ConditionStatus) error {
+
+	if reconciler.containsCondition(svmCR, CONDITION_REASON_SVM_DELETION) {
+		reconciler.deleteCondition(ctx, svmCR, CONDITION_TYPE_SVM_DELETION, CONDITION_REASON_SVM_DELETION)
+	}
+
+	// if status == CONDITION_STATUS_TRUE {
+	// 	return appendCondition(ctx, reconciler.Client, svmCR, CONDITION_TYPE_SVM_DELETION, status,
+	// 		CONDITION_REASON_SVM_DELETION, CONDITION_MESSAGE_SVM_DELETION_TRUE)
+	// }
+
+	if status == CONDITION_STATUS_FALSE {
+		return appendCondition(ctx, reconciler.Client, svmCR, CONDITION_TYPE_SVM_DELETION, status,
+			CONDITION_REASON_SVM_DELETION, CONDITION_MESSAGE_SVM_DELETION_FALSE)
+	}
+
+	if status == CONDITION_STATUS_UNKNOWN {
+		return appendCondition(ctx, reconciler.Client, svmCR, CONDITION_TYPE_SVM_DELETION, status,
+			CONDITION_REASON_SVM_DELETION, CONDITION_MESSAGE_SVM_DELETION_UNKNOWN)
+	}
+	return nil
+}

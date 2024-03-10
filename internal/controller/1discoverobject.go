@@ -33,3 +33,20 @@ func (r *StorageVirtualMachineReconciler) reconcileDiscoverObject(ctx context.Co
 	return svmCR, nil
 
 }
+
+// STEP 1
+// Report whether custom resource was located by operator
+// Note: Status of RESOURCE_FOUND can only be true; otherwise there is no condition
+const CONDITION_TYPE_RESOURCE_FOUND = "1ResourceDiscovered"
+const CONDITION_REASON_RESOURCE_FOUND = "ResourceFound"
+const CONDITION_MESSAGE_RESOURCE_FOUND = "Resource discovered"
+
+func (reconciler *StorageVirtualMachineReconciler) setConditionResourceFound(ctx context.Context,
+	svmCR *gateway.StorageVirtualMachine) error {
+
+	if !reconciler.containsCondition(svmCR, CONDITION_REASON_RESOURCE_FOUND) {
+		return appendCondition(ctx, reconciler.Client, svmCR, CONDITION_TYPE_RESOURCE_FOUND, CONDITION_STATUS_TRUE,
+			CONDITION_REASON_RESOURCE_FOUND, CONDITION_MESSAGE_RESOURCE_FOUND)
+	}
+	return nil
+}

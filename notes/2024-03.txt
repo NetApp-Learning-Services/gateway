@@ -32,4 +32,11 @@ ENVTEST_K8S_VERSION = 1.29.2
 
 6. Updated testCR.yaml
 
-7. 
+7. Tested:
+
+make generate
+make manifests
+make deploy
+make undeploy
+
+8. NVMe support added

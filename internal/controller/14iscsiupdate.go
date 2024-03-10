@@ -10,6 +10,7 @@ import (
 
 	"github.com/go-logr/logr"
 	"k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 const IscsiLifType = "default-data-blocks" //magic word
@@ -210,5 +211,57 @@ func (r *StorageVirtualMachineReconciler) reconcileIscsiUpdate(ctx context.Conte
 
 	// END ISCSI LIFS
 
+	return nil
+}
+
+// STEP 14
+// iSCSI update
+// Note: Status of ISCSI_SERVICE can only be true or false
+const CONDITION_TYPE_ISCSI_SERVICE = "14iSCSIservice"
+const CONDITION_REASON_ISCSI_SERVICE = "iSCSIservice"
+const CONDITION_MESSAGE_ISCSI_SERVICE_TRUE = "iSCSI service configuration succeeded"
+const CONDITION_MESSAGE_ISCSI_SERVICE_FALSE = "iSCSI service configuration failed"
+
+func (reconciler *StorageVirtualMachineReconciler) setConditionIscsiService(ctx context.Context,
+	svmCR *gateway.StorageVirtualMachine, status metav1.ConditionStatus) error {
+
+	// I don't want to delete old references to updates to make a history
+	// if reconciler.containsCondition(ctx, svmCR, CONDITION_REASON_ISCSI_SERVICE) {
+	// 	reconciler.deleteCondition(ctx, svmCR, CONDITION_TYPE_ISCSI_SERVICE, CONDITION_REASON_ISCSI_SERVICE)
+	// }
+
+	if status == CONDITION_STATUS_TRUE {
+		return appendCondition(ctx, reconciler.Client, svmCR, CONDITION_TYPE_ISCSI_SERVICE, status,
+			CONDITION_REASON_ISCSI_SERVICE, CONDITION_MESSAGE_ISCSI_SERVICE_TRUE)
+	}
+
+	if status == CONDITION_STATUS_FALSE {
+		return appendCondition(ctx, reconciler.Client, svmCR, CONDITION_TYPE_ISCSI_SERVICE, status,
+			CONDITION_REASON_ISCSI_SERVICE, CONDITION_MESSAGE_ISCSI_SERVICE_FALSE)
+	}
+	return nil
+}
+
+const CONDITION_REASON_ISCSI_LIF = "iSCSIlif"
+const CONDITION_MESSAGE_ISCSI_LIF_TRUE = "iSCSI LIF configuration succeeded"
+const CONDITION_MESSAGE_ISCSI_LIF_FALSE = "iSCSI LIF configuration failed"
+
+func (reconciler *StorageVirtualMachineReconciler) setConditionIscsiLif(ctx context.Context,
+	svmCR *gateway.StorageVirtualMachine, status metav1.ConditionStatus) error {
+
+	// I don't want to delete old references to updates to make a history
+	// if reconciler.containsCondition(ctx, svmCR, CONDITION_REASON_ISCSI_LIF) {
+	// 	reconciler.deleteCondition(ctx, svmCR, CONDITION_TYPE_ISCSI_SERVICE, CONDITION_REASON_ISCSI_LIF)
+	// }
+
+	if status == CONDITION_STATUS_TRUE {
+		return appendCondition(ctx, reconciler.Client, svmCR, CONDITION_TYPE_ISCSI_SERVICE, status,
+			CONDITION_REASON_ISCSI_LIF, CONDITION_MESSAGE_ISCSI_LIF_TRUE)
+	}
+
+	if status == CONDITION_STATUS_FALSE {
+		return appendCondition(ctx, reconciler.Client, svmCR, CONDITION_TYPE_ISCSI_SERVICE, status,
+			CONDITION_REASON_ISCSI_LIF, CONDITION_MESSAGE_ISCSI_LIF_FALSE)
+	}
 	return nil
 }

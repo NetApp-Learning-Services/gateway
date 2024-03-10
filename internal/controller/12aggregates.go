@@ -9,6 +9,7 @@ import (
 	"gateway/internal/controller/ontap"
 
 	"github.com/go-logr/logr"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 func (r *StorageVirtualMachineReconciler) reconcileAggregates(ctx context.Context,
@@ -79,4 +80,32 @@ func doesElementExist(s []ontap.Aggregate, str string) bool {
 		}
 	}
 	return false
+}
+
+// STEP 12
+// Aggregate assigned
+// Note: Status of AGGREGATE_ASSIGNED can only be true or false
+const CONDITION_TYPE_AGGREGATE_ASSIGNED = "12AggregateAssigned"
+const CONDITION_REASON_AGGREGATE_ASSIGNED = "AggregateAssigned"
+const CONDITION_MESSAGE_AGGREGATE_ASSIGNED_TRUE = "Aggregate assigned to SVM succeeded"
+const CONDITION_MESSAGE_AGGREGATE_ASSIGNED_FALSE = "Aggregate assigned to SVM failed"
+
+func (reconciler *StorageVirtualMachineReconciler) setConditionAggregateAssigned(ctx context.Context,
+	svmCR *gateway.StorageVirtualMachine, status metav1.ConditionStatus) error {
+
+	// I don't want to delete old references to updates to make a history
+	// if reconciler.containsCondition(ctx, svmCR, CONDITION_REASON_AGGREGATE_ASSIGNED) {
+	// 	reconciler.deleteCondition(ctx, svmCR, CONDITION_TYPE_AGGREGATE_ASSIGNED, CONDITION_REASON_AGGREGATE_ASSIGNED)
+	// }
+
+	if status == CONDITION_STATUS_TRUE {
+		return appendCondition(ctx, reconciler.Client, svmCR, CONDITION_TYPE_AGGREGATE_ASSIGNED, status,
+			CONDITION_REASON_AGGREGATE_ASSIGNED, CONDITION_MESSAGE_AGGREGATE_ASSIGNED_TRUE)
+	}
+
+	if status == CONDITION_STATUS_FALSE {
+		return appendCondition(ctx, reconciler.Client, svmCR, CONDITION_TYPE_AGGREGATE_ASSIGNED, status,
+			CONDITION_REASON_AGGREGATE_ASSIGNED, CONDITION_MESSAGE_AGGREGATE_ASSIGNED_FALSE)
+	}
+	return nil
 }

@@ -71,6 +71,10 @@ type StorageVirtualMachineSpec struct {
 	// Provide optional iSCSI configuration
 	// +kubebuilder:validation:Optional
 	IscsiConfig *IscsiSubSpec `json:"iscsi,omitempty"`
+
+	// Provide optional NVMe configuration
+	// +kubebuilder:validation:Optional
+	NvmeConfig *NvmeSubSpec `json:"nvme,omitempty"`
 }
 
 // StorageVirtualMachineStatus defines the observed state of StorageVirtualMachine

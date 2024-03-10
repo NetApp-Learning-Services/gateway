@@ -204,6 +204,13 @@ func (r *StorageVirtualMachineReconciler) Reconcile(ctx context.Context, req ctr
 			if err != nil {
 				return ctrl.Result{RequeueAfter: 30 * time.Second}, err
 			}
+
+			// STEP 15
+			// Reconcile NVMe information
+			err = r.reconcileNvmeUpdate(ctx, svmCR, svmRetrieved.Uuid, oc, log)
+			if err != nil {
+				return ctrl.Result{RequeueAfter: 30 * time.Second}, err
+			}
 		}
 
 	}

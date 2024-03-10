@@ -10,6 +10,7 @@ import (
 
 	"github.com/go-logr/logr"
 	"k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 const NfsLifType = "default-data-files" //magic word
@@ -266,7 +267,7 @@ func (r *StorageVirtualMachineReconciler) reconcileNfsUpdate(ctx context.Context
 			// never delete the first export
 			for i := 1; i < exportRetrieved.NumRecords; i++ {
 				log.Info("NFS export delete attempt: " + exportRetrieved.Records[i].Name)
-				oc.DeleteNfsExport(exportRetrieved.Records[i].Id)
+				err = oc.DeleteNfsExport(exportRetrieved.Records[i].Id)
 				if err != nil {
 					log.Error(err, "Error occurred when deleting NFS export: "+exportRetrieved.Records[i].Name+" - requeuing")
 					// no condition error
@@ -406,5 +407,81 @@ func CreateNfsExport(exportToCreate gateway.NfsExport, uuid string, oc *ontap.Cl
 	}
 	log.Info("NFS export creation successful: " + exportToCreate.Name)
 
+	return nil
+}
+
+// STEP 13
+// NFS update
+// Note: Status of NFS_SERVICE can only be true or false
+const CONDITION_TYPE_NFS_SERVICE = "13NFSservice"
+const CONDITION_REASON_NFS_SERVICE = "NFSservice"
+const CONDITION_MESSAGE_NFS_SERVICE_TRUE = "NFS service configuration succeeded"
+const CONDITION_MESSAGE_NFS_SERVICE_FALSE = "NFS service configuration failed"
+
+func (reconciler *StorageVirtualMachineReconciler) setConditionNfsService(ctx context.Context,
+	svmCR *gateway.StorageVirtualMachine, status metav1.ConditionStatus) error {
+
+	// I don't want to delete old references to updates to make a history
+	// if reconciler.containsCondition(ctx, svmCR, CONDITION_REASON_NFS_SERVICE) {
+	// 	reconciler.deleteCondition(ctx, svmCR, CONDITION_TYPE_NFS_SERVICE, CONDITION_REASON_NFS_SERVICE)
+	// }
+
+	if status == CONDITION_STATUS_TRUE {
+		return appendCondition(ctx, reconciler.Client, svmCR, CONDITION_TYPE_NFS_SERVICE, status,
+			CONDITION_REASON_NFS_SERVICE, CONDITION_MESSAGE_NFS_SERVICE_TRUE)
+	}
+
+	if status == CONDITION_STATUS_FALSE {
+		return appendCondition(ctx, reconciler.Client, svmCR, CONDITION_TYPE_NFS_SERVICE, status,
+			CONDITION_REASON_NFS_SERVICE, CONDITION_MESSAGE_NFS_SERVICE_FALSE)
+	}
+	return nil
+}
+
+const CONDITION_REASON_NFS_LIF = "NFSlif"
+const CONDITION_MESSAGE_NFS_LIF_TRUE = "NFS LIF configuration succeeded"
+const CONDITION_MESSAGE_NFS_LIF_FALSE = "NFS LIF configuration failed"
+
+func (reconciler *StorageVirtualMachineReconciler) setConditionNfsLif(ctx context.Context,
+	svmCR *gateway.StorageVirtualMachine, status metav1.ConditionStatus) error {
+
+	// I don't want to delete old references to updates to make a history
+	// if reconciler.containsCondition(ctx, svmCR, CONDITION_REASON_NFS_LIF) {
+	// 	reconciler.deleteCondition(ctx, svmCR, CONDITION_TYPE_NFS_SERVICE, CONDITION_REASON_NFS_LIF)
+	// }
+
+	if status == CONDITION_STATUS_TRUE {
+		return appendCondition(ctx, reconciler.Client, svmCR, CONDITION_TYPE_NFS_SERVICE, status,
+			CONDITION_REASON_NFS_LIF, CONDITION_MESSAGE_NFS_LIF_TRUE)
+	}
+
+	if status == CONDITION_STATUS_FALSE {
+		return appendCondition(ctx, reconciler.Client, svmCR, CONDITION_TYPE_NFS_SERVICE, status,
+			CONDITION_REASON_NFS_LIF, CONDITION_MESSAGE_NFS_LIF_FALSE)
+	}
+	return nil
+}
+
+const CONDITION_REASON_NFS_EXPORT = "NFSexport"
+const CONDITION_MESSAGE_NFS_EXPORT_TRUE = "NFS export configuration succeeded"
+const CONDITION_MESSAGE_NFS_EXPORT_FALSE = "NFS export configuration failed"
+
+func (reconciler *StorageVirtualMachineReconciler) setConditionNfsExport(ctx context.Context,
+	svmCR *gateway.StorageVirtualMachine, status metav1.ConditionStatus) error {
+
+	// I don't want to delete old references to updates to make a history
+	// if reconciler.containsCondition(ctx, svmCR, CONDITION_REASON_NFS_EXPORT) {
+	// 	reconciler.deleteCondition(ctx, svmCR, CONDITION_TYPE_NFS_SERVICE, CONDITION_REASON_NFS_EXPORT)
+	// }
+
+	if status == CONDITION_STATUS_TRUE {
+		return appendCondition(ctx, reconciler.Client, svmCR, CONDITION_TYPE_NFS_SERVICE, status,
+			CONDITION_REASON_NFS_EXPORT, CONDITION_MESSAGE_NFS_EXPORT_TRUE)
+	}
+
+	if status == CONDITION_STATUS_FALSE {
+		return appendCondition(ctx, reconciler.Client, svmCR, CONDITION_TYPE_NFS_SERVICE, status,
+			CONDITION_REASON_NFS_EXPORT, CONDITION_MESSAGE_NFS_EXPORT_FALSE)
+	}
 	return nil
 }

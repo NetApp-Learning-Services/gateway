@@ -12,6 +12,7 @@ import (
 	"gateway/internal/controller/ontap"
 
 	"github.com/go-logr/logr"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
@@ -103,4 +104,31 @@ func (r *StorageVirtualMachineReconciler) addFinalizer(ctx context.Context,
 		}
 	}
 	return ctrl.Result{}, nil
+}
+
+// STEP 7
+// SVM Creation
+// Note: Status of SVM_CREATED can only be true or false
+const CONDITION_TYPE_SVM_CREATED = "7CreatedSVM"
+const CONDITION_REASON_SVM_CREATED = "SVMCreation"
+const CONDITION_MESSAGE_SVM_CREATED_TRUE = "SVM creation succeeded"
+const CONDITION_MESSAGE_SVM_CREATED_FALSE = "SVM creation failed"
+
+func (reconciler *StorageVirtualMachineReconciler) setConditionSVMCreation(ctx context.Context,
+	svmCR *gateway.StorageVirtualMachine, status metav1.ConditionStatus) error {
+
+	if reconciler.containsCondition(svmCR, CONDITION_REASON_SVM_CREATED) {
+		reconciler.deleteCondition(ctx, svmCR, CONDITION_TYPE_SVM_CREATED, CONDITION_REASON_SVM_CREATED)
+	}
+
+	if status == CONDITION_STATUS_TRUE {
+		return appendCondition(ctx, reconciler.Client, svmCR, CONDITION_TYPE_SVM_CREATED, status,
+			CONDITION_REASON_SVM_CREATED, CONDITION_MESSAGE_SVM_CREATED_TRUE)
+	}
+
+	if status == CONDITION_STATUS_FALSE {
+		return appendCondition(ctx, reconciler.Client, svmCR, CONDITION_TYPE_SVM_CREATED, status,
+			CONDITION_REASON_SVM_CREATED, CONDITION_MESSAGE_SVM_CREATED_FALSE)
+	}
+	return nil
 }
