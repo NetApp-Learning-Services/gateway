@@ -10,13 +10,8 @@ import (
 )
 
 type NvmeService struct {
-	Target  NvmeTarget `json:"target,omitempty"`
-	Svm     SvmRef     `json:"svm,omitempty"`
-	Enabled *bool      `json:"enabled,omitempty"`
-}
-
-type NvmeTarget struct {
-	Alias string `json:"alias,omitempty"`
+	Svm     SvmRef `json:"svm,omitempty"`
+	Enabled *bool  `json:"enabled,omitempty"`
 }
 
 const returnNvmeQs string = "?return_records=true"
