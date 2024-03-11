@@ -49,3 +49,12 @@ make deploy
 make undeploy
 
 8. NVMe support added
+
+POST /api/protocols/nvme/services { "enabled": true, "svm": { "uuid": "83d7d9de-df48-11ee-812a-005056815047" } }
+
+POST /api/network/ip/interfaces { "name": "lif_svmtest_791", "ip": { "address": "***", "netmask": "***" }, "service_policy": { "name": "default-data-nvme-tcp" }, "location": { "broadcast_domain": { "name": "Default" }, "home_node": { "name": "Cluster1-01", "uuid": "71198e05-bec9-11ee-8284-005056b0a86b" } }, "svm": { "uuid": "83d7d9de-df48-11ee-812a-005056815047" } }(2.28s)
+POST /api/network/ip/interfaces { "name": "lif_svmtest_388", "ip": { "address": "***", "netmask": "***" }, "service_policy": { "name": "default-data-nvme-tcp" }, "location": { "broadcast_domain": { "name": "Default" }, "home_node": { "name": "Cluster1-01", "uuid": "71198e05-bec9-11ee-8284-005056b0a86b" } }, "svm": { "uuid": "83d7d9de-df48-11ee-812a-005056815047" } }(1.12s)
+
+
+POST /api/protocols/nvme/services { "enabled": true, "svm": { "uuid": "e34a0d5d-df4a-11ee-812a-005056815047" } }(0.059s)
+POST /api/network/ip/interfaces { "name": "lif_svmtest_104", "ip": { "address": "***", "netmask": "***" }, "service_policy": { "name": "default-data-nvme-tcp" }, "location": { "broadcast_domain": { "name": "Default" }, "home_node": { "name": "Cluster1-01", "uuid": "71198e05-bec9-11ee-8284-005056b0a86b" } }, "svm": { "uuid": "e34a0d5d-df4a-11ee-812a-005056815047" } }(1.98s)

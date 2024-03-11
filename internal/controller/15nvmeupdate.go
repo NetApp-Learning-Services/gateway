@@ -46,8 +46,9 @@ func (r *StorageVirtualMachineReconciler) reconcileNvmeUpdate(ctx context.Contex
 
 	if createNvmeService {
 		log.Info("No NVMe service defined for SVM: " + uuid + " - creating NVMe service")
-		upsertNvmeService.Enabled = &svmCR.Spec.NvmeConfig.Enabled
+
 		upsertNvmeService.Svm.Uuid = svmCR.Spec.SvmUuid
+		upsertNvmeService.Enabled = &svmCR.Spec.NvmeConfig.Enabled
 
 		jsonPayload, err := json.Marshal(upsertNvmeService)
 		if err != nil {
