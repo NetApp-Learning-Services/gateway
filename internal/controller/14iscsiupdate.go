@@ -13,8 +13,8 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-const Iscsi909Type = "default-data-blocks"    //magic word
-const Iscsi910Type = "use default-data-iscsi" //magic word
+const Iscsi909Type = "default-data-blocks" //magic word
+const Iscsi910Type = "default-data-iscsi"  //magic word
 /*
 todo: check on this
 if 9.9.1 - use default-data-blocks
@@ -142,6 +142,9 @@ func (r *StorageVirtualMachineReconciler) reconcileIscsiUpdate(ctx context.Conte
 	cluster, err := oc.GetCluster()
 
 	if err != nil {
+		log.Error(err, "Error getting cluster version")
+		IscsiLifType = Iscsi909Type
+	} else {
 		if cluster.Version.Generation > 8 {
 			if cluster.Version.Major > 9 {
 				IscsiLifType = Iscsi910Type
@@ -151,8 +154,6 @@ func (r *StorageVirtualMachineReconciler) reconcileIscsiUpdate(ctx context.Conte
 		} else {
 			IscsiLifType = Iscsi909Type
 		}
-	} else {
-		IscsiLifType = Iscsi909Type
 	}
 
 	log.Info("Using iSCSI LIF service policy as: " + IscsiLifType)
