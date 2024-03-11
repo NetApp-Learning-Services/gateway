@@ -13,11 +13,12 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-const IscsiLifType = "default-data-blocks" //magic word
+const Iscsi909Type = "default-data-blocks"    //magic word
+const Iscsi910Type = "use default-data-iscsi" //magic word
 /*
 todo: check on this
 if 9.9.1 - use default-data-blocks
-if 9.11.1 - use default-data-iscsi
+if 9.10.1+ - use default-data-iscsi
 */
 const IscsiLifScope = "svm" //magic word
 
@@ -133,6 +134,28 @@ func (r *StorageVirtualMachineReconciler) reconcileIscsiUpdate(ctx context.Conte
 		log.Info("No iSCSI LIFs defined - skipping updates")
 		return nil
 	}
+
+	// Check to see if cluster version is less than 9.10 and assign the correct
+	// LIF service policy
+
+	var IscsiLifType string
+	cluster, err := oc.GetCluster()
+
+	if err != nil {
+		if cluster.Version.Generation > 8 {
+			if cluster.Version.Major > 9 {
+				IscsiLifType = Iscsi910Type
+			} else {
+				IscsiLifType = Iscsi909Type
+			}
+		} else {
+			IscsiLifType = Iscsi909Type
+		}
+	} else {
+		IscsiLifType = Iscsi909Type
+	}
+
+	log.Info("Using iSCSI LIF service policy as: " + IscsiLifType)
 
 	createIscsiLifs := false
 
