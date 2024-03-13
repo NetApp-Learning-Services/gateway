@@ -36,6 +36,11 @@ func (r *StorageVirtualMachineReconciler) reconcileSvmUpdate(ctx context.Context
 		execute = true
 	}
 
+	if svmCR.Spec.NvmeConfig != nil && svmCR.Spec.NvmeConfig.Enabled != svmRetrieved.Nvme.Enabled {
+		patchSVM.Nvme.Enabled = svmCR.Spec.NvmeConfig.Enabled
+		execute = true
+	}
+
 	if !execute {
 		log.Info("No changes for SVM - skipping STEP 10")
 		return nil

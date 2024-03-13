@@ -252,7 +252,7 @@ type SvmByUUID struct {
 // Missing anti_ransomware_default_volume_state
 // Missing is space reporting logical
 // Missing is space enforcement logical
-// Missing max volumes
+// Missing max volume
 type SvmPatch struct {
 	Resource
 	Name         string        `json:"name,omitempty"`
@@ -261,6 +261,7 @@ type SvmPatch struct {
 	State        string        `json:"state,omitempty"`
 	Comment      string        `json:"comment,omitempty"`
 	IpInterfaces []IpInterface `json:"ip_interfaces,omitempty"`
+	Nvme         Nvme          `json:"nvme,omitempty"`
 }
 
 // Return svm uuid from name
