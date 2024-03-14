@@ -241,6 +241,7 @@ type SvmByUUID struct {
 		Enabled bool `json:"enabled"`
 	} `json:"fcp"`
 	Nvme struct {
+		Allowed bool `json:"allowed"`
 		Enabled bool `json:"enabled"`
 	} `json:"nvme"`
 	Links SelfLinks `json:"_links"`
@@ -261,7 +262,12 @@ type SvmPatch struct {
 	State        string        `json:"state,omitempty"`
 	Comment      string        `json:"comment,omitempty"`
 	IpInterfaces []IpInterface `json:"ip_interfaces,omitempty"`
-	Nvme         Nvme          `json:"nvme,omitempty"`
+	Nvme         NvmePatch     `json:"nvme,omitempty"`
+}
+
+type NvmePatch struct {
+	Resource
+	Allowed bool `json:"allowed"`
 }
 
 // Return svm uuid from name
