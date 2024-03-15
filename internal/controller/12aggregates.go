@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	defaultLog "log"
 
 	gateway "gateway/api/v1beta1"
 	"gateway/internal/controller/ontap"
@@ -38,7 +39,9 @@ func (r *StorageVirtualMachineReconciler) reconcileAggregates(ctx context.Contex
 				patchSVM.Aggregates = append(patchSVM.Aggregates, res)
 			}
 
-			log.Info("SVM aggregates payload: " + fmt.Sprintf("%#v\n", patchSVM))
+			if oc.Debug {
+				defaultLog.Printf("[DEBUG] SVM aggregates payload: " + fmt.Sprintf("%#v\n", patchSVM))
+			}
 
 			jsonPayload, err := json.Marshal(patchSVM)
 			if err != nil {
