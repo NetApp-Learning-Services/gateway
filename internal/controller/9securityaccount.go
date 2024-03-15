@@ -145,7 +145,7 @@ func (r *StorageVirtualMachineReconciler) reconcileSecurityAccount(ctx context.C
 		if err != nil {
 			log.Error(err, "Error occurred when creating security account - requeuing")
 			_ = r.setConditionVsadminSecretUpdate(ctx, svmCR, CONDITION_STATUS_FALSE)
-			r.Recorder.Event(svmCR, "Warningg", "VsadminCreationFailed", "Error: "+err.Error())
+			r.Recorder.Event(svmCR, "Warning", "VsadminCreationFailed", "Error: "+err.Error())
 			return err
 		} else {
 			log.Info("SVM managment credentials created in ONTAP")

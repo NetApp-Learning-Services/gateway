@@ -16,7 +16,7 @@ func (r *StorageVirtualMachineReconciler) reconcileAggregates(ctx context.Contex
 	svmCR *gateway.StorageVirtualMachine, svmRetrieved ontap.SvmByUUID, oc *ontap.Client, log logr.Logger) error {
 
 	log.Info("STEP 12: Update SVM aggregates")
-	var patchSVM ontap.SvmPatch
+	var patchSVM ontap.SvmAggregatePatch
 	needToUpdate := true //default to always update #16
 
 	// interate over custom resoource svmCR and look for differences in retrieved SVM

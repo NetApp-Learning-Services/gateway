@@ -270,6 +270,18 @@ type NvmePatch struct {
 	Allowed bool `json:"allowed"`
 }
 
+// In 9.11.1:
+// Missing QOS
+// Mssing Certificate
+// Missing anti_ransomware_default_volume_state
+// Missing is space reporting logical
+// Missing is space enforcement logical
+// Missing max volume
+type SvmAggregatePatch struct {
+	Resource
+	Aggregates []Resource `json:"aggregates,omitempty"`
+}
+
 // Return svm uuid from name
 func (c *Client) GetStorageVmUUIDByName(name string) (uuid string, err error) {
 	uri := "/api/svm/svms?name=" + name

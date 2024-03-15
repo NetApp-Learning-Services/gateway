@@ -26,7 +26,7 @@ metadata:
 spec:
   svmName: svmtest
   clusterHost: 192.168.0.101
-  debug: true
+  debug: false
   aggregates:
   - name: Cluster1_01_FC_1
   management:
@@ -58,23 +58,23 @@ spec:
       netmask: 255.255.255.0
       broadcastDomain: Default
       homeNode: Cluster1-01
-  # nfs:
-  #   enabled: true
-  #   v3: true
-  #   v4: true
-  #   v41: true
-  #   interfaces:
-  #   - name: nfs1
-  #     ip: 192.168.0.81
-  #     netmask: 255.255.255.0
-  #     broadcastDomain: Default
-  #     homeNode: Cluster1-01
-  #   export:
-  #     name: default
-  #     rules:
-  #     - clients: 0.0.0.0/0
-  #       protocols: any
-  #       rw: any
-  #       ro: any
-  #       superuser: any
-  #       anon:  "65534"
+  nfs:
+    enabled: true
+    v3: true
+    v4: true
+    v41: true
+    interfaces:
+    - name: nfs1
+      ip: 192.168.0.81
+      netmask: 255.255.255.0
+      broadcastDomain: Default
+      homeNode: Cluster1-01
+    export:
+      name: default
+      rules:
+      - clients: 0.0.0.0/0
+        protocols: any
+        rw: any
+        ro: any
+        superuser: any
+        anon:  "65534"
