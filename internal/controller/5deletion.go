@@ -14,7 +14,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 )
 
-const finalizerName = "gateway.netapp.com" //magic word
+const finalizerName = "gateway.netapp.com/finalizer" //magic word
 
 func (r *StorageVirtualMachineReconciler) reconcileDeletions(ctx context.Context,
 	svmCR *gateway.StorageVirtualMachine, oc *ontap.Client, log logr.Logger) (ctrl.Result, error) {
