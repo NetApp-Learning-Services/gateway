@@ -9,30 +9,25 @@ import (
 	"k8s.io/apimachinery/pkg/runtime/schema"
 )
 
-type IscsiService struct {
-	Target  IscsiTarget `json:"target,omitempty"`
-	Svm     SvmRef      `json:"svm,omitempty"`
-	Enabled *bool       `json:"enabled,omitempty"`
+type NvmeService struct {
+	Svm     SvmRef `json:"svm,omitempty"`
+	Enabled *bool  `json:"enabled,omitempty"`
 }
 
-type IscsiTarget struct {
-	Alias string `json:"alias,omitempty"`
-}
+const returnNvmeQs string = "?return_records=true"
 
-const returnIscsiQs string = "?return_records=true"
-
-func (c *Client) GetIscsiServiceBySvmUuid(uuid string) (iscsiService IscsiService, err error) {
-	uri := "/api/protocols/san/iscsi/services/" + uuid
+func (c *Client) GetNvmeServiceBySvmUuid(uuid string) (nvmeService NvmeService, err error) {
+	uri := "/api/protocols/nvme/services/" + uuid
 
 	data, err := c.clientGet(uri)
 	if err != nil {
-		if strings.Contains(err.Error(), "Cannot find iSCSI service") {
-			return iscsiService, errors.NewNotFound(schema.GroupResource{Group: "gatewayv1alpha2", Resource: "StorageVirtualMachine"}, "no iscsi")
+		if strings.Contains(err.Error(), "An NVMe service does not exist") {
+			return nvmeService, errors.NewNotFound(schema.GroupResource{Group: "gatewayv1beta1", Resource: "StorageVirtualMachine"}, "no nvme")
 		}
-		return iscsiService, &apiError{1, err.Error()}
+		return nvmeService, &apiError{1, err.Error()}
 	}
 
-	var resp IscsiService
+	var resp NvmeService
 	err = json.Unmarshal(data, &resp)
 	if err != nil {
 		return resp, &apiError{2, err.Error()}
@@ -41,8 +36,8 @@ func (c *Client) GetIscsiServiceBySvmUuid(uuid string) (iscsiService IscsiServic
 	return resp, nil
 }
 
-func (c *Client) CreateIscsiService(jsonPayload []byte) (err error) {
-	uri := "/api/protocols/san/iscsi/services" + returnIscsiQs
+func (c *Client) CreateNvmeService(jsonPayload []byte) (err error) {
+	uri := "/api/protocols/nvme/services" + returnNvmeQs
 	_, err = c.clientPost(uri, jsonPayload)
 	if err != nil {
 		//fmt.Println("Error: " + err.Error())
@@ -52,8 +47,8 @@ func (c *Client) CreateIscsiService(jsonPayload []byte) (err error) {
 	return nil
 }
 
-func (c *Client) PatchIscsiService(uuid string, jsonPayload []byte) (err error) {
-	uri := "/api/protocols/san/iscsi/services/" + uuid
+func (c *Client) PatchNvmeService(uuid string, jsonPayload []byte) (err error) {
+	uri := "/api/protocols/nvme/services/" + uuid
 
 	_, err = c.clientPatch(uri, jsonPayload)
 	if err != nil {
@@ -70,8 +65,8 @@ func (c *Client) PatchIscsiService(uuid string, jsonPayload []byte) (err error) 
 	return nil
 }
 
-func (c *Client) DeleteIscsiService(uuid string) (err error) {
-	uri := "/api/protocols/san/iscsi/services/" + uuid
+func (c *Client) DeleteNvmeService(uuid string) (err error) {
+	uri := "/api/protocols/nvme/services/" + uuid
 
 	_, err = c.clientDelete(uri)
 	if err != nil {
@@ -81,7 +76,7 @@ func (c *Client) DeleteIscsiService(uuid string) (err error) {
 	return nil
 }
 
-func (c *Client) GetIscsiInterfacesBySvmUuid(uuid string, servicePolicy string) (lifs IpInterfacesResponse, err error) {
+func (c *Client) GetNvmeInterfacesBySvmUuid(uuid string, servicePolicy string) (lifs IpInterfacesResponse, err error) {
 	uri := "/api/network/ip/interfaces" + qs + "&service_policy.name=" + servicePolicy + "&svm.uuid=" + uuid
 
 	data, err := c.clientGet(uri)
@@ -98,7 +93,7 @@ func (c *Client) GetIscsiInterfacesBySvmUuid(uuid string, servicePolicy string) 
 	return resp, nil
 }
 
-func (c *Client) GetIscsiServicePolicyByName(servicePolicy string) (err error) {
+func (c *Client) GetNvmeServicePolicyByName(servicePolicy string) (err error) {
 	uri := "/api/network/ip/service-policies?name=" + servicePolicy
 
 	_, err = c.clientGet(uri)
@@ -109,7 +104,7 @@ func (c *Client) GetIscsiServicePolicyByName(servicePolicy string) (err error) {
 	return nil
 }
 
-func (c *Client) CreateIscsiServicePolicy(jsonPayload []byte) (err error) {
+func (c *Client) CreateNvmeServicePolicy(jsonPayload []byte) (err error) {
 	uri := "/api/network/ip/service-policies"
 	_, err = c.clientPost(uri, jsonPayload)
 	if err != nil {

@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package v1beta1
+package v1alpha3
 
 import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -71,10 +71,6 @@ type StorageVirtualMachineSpec struct {
 	// Provide optional iSCSI configuration
 	// +kubebuilder:validation:Optional
 	IscsiConfig *IscsiSubSpec `json:"iscsi,omitempty"`
-
-	// Provide optional NVMe configuration
-	// +kubebuilder:validation:Optional
-	NvmeConfig *NvmeSubSpec `json:"nvme,omitempty"`
 }
 
 // StorageVirtualMachineStatus defines the observed state of StorageVirtualMachine
@@ -90,7 +86,6 @@ type StorageVirtualMachineStatus struct {
 // +kubebuilder:object:root=true
 // +kubebuilder:subresource:status
 // +kubebuilder:resource:path=storagevirtualmachines,shortName=svm
-// +kubebuilder:storageversion
 // StorageVirtualMachine is the Schema for the storagevirtualmachines API
 type StorageVirtualMachine struct {
 	metav1.TypeMeta   `json:",inline"`

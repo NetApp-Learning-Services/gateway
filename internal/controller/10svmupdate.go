@@ -12,6 +12,7 @@ import (
 	"gateway/internal/controller/ontap"
 
 	"github.com/go-logr/logr"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 func (r *StorageVirtualMachineReconciler) reconcileSvmUpdate(ctx context.Context,
@@ -32,6 +33,11 @@ func (r *StorageVirtualMachineReconciler) reconcileSvmUpdate(ctx context.Context
 	if svmCR.Spec.SvmComment != "" && svmCR.Spec.SvmComment != svmRetrieved.Comment {
 		//update comment
 		patchSVM.Comment = svmCR.Spec.SvmComment
+		execute = true
+	}
+
+	if svmCR.Spec.NvmeConfig != nil {
+		patchSVM.Nvme.Allowed = true
 		execute = true
 	}
 
@@ -67,5 +73,33 @@ func (r *StorageVirtualMachineReconciler) reconcileSvmUpdate(ctx context.Context
 		return nil //even though condition not create, don't reconcile again
 	}
 
+	return nil
+}
+
+// STEP 10
+// SVM Update
+// Note: Status of SVM_UPDATED can only be true or false
+const CONDITION_TYPE_SVM_UPDATED = "10UpdatedSVM"
+const CONDITION_REASON_SVM_UPDATED = "SVMUpdate"
+const CONDITION_MESSAGE_SVM_UPDATED_TRUE = "SVM update succeeded"
+const CONDITION_MESSAGE_SVM_UPDATED_FALSE = "SVM update failed"
+
+func (reconciler *StorageVirtualMachineReconciler) setConditionSVMUpdate(ctx context.Context,
+	svmCR *gateway.StorageVirtualMachine, status metav1.ConditionStatus) error {
+
+	// I don't want to delete old references to updates to make a history
+	// if reconciler.containsCondition(ctx, svmCR, CONDITION_REASON_SVM_UPDATED) {
+	// 	reconciler.deleteCondition(ctx, svmCR, CONDITION_TYPE_SVM_UPDATED, CONDITION_REASON_SVM_UPDATED)
+	// }
+
+	if status == CONDITION_STATUS_TRUE {
+		return appendCondition(ctx, reconciler.Client, svmCR, CONDITION_TYPE_SVM_UPDATED, status,
+			CONDITION_REASON_SVM_UPDATED, CONDITION_MESSAGE_SVM_UPDATED_TRUE)
+	}
+
+	if status == CONDITION_STATUS_FALSE {
+		return appendCondition(ctx, reconciler.Client, svmCR, CONDITION_TYPE_SVM_UPDATED, status,
+			CONDITION_REASON_SVM_UPDATED, CONDITION_MESSAGE_SVM_UPDATED_FALSE)
+	}
 	return nil
 }

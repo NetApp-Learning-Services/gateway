@@ -241,6 +241,7 @@ type SvmByUUID struct {
 		Enabled bool `json:"enabled"`
 	} `json:"fcp"`
 	Nvme struct {
+		Allowed bool `json:"allowed"`
 		Enabled bool `json:"enabled"`
 	} `json:"nvme"`
 	Links SelfLinks `json:"_links"`
@@ -252,7 +253,7 @@ type SvmByUUID struct {
 // Missing anti_ransomware_default_volume_state
 // Missing is space reporting logical
 // Missing is space enforcement logical
-// Missing max volumes
+// Missing max volume
 type SvmPatch struct {
 	Resource
 	Name         string        `json:"name,omitempty"`
@@ -261,6 +262,24 @@ type SvmPatch struct {
 	State        string        `json:"state,omitempty"`
 	Comment      string        `json:"comment,omitempty"`
 	IpInterfaces []IpInterface `json:"ip_interfaces,omitempty"`
+	Nvme         NvmePatch     `json:"nvme,omitempty"`
+}
+
+type NvmePatch struct {
+	Resource
+	Allowed bool `json:"allowed"`
+}
+
+// In 9.11.1:
+// Missing QOS
+// Mssing Certificate
+// Missing anti_ransomware_default_volume_state
+// Missing is space reporting logical
+// Missing is space enforcement logical
+// Missing max volume
+type SvmAggregatePatch struct {
+	Resource
+	Aggregates []Resource `json:"aggregates,omitempty"`
 }
 
 // Return svm uuid from name

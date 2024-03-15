@@ -14,6 +14,7 @@ import (
 	"github.com/go-logr/logr"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 const secondAuthMethod = "none" // magic word
@@ -144,7 +145,7 @@ func (r *StorageVirtualMachineReconciler) reconcileSecurityAccount(ctx context.C
 		if err != nil {
 			log.Error(err, "Error occurred when creating security account - requeuing")
 			_ = r.setConditionVsadminSecretUpdate(ctx, svmCR, CONDITION_STATUS_FALSE)
-			r.Recorder.Event(svmCR, "Warningg", "VsadminCreationFailed", "Error: "+err.Error())
+			r.Recorder.Event(svmCR, "Warning", "VsadminCreationFailed", "Error: "+err.Error())
 			return err
 		} else {
 			log.Info("SVM managment credentials created in ONTAP")
@@ -153,5 +154,32 @@ func (r *StorageVirtualMachineReconciler) reconcileSecurityAccount(ctx context.C
 		}
 	}
 
+	return nil
+}
+
+// STEP 9
+// VSADMIN UPDATE
+// Note: Status of VSADMIN_UPDATE can only be true or false
+const CONDITION_TYPE_VSADMIN_SECRET_UPDATE = "9VsAdminSecretUpdate"
+const CONDITION_REASON_VSADMIN_SECRET_UPDATE = "VsAdminSecretUpdate"
+const CONDITION_MESSAGE_VSADMIN_SECRET_UPDATE_TRUE = "SVM Admin credentials updated in ONTAP"
+const CONDITION_MESSAGE_VSADMIN_SECRET_UPDATE_FALSE = "SVM Admin credentials NOT updated in ONTAP"
+
+func (reconciler *StorageVirtualMachineReconciler) setConditionVsadminSecretUpdate(ctx context.Context,
+	svmCR *gateway.StorageVirtualMachine, status metav1.ConditionStatus) error {
+
+	if reconciler.containsCondition(svmCR, CONDITION_REASON_VSADMIN_SECRET_UPDATE) {
+		reconciler.deleteCondition(ctx, svmCR, CONDITION_TYPE_VSADMIN_SECRET_UPDATE, CONDITION_REASON_VSADMIN_SECRET_UPDATE)
+	}
+
+	if status == CONDITION_STATUS_TRUE {
+		return appendCondition(ctx, reconciler.Client, svmCR, CONDITION_TYPE_VSADMIN_SECRET_UPDATE, status,
+			CONDITION_REASON_VSADMIN_SECRET_UPDATE, CONDITION_MESSAGE_VSADMIN_SECRET_UPDATE_TRUE)
+	}
+
+	if status == CONDITION_STATUS_FALSE {
+		return appendCondition(ctx, reconciler.Client, svmCR, CONDITION_TYPE_VSADMIN_SECRET_UPDATE, status,
+			CONDITION_REASON_VSADMIN_SECRET_UPDATE, CONDITION_MESSAGE_VSADMIN_SECRET_UPDATE_FALSE)
+	}
 	return nil
 }

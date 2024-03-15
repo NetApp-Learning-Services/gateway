@@ -19,7 +19,7 @@ type ConditionsAware interface {
 	SetConditions(conditions []metav1.Condition)
 }
 
-func (reconciler *StorageVirtualMachineReconciler) containsCondition(ctx context.Context,
+func (reconciler *StorageVirtualMachineReconciler) containsCondition(
 	svmCR *gateway.StorageVirtualMachine, reason string) bool {
 
 	output := false

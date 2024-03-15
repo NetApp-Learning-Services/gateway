@@ -148,6 +148,7 @@ func (r *StorageVirtualMachineReconciler) Reconcile(ctx context.Context, req ctr
 			svmCR.Spec.VsadminCredentialSecret.Name,
 			svmCR.Spec.VsadminCredentialSecret.Namespace, svmCR, log)
 		if err != nil {
+			log.Error(err, "Error on SVM management credentials check: not requeuing")
 			return ctrl.Result{Requeue: false}, nil // not a valid secret - ignore
 		} else {
 
@@ -155,10 +156,12 @@ func (r *StorageVirtualMachineReconciler) Reconcile(ctx context.Context, req ctr
 			// Create or update SVM management credentials
 			err = r.reconcileSecurityAccount(ctx, svmCR, oc, vsAdminSecret, log)
 			if err != nil {
+				log.Error(err, "Error on SVM management credentials reconcile: requeuing")
 				return ctrl.Result{RequeueAfter: 30 * time.Second}, err
 			}
 
 		}
+		log.Info("Creation of SVM complete - re-reconciling to complete configuration")
 	}
 
 	// Check whether we need to update the SVM
@@ -201,6 +204,13 @@ func (r *StorageVirtualMachineReconciler) Reconcile(ctx context.Context, req ctr
 			// STEP 14
 			// Reconcile iSCSI information
 			err = r.reconcileIscsiUpdate(ctx, svmCR, svmRetrieved.Uuid, oc, log)
+			if err != nil {
+				return ctrl.Result{RequeueAfter: 30 * time.Second}, err
+			}
+
+			// STEP 15
+			// Reconcile NVMe information
+			err = r.reconcileNvmeUpdate(ctx, svmCR, svmRetrieved.Uuid, oc, log)
 			if err != nil {
 				return ctrl.Result{RequeueAfter: 30 * time.Second}, err
 			}

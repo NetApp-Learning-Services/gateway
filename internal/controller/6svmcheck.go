@@ -11,6 +11,7 @@ import (
 
 	"github.com/go-logr/logr"
 	"k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 )
 
@@ -43,4 +44,37 @@ func (r *StorageVirtualMachineReconciler) reconcileSvmCheck(ctx context.Context,
 		return svm, nil
 	}
 
+}
+
+// STEP 6
+// SVM Lookup
+// Note: Status of SVM_FOUND can only be true, false, or unknown
+const CONDITION_TYPE_SVM_FOUND = "6SVMDiscovered"
+const CONDITION_REASON_SVM_FOUND = "SVMFound"
+const CONDITION_MESSAGE_SVM_FOUND_TRUE = "UUID maps to SVM"
+const CONDITION_MESSAGE_SVM_FOUND_FALSE = "NO UUID"
+const CONDITION_MESSAGE_SVM_FOUND_UNKNOWN = "UUID does NOT map to SVM"
+
+func (reconciler *StorageVirtualMachineReconciler) setConditionSVMFound(ctx context.Context,
+	svmCR *gateway.StorageVirtualMachine, status metav1.ConditionStatus) error {
+
+	if reconciler.containsCondition(svmCR, CONDITION_REASON_SVM_FOUND) {
+		reconciler.deleteCondition(ctx, svmCR, CONDITION_TYPE_SVM_FOUND, CONDITION_REASON_SVM_FOUND)
+	}
+
+	if status == CONDITION_STATUS_TRUE {
+		return appendCondition(ctx, reconciler.Client, svmCR, CONDITION_TYPE_SVM_FOUND, status,
+			CONDITION_REASON_SVM_FOUND, CONDITION_MESSAGE_SVM_FOUND_TRUE)
+	}
+
+	if status == CONDITION_STATUS_FALSE {
+		return appendCondition(ctx, reconciler.Client, svmCR, CONDITION_TYPE_SVM_FOUND, status,
+			CONDITION_REASON_SVM_FOUND, CONDITION_MESSAGE_SVM_FOUND_FALSE)
+	}
+
+	if status == CONDITION_STATUS_UNKNOWN {
+		return appendCondition(ctx, reconciler.Client, svmCR, CONDITION_TYPE_SVM_FOUND, status,
+			CONDITION_REASON_SVM_FOUND, CONDITION_MESSAGE_SVM_FOUND_UNKNOWN)
+	}
+	return nil
 }

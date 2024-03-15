@@ -4,23 +4,21 @@ A simple Kubernetes operator that creates, configures, and deletes NetApp ONTAP 
 ## Description
 This operator uses Red Hat's [Operator-SDK](https://sdk.operatorframework.io) to scaffold a controller that manages an Storage Virtual Machines (SVMs) resources in an NetApp ONTAP cluster. 
 
-
-The current version of the operator is v1beta1.  V1beta1 migrated Operator-SDK to 1.33.0 and updated go dependencies to avoid critical warnings.  
+The current version of the operator is v1beta1.  V1beta1 migrated Operator-SDK to 1.34.1 and updated go dependencies to avoid critical warnings.  
 
 The operator creates and updates:
 * an SVM, 
 * an optional SVM management LIF, 
 * an optional SVM administrator management credentials (vsadmin), 
 * an optional NFS configuration with NFS interfaces and NFS exports, 
-* and an optional iSCSI configuration with iSCSI interfaces.
+* an optional iSCSI configuration with iSCSI interfaces,
+* and an optional NVMe/TCP configure with NVMe/TCP interfaces.
 
-
-When the custom resource (CR) is delete, the operator uses a finalizer (called gateway.netapp.com) to delete the SVM and all it configuration when the CR is deleted.  
+When the custom resource (CR) is delete, the operator uses a finalizer (called gateway.netapp.com/finalizer) to delete the SVM and all it configuration when the CR is deleted. NOTE: You will loose SVM's data when the CR is deleted.   
 
 ## Getting Started
 
 ### 1. Install a version of the operator: 
-
 
 ```
 kubectl create -f https://raw.githubusercontent.com/NetApp-Learning-Services/gateway/main/config/deploy/v1beta1/gatewayoperator.yaml
@@ -28,7 +26,7 @@ kubectl create -f https://raw.githubusercontent.com/NetApp-Learning-Services/gat
 
 ### 2. Create a secret for the ONTAP cluster administrator's credentials:
 
-(NOTE: This example is deployed in the gateway namesspaces that gets created when deploying the operator)
+(NOTE: This example is deployed in the gateway-system namesspaces that gets created when deploying the operator)
 
 	
 ```
@@ -36,7 +34,7 @@ apiVersion: v1
 kind: Secret
 metadata:
   name: ontap-cluster-admin
-  namespace: gateway
+  namespace: gateway-system
 type: kubernetes.io/basic-auth
 stringData:
   username: admin
@@ -46,13 +44,13 @@ stringData:
 
 ### 3. Create an optional secret for the SVM administrator's credentials: 
 
-(NOTE: This example is deployed in the gateway namesspaces that gets created when deploying the operator)
+(NOTE: This example is deployed in the gateway-system namespaces that gets created when deploying the operator)
 ```
 apiVersion: v1
 kind: Secret
 metadata:
   name: ontap-svm-admin
-  namespace: gateway
+  namespace: gateway-system
 type: kubernetes.io/basic-auth
 stringData:
   username: vsadmin
@@ -70,7 +68,7 @@ apiVersion: gateway.netapp.com/v1beta1
 kind: StorageVirtualMachine
 metadata:
   name: storagevirtualmachine-testcase
-  namespace: gateway
+  namespace: gateway-system
 spec:
   svmName: testVs
   clusterHost: 192.168.0.102
@@ -85,10 +83,10 @@ spec:
     homeNode: Cluster2-01
   vsadminCredentials:
     name: ontap-svm-admin
-    namespace: gateway 
+    namespace: gateway-system
   clusterCredentials:
     name: ontap-cluster-admin
-    namespace: gateway
+    namespace: gateway-system
   iscsi:
     enabled: true
     alias: testVs
@@ -98,6 +96,14 @@ spec:
       netmask: 255.255.255.0
       broadcastDomain: Default
       homeNode: Cluster2-01
+  nvme:
+    enabled: true
+    interfaces:
+    - name: nvme1
+      ip: 192.168.0.81
+      netmask: 255.255.255.0
+      broadcastDomain: Default
+      homeNode: Cluster1-01
   nfs:
     enabled: true
     v3: true
@@ -134,4 +140,3 @@ It uses [Controllers](https://kubernetes.io/docs/concepts/architecture/controlle
 Copyright 2024.
 
 Creative Commons Legal Code, CC0 1.0 Universal
-
