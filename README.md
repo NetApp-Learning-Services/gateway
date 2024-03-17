@@ -71,6 +71,8 @@ metadata:
   namespace: gateway-system
 spec:
   svmName: testVs
+  svmComment: "this is a test SVM"
+  svmDeletionPolicy: retain
   clusterHost: 192.168.0.102
   debug: false
   aggregates:
@@ -125,6 +127,8 @@ spec:
         superuser: any
         anon:  "65534"
 ``` 
+
+The svmDeletionPolicy can be either delete (default) or retain.  If set to retain, upon deletion of the CR, the SVM is retained.  The default behavior is upon deletion of the CR, the SVM is also deleted.  
 
 ### 5. Deploy NetApp [Astra Trident](https://github.com/NetApp/trident) to manage the SVM resources created by this operator.
 
