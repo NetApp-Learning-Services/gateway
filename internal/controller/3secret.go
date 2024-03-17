@@ -41,7 +41,7 @@ func (r *StorageVirtualMachineReconciler) reconcileSecret(ctx context.Context, s
 		} else if secretType == svmAdminRequest {
 			_ = r.setConditionVsadminSecretLookup(ctx, svmCR, CONDITION_STATUS_FALSE)
 		}
-		return nil, nil
+		return nil, err
 	} else if err != nil {
 		log.Error(err, "Failed to get secret - not requeuing")
 		if secretType == clusterAdminRequest {
@@ -49,7 +49,7 @@ func (r *StorageVirtualMachineReconciler) reconcileSecret(ctx context.Context, s
 		} else if secretType == svmAdminRequest {
 			_ = r.setConditionVsadminSecretLookup(ctx, svmCR, CONDITION_STATUS_FALSE)
 		}
-		return nil, nil
+		return nil, err
 	}
 
 	if strings.TrimSpace(string(secret.Data["username"])) == "" {

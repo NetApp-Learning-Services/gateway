@@ -24,6 +24,13 @@ func (r *StorageVirtualMachineReconciler) reconcileSecurityAccount(ctx context.C
 
 	log.Info("STEP 9: Verify SVM management account is update to date")
 
+	// if credentials == nil {
+	// 	err := errors.NewNotFound(schema.GroupResource{Group: "v1", Resource: "Secret"}, "No corresponding secret exist for SVM Management administrator "+svmCR.Spec.VsadminCredentialSecret.Name+" in the Kubernetes namespace "+svmCR.Spec.VsadminCredentialSecret.Namespace+"")
+	// 	//log.Error(err, "Error while retrieving SVM management credentials - skipping Step 9")
+	// 	return err
+	// }
+
+	//this should exist
 	userNameToModify := string(credentials.Data["username"])
 
 	// Check to see if we have a uuid
