@@ -1285,6 +1285,13 @@ spec:
               svmComment:
                 description: Stores optional SVM's comment
                 type: string
+              svmDeletionPolicy:
+                default: delete
+                description: Stores optional SVM's deletion policy
+                enum:
+                - delete
+                - retain
+                type: string
               svmName:
                 description: |-
                   Provides required SVM name

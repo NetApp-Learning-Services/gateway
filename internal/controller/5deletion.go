@@ -7,6 +7,7 @@ import (
 	"fmt"
 	gateway "gateway/api/v1beta1"
 	"gateway/internal/controller/ontap"
+	defaultLog "log"
 
 	"github.com/go-logr/logr"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -20,12 +21,16 @@ func (r *StorageVirtualMachineReconciler) reconcileDeletions(ctx context.Context
 	svmCR *gateway.StorageVirtualMachine, oc *ontap.Client, log logr.Logger) (ctrl.Result, error) {
 
 	log.Info("STEP 5: Delete SVM in ONTAP and remove custom resource")
+	var currentDeletionPolicy = svmCR.Spec.SvmDeletionPolicy
+	if oc.Debug {
+		defaultLog.Printf("[DEBUG] current deletion policy: " + fmt.Sprintf("%v", currentDeletionPolicy))
+	}
 
 	isSMVMarkedToBeDeleted := svmCR.GetDeletionTimestamp() != nil
 	if isSMVMarkedToBeDeleted {
 		if controllerutil.ContainsFinalizer(svmCR, finalizerName) {
 			if err := r.finalizeSVM(svmCR, oc); err != nil {
-				log.Error(err, "Error during custom resource deletion - requeuing")
+				log.Error(err, "Error during deletionpolicy implementation - requeuing")
 				_ = r.setConditionSVMDeleted(ctx, svmCR, CONDITION_STATUS_FALSE)
 				return ctrl.Result{}, err
 			}
@@ -33,22 +38,34 @@ func (r *StorageVirtualMachineReconciler) reconcileDeletions(ctx context.Context
 			controllerutil.RemoveFinalizer(svmCR, finalizerName)
 			err := r.Update(ctx, svmCR)
 			if err != nil {
-				log.Error(err, "Error during custom resource deletion - requeuing")
+				log.Error(err, "Error during removal of finalizer - requeuing")
 				_ = r.setConditionSVMDeleted(ctx, svmCR, CONDITION_STATUS_UNKNOWN)
 				return ctrl.Result{}, err
 			}
 		}
 		// Can't do this because custom resource is deleted
 		//_ = r.setConditionSVMDeleted(ctx, svmCR, CONDITION_STATUS_TRUE)
-		log.Info("SVM deleted, removed finalizer, cleaning up custom resource")
+		if currentDeletionPolicy == gateway.DeletionPolicyDelete {
+			log.Info("SVM deleted, removed finalizer, cleaning up custom resource")
+		} else if currentDeletionPolicy == gateway.DeletionPolicyRetain {
+			log.Info("SVM retained, removed finalizer, cleaning up custom resource")
+		} else {
+			// default policy
+			log.Info("SVM deleted, Removed finalizer, cleaning up custom resource")
+		}
+
 		return ctrl.Result{}, nil
 	}
-	// Not deleted
+	// CR is not deleted
 	return ctrl.Result{}, nil
 }
 
 func (r *StorageVirtualMachineReconciler) finalizeSVM(
 	svmCR *gateway.StorageVirtualMachine, oc *ontap.Client) error {
+
+	if svmCR.Spec.SvmDeletionPolicy == gateway.DeletionPolicyRetain {
+		return nil
+	}
 
 	err := oc.DeleteStorageVM(svmCR.Spec.SvmUuid)
 	if err != nil {
