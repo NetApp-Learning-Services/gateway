@@ -1286,11 +1286,11 @@ spec:
                 description: Stores optional SVM's comment
                 type: string
               svmDeletionPolicy:
-                default: delete
+                default: Delete
                 description: Stores optional SVM's deletion policy
                 enum:
-                - delete
-                - retain
+                - Delete
+                - Retain
                 type: string
               svmName:
                 description: |-

@@ -23,8 +23,8 @@ import (
 type DeletionPolicy string
 
 const (
-	DeletionPolicyRetain DeletionPolicy = "retain"
-	DeletionPolicyDelete DeletionPolicy = "delete"
+	DeletionPolicyRetain DeletionPolicy = "Retain"
+	DeletionPolicyDelete DeletionPolicy = "Delete"
 )
 
 // EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
@@ -53,8 +53,8 @@ type StorageVirtualMachineSpec struct {
 
 	// Stores optional SVM's deletion policy
 	// +kubebuilder:validation:Optional
-	// +kubebuilder:validation:Enum="delete";"retain"
-	// +kubebuilder:default:=delete
+	// +kubebuilder:validation:Enum="Delete";"Retain"
+	// +kubebuilder:default:=Delete
 	SvmDeletionPolicy DeletionPolicy `json:"svmDeletionPolicy,omitempty"`
 
 	// Stores optional debug
