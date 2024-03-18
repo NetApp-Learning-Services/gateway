@@ -20,6 +20,13 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
+type DeletionPolicy string
+
+const (
+	DeletionPolicyRetain DeletionPolicy = "Retain"
+	DeletionPolicyDelete DeletionPolicy = "Delete"
+)
+
 // EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
 // NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
 
@@ -43,6 +50,12 @@ type StorageVirtualMachineSpec struct {
 	// Stores optional SVM's comment
 	// +kubebuilder:validation:Optional
 	SvmComment string `json:"svmComment,omitempty"`
+
+	// Stores optional SVM's deletion policy
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:validation:Enum="Delete";"Retain"
+	// +kubebuilder:default:=Delete
+	SvmDeletionPolicy DeletionPolicy `json:"svmDeletionPolicy,omitempty"`
 
 	// Stores optional debug
 	// +kubebuilder:default:=false

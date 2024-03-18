@@ -25,6 +25,7 @@ metadata:
   namespace: gateway-system
 spec:
   svmName: svmtest
+  svmDeletionPolicy: Delete
   clusterHost: 192.168.0.101
   debug: false
   aggregates:

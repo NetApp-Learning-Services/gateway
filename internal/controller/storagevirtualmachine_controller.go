@@ -148,20 +148,26 @@ func (r *StorageVirtualMachineReconciler) Reconcile(ctx context.Context, req ctr
 			svmCR.Spec.VsadminCredentialSecret.Name,
 			svmCR.Spec.VsadminCredentialSecret.Namespace, svmCR, log)
 		if err != nil {
-			log.Error(err, "Error on SVM management credentials check: not requeuing")
-			return ctrl.Result{Requeue: false}, nil // not a valid secret - ignore
+			log.Error(err, "Error on SVM management credentials check, skipping Step 9 - not requeuing")
+			// not a valid secret - ignore
+			// Don't stop result
+			//return ctrl.Result{Requeue: false}, nil
 		} else {
 
 			// STEP 9
 			// Create or update SVM management credentials
 			err = r.reconcileSecurityAccount(ctx, svmCR, oc, vsAdminSecret, log)
+			// if err != nil && errors.IsNotFound(err) {
+			// 	log.Error(err, "Error on SVM management credentials not found, skipping Step 9 - not requeuing")
+			// 	return ctrl.Result{Requeue: false}, nil // not a valid secret - ignore
+			// } else
 			if err != nil {
-				log.Error(err, "Error on SVM management credentials reconcile: requeuing")
+				log.Error(err, "Error on SVM management credentials reconcile - requeuing")
 				return ctrl.Result{RequeueAfter: 30 * time.Second}, err
 			}
-
+			log.Info("Creation of SVM complete - re-reconciling to complete configuration")
 		}
-		log.Info("Creation of SVM complete - re-reconciling to complete configuration")
+
 	}
 
 	// Check whether we need to update the SVM
