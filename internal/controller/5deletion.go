@@ -47,11 +47,9 @@ func (r *StorageVirtualMachineReconciler) reconcileDeletions(ctx context.Context
 		//_ = r.setConditionSVMDeleted(ctx, svmCR, CONDITION_STATUS_TRUE)
 		if currentDeletionPolicy == gateway.DeletionPolicyDelete {
 			log.Info("SVM deleted, removed finalizer, cleaning up custom resource")
-		} else if currentDeletionPolicy == gateway.DeletionPolicyRetain {
-			log.Info("SVM retained, removed finalizer, cleaning up custom resource")
 		} else {
-			// default policy
-			log.Info("SVM deleted, Removed finalizer, cleaning up custom resource")
+			// default policy or currentDeletionPolicy == gateway.DeletionPolicyRetain
+			log.Info("SVM retained, removed finalizer, cleaning up custom resource")
 		}
 
 		return ctrl.Result{}, nil
@@ -63,14 +61,13 @@ func (r *StorageVirtualMachineReconciler) reconcileDeletions(ctx context.Context
 func (r *StorageVirtualMachineReconciler) finalizeSVM(
 	svmCR *gateway.StorageVirtualMachine, oc *ontap.Client) error {
 
-	if svmCR.Spec.SvmDeletionPolicy == gateway.DeletionPolicyRetain {
-		return nil
+	if svmCR.Spec.SvmDeletionPolicy == gateway.DeletionPolicyDelete {
+		err := oc.DeleteStorageVM(svmCR.Spec.SvmUuid)
+		if err != nil {
+			return fmt.Errorf("SVM not deleted yet")
+		}
 	}
 
-	err := oc.DeleteStorageVM(svmCR.Spec.SvmUuid)
-	if err != nil {
-		return fmt.Errorf("SVM not deleted yet")
-	}
 	return nil
 }
 

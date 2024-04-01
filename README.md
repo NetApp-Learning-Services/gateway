@@ -128,7 +128,7 @@ spec:
         anon:  "65534"
 ``` 
 
-The svmDeletionPolicy can be either Delete (default) or Retain.  If set to Retain, upon deletion of the CR, the SVM is retained.  The default behavior (svmDeleteionPolicy set to Delete) is upon deletion of the CR, the SVM is also deleted.  
+The svmDeletionPolicy can be either Delete or Retain (default).  If set to Delete, upon deletion of the CR, the SVM is deleted.  The default behavior (svmDeleteionPolicy set to Retain) is upon deletion of the CR, the SVM is not deleted but must be manually managed.  (Updated April 1, 2024)
 
 ### 5. Deploy NetApp [Astra Trident](https://github.com/NetApp/trident) to manage the SVM resources created by this operator.
 
