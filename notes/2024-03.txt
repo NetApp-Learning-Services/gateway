@@ -61,3 +61,5 @@ POST /api/network/ip/interfaces { "name": "lif_svmtest_388", "ip": { "address": 
 
 /home/user/repo/gateway/bin/kustomize build config/default > config/deploy/v1beta1/gatewayoperator.yaml 
 
+Removed gateway-reg-cred-secret from the output in 2 locations
+

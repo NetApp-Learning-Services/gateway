@@ -1298,7 +1298,7 @@ spec:
                 description: Stores optional SVM's comment
                 type: string
               svmDeletionPolicy:
-                default: Delete
+                default: Retain
                 description: Stores optional SVM's deletion policy
                 enum:
                 - Delete
@@ -1418,8 +1418,6 @@ spec:
       status: {}
 ---
 apiVersion: v1
-imagePullSecrets:
-- name: gateway-reg-cred-secret
 kind: ServiceAccount
 metadata:
   labels:
@@ -1626,16 +1624,6 @@ subjects:
 - kind: ServiceAccount
   name: gateway-controller-manager
   namespace: gateway-system
----
-apiVersion: v1
-data:
-  .dockerconfigjson: eyJhdXRocyI6eyJodHRwczovL2RvY2tlci1yZWdpc3RyeTozMDAwMSI6eyJ1c2VybmFtZSI6ImFkbWluIiwicGFzc3dvcmQiOiJOZXRhcHAxISIsImF1dGgiOiJZV1J0YVc0NlRtVjBZWEJ3TVNFPSJ9fX0=
-kind: Secret
-metadata:
-  creationTimestamp: null
-  name: gateway-reg-cred-secret
-  namespace: gateway-system
-type: kubernetes.io/dockerconfigjson
 ---
 apiVersion: v1
 kind: Service

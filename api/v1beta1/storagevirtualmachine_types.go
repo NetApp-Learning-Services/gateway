@@ -54,7 +54,7 @@ type StorageVirtualMachineSpec struct {
 	// Stores optional SVM's deletion policy
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:validation:Enum="Delete";"Retain"
-	// +kubebuilder:default:=Delete
+	// +kubebuilder:default:=Retain
 	SvmDeletionPolicy DeletionPolicy `json:"svmDeletionPolicy,omitempty"`
 
 	// Stores optional debug
