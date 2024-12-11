@@ -43,3 +43,9 @@ Updated  go.mod
  k8s.io/apimachinery v0.29.11
  k8s.io/client-go v0.29.11
  sigs.k8s.io/controller-runtime v0.18.4
+
+ Updated DockerFile
+
+ Updated main.go
+
+ Update config subdirectories to remove kube-rbac-proxy
