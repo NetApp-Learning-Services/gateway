@@ -33,3 +33,13 @@ check: operator-sdk version
 go mod tidy
 go get -u ./...
 go get -u golang.org/x/net # because of detected security vulnerabilities
+
+5.  Followed:  https://sdk.operatorframework.io/docs/upgrading-sdk-version/v1.38.0/
+
+Updated  go.mod
+ github.com/onsi/ginkgo v1.17.2
+ github.com/onsi/gomega v1.32.0
+ k8s.io/api v0.29.11
+ k8s.io/apimachinery v0.29.11
+ k8s.io/client-go v0.29.11
+ sigs.k8s.io/controller-runtime v0.18.4
