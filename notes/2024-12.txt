@@ -28,3 +28,8 @@ chmod +x operator-sdk_${OS}_${ARCH} && sudo mv operator-sdk_${OS}_${ARCH} /usr/l
 
 check: operator-sdk version
 
+4. To update go dependiences recursively:  
+
+go mod tidy
+go get -u ./...
+go get -u golang.org/x/net # because of detected security vulnerabilities
