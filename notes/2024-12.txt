@@ -49,3 +49,35 @@ Updated  go.mod
  Updated main.go
 
  Update config subdirectories to remove kube-rbac-proxy
+
+ 6. REST APIs examples:
+
+If TLS:
+Create a certificate:
+GET /api/security/certificates?common_name=SVM_SYSMGR_CA&type=root_ca&svm.uuid=0709252d-ba46-11ef-8316-005056b0d33d&fields=uuid%2Ccommon_name%2Csvm%2Cexpiry_time%2Cpublic_certificate%2Cserial_number&return_timeout=120(0.329s)
+POST /api/security/certificates?return_records=true { "common_name": "***", "svm": { "uuid": "0709252d-ba46-11ef-8316-005056b0d33d" }, "type": "root_ca", "expiry_time": "P725DT" }(0.291s)
+GET /api/security/certificates?uuid=8b93aa03-ba47-11ef-8316-005056b0d33d&fields=uuid%2Ccommon_name%2Csvm%2Cexpiry_time%2Cpublic_certificate%2Cserial_number&return_timeout=120(0.055s)
+POST /api/security/certificate-signing-request { "subject_name": "CN=svm0" }(0.918s)
+POST /api/security/certificates/8b93aa03-ba47-11ef-8316-005056b0d33d/sign { "expiry_time": "P723DT", "signing_request": "***" }(0.242s)
+POST /api/security/certificates?return_records=true { "public_certificate": "***", "private_key": "***", "svm": { "uuid": "0709252d-ba46-11ef-8316-005056b0d33d" }, "type": "server" }(0.311s)
+GET /api/security/certificates?fields=uuid%2Cserial_number%2Ccommon_name%2Cexpiry_time%2Csvm%2Cauthority_key_identifier&uuid=8c5d6cdb-ba47-11ef-8316-005056b0d33d&type=server&return_timeout=120(0.056s)
+GET /api/security/certificates?fields=serial_number%2Cpublic_certificate%2Cexpiry_time&type=root_ca&subject_key_identifier=61%3AAE%3A88%3A46%3AF6%3AD5%3A1A%3A69%3A1A%3AA5%3A17%3A8C%3A38%3AD3%3AE3%3A4B%3A87%3A07%3A0B%3A35&return_timeout=120(0.284s)
+
+Create S3 server: 
+POST /api/protocols/s3/services { "enabled": true, "name": "svm0", "svm": { "uuid": "0709252d-ba46-11ef-8316-005056b0d33d" }, "users": [ { "name": "sm_s3_user" } ], "is_http_enabled": true, "port": 80, "is_https_enabled": true, "secure_port": 443, "certificate": { "uuid": "8c5d6cdb-ba47-11ef-8316-005056b0d33d" } }(0.267s)
+
+If using existing network:
+POST /api/network/ip/service-policies?return_records=true { "name": "sm-custom-service-policy-nas-s3", "scope": "svm", "svm": { "name": "svm0" }, "services": [ "data_core", "data_s3_server", "data_nfs", "data_cifs", "data_fpolicy_client", "management_dns_client", "management_ad_client", "management_ldap_client", "management_nis_client", "data_dns_server" ] }(0.146s)
+GET /api/network/ip/interfaces?ip.address=192.168.0.31&svm.uuid=0709252d-ba46-11ef-8316-005056b0d33d&return_timeout=120(0.057s)
+PATCH /api/network/ip/interfaces/1543d0bc-ba46-11ef-8316-005056b0d33d { "service_policy": { "name": "sm-custom-service-policy-nas-s3" } }(0.262s)
+
+If creating a new LIF: 
+Check to see if LIF exists:
+GET /api/network/ip/interfaces?ip.address=192.168.0.32&fields=ip&svm.uuid=240f9f26-ba5f-11ef-8316-005056b0d33d&return_timeout=120(0.069s)
+
+Configure S3 server: 
+POST /api/protocols/s3/services { "enabled": true, "name": "svm0", "svm": { "uuid": "240f9f26-ba5f-11ef-8316-005056b0d33d" }, "users": [ { "name": "sm_s3_user" } ], "is_http_enabled": true, "port": 80, "is_https_enabled": false }(0.078s)
+
+Create network LIF:
+POST /api/network/ip/service-policies?return_records=true { "name": "sm-custom-service-policy-nas-s3", "scope": "svm", "svm": { "name": "svm0" }, "services": [ "data_core", "data_s3_server", "data_nfs", "data_cifs", "data_fpolicy_client", "management_dns_client", "management_ad_client", "management_ldap_client", "management_nis_client", "data_dns_server" ] }(0.081s)
+POST /api/network/ip/interfaces { "name": "lif_svm0_786", "ip": { "address": "***", "netmask": "***" }, "location": { "broadcast_domain": { "name": "Default" }, "home_node": { "name": "Cluster1-01", "uuid": "71198e05-bec9-11ee-8284-005056b0a86b" } }, "svm": { "uuid": "240f9f26-ba5f-11ef-8316-005056b0d33d" }, "service_policy": { "name": "sm-custom-service-policy-nas-s3" } }(0.513s)

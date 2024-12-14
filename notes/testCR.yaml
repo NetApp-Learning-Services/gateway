@@ -42,6 +42,23 @@ spec:
   clusterCredentials:
     name: ontap-cluster1-admin
     namespace: gateway-system
+  s3:
+    enabled: true
+    name: svm0
+    tls:
+      enabled: false
+      certificate:
+    http:
+      enabled: true
+      port: 80
+    users:
+    - name: gateway_s3_user
+    interfaces:
+    - name: s31
+      ip: 192.168.0.32    
+      netmask: 255.255.255.0
+      broadcastDomain: Default
+      homeNode: Cluster1-01
   iscsi:
     enabled: true
     alias: testVs
