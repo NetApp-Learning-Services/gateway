@@ -11,8 +11,8 @@ Check the current go version:  sudo apt list --installed | grep golang
 Purge current go version:  sudo apt-get purge golang*
 
 export PATH=$PATH:/usr/local/go/bin
-wget https://dl.google.com/go/go1.22.10.linux-amd64.tar.gz
-sudo tar -C /usr/local/ -xzf go1.22.10.linux-amd64.tar.gz
+wget https://dl.google.com/go/go1.22.1.linux-amd64.tar.gz
+sudo tar -C /usr/local/ -xzf go1.22.1.linux-amd64.tar.gz
 export GO111MODULE=on
 
 check go: go env
@@ -22,7 +22,7 @@ check go version: go version
 
 export ARCH=$(case $(uname -m) in x86_64) echo -n amd64 ;; aarch64) echo -n arm64 ;; *) echo -n $(uname -m) ;; esac)
 export OS=$(uname | awk '{print tolower($0)}')
-export OPERATOR_SDK_DL_URL=https://github.com/operator-framework/operator-sdk/releases/download/v1.38.0
+export OPERATOR_SDK_DL_URL=https://github.com/operator-framework/operator-sdk/releases/download/v1.34.0
 curl -LO ${OPERATOR_SDK_DL_URL}/operator-sdk_${OS}_${ARCH}
 chmod +x operator-sdk_${OS}_${ARCH} && sudo mv operator-sdk_${OS}_${ARCH} /usr/local/bin/operator-sdk
 
@@ -37,18 +37,14 @@ go get -u golang.org/x/net # because of detected security vulnerabilities
 5.  Followed:  https://sdk.operatorframework.io/docs/upgrading-sdk-version/v1.38.0/
 
 Updated  go.mod
- github.com/onsi/ginkgo v1.17.2
- github.com/onsi/gomega v1.32.0
- k8s.io/api v0.29.11
- k8s.io/apimachinery v0.29.11
- k8s.io/client-go v0.29.11
- sigs.k8s.io/controller-runtime v0.18.4
-
- Updated DockerFile
-
- Updated main.go
-
- Update config subdirectories to remove kube-rbac-proxy
+	github.com/go-logr/logr v1.4.1
+	github.com/onsi/ginkgo v1.16.5
+	github.com/onsi/gomega v1.32.0
+	golang.org/x/exp v0.0.0-20220722155223-a9213eeb770e
+	k8s.io/api v0.30.1
+	k8s.io/apimachinery v0.30.1
+	k8s.io/client-go v0.30.1
+	sigs.k8s.io/controller-runtime v0.18.4
 
  6. REST APIs examples:
 
