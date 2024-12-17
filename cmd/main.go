@@ -37,6 +37,7 @@ import (
 	gatewayv1alpha2 "gateway/api/v1alpha2"
 	gatewayv1alpha3 "gateway/api/v1alpha3"
 	gatewayv1beta1 "gateway/api/v1beta1"
+	gatewayv1beta2 "gateway/api/v1beta2"
 	"gateway/internal/controller"
 	//+kubebuilder:scaffold:imports
 )
@@ -53,6 +54,7 @@ func init() {
 	utilruntime.Must(gatewayv1alpha2.AddToScheme(scheme))
 	utilruntime.Must(gatewayv1alpha3.AddToScheme(scheme))
 	utilruntime.Must(gatewayv1beta1.AddToScheme(scheme))
+	utilruntime.Must(gatewayv1beta2.AddToScheme(scheme))
 	//+kubebuilder:scaffold:scheme
 }
 

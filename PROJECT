@@ -44,4 +44,12 @@ resources:
   kind: StorageVirtualMachine
   path: github.com/NetApp-Learning-Services/gateway/api/v1beta1
   version: v1beta1
+- api:
+    crdVersion: v1
+    namespaced: true
+  domain: netapp.com
+  group: gateway
+  kind: StorageVirtualMachine
+  path: github.com/NetApp-Learning-Services/gateway/api/v1beta2
+  version: v1beta2
 version: "3"

@@ -4,4 +4,5 @@ resources:
 - gateway_v1alpha2_storagevirtualmachine.yaml
 - gateway_v1alpha3_storagevirtualmachine.yaml
 - gateway_v1beta1_storagevirtualmachine.yaml
+- gateway_v1beta2_storagevirtualmachine.yaml
 #+kubebuilder:scaffold:manifestskustomizesamples

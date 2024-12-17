@@ -77,3 +77,14 @@ POST /api/protocols/s3/services { "enabled": true, "name": "svm0", "svm": { "uui
 Create network LIF:
 POST /api/network/ip/service-policies?return_records=true { "name": "sm-custom-service-policy-nas-s3", "scope": "svm", "svm": { "name": "svm0" }, "services": [ "data_core", "data_s3_server", "data_nfs", "data_cifs", "data_fpolicy_client", "management_dns_client", "management_ad_client", "management_ldap_client", "management_nis_client", "data_dns_server" ] }(0.081s)
 POST /api/network/ip/interfaces { "name": "lif_svm0_786", "ip": { "address": "***", "netmask": "***" }, "location": { "broadcast_domain": { "name": "Default" }, "home_node": { "name": "Cluster1-01", "uuid": "71198e05-bec9-11ee-8284-005056b0a86b" } }, "svm": { "uuid": "240f9f26-ba5f-11ef-8316-005056b0d33d" }, "service_policy": { "name": "sm-custom-service-policy-nas-s3" } }(0.513s)
+
+7. Stubbed out v1beta2 new api: operator-sdk create api --group gateway --version v1beta2 --kind StorageVirtualMachine --resource
+
+8. Added files from api/v1beta1 to api/v1beta2
+
+9. Updated storagevirtualmachine_types.go from v1beta1 to v1beta2
+
+10. Ran make generate to created the zz_generate files
+
+11. Ran go mod tidy to get rid of the unused dependiences
+
