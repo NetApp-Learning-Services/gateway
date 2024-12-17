@@ -105,16 +105,6 @@ type SnapMirror struct {
 	ProtectedVolumesCount int  `json:"protected_volumes_count"`
 }
 
-type S3Service struct {
-	Resource
-	Certificate    Resource `json:"certificate,omitempty"`
-	IsHttpEnabled  bool     `json:"is_http_enabled"`
-	IsHttpsEnabled bool     `json:"is_https_enabled"`
-	Port           int      `json:"port"`
-	SecurePort     int      `json:"secure_port"`
-	Enabled        bool     `json:"enabled"`
-}
-
 type SelfLink struct {
 	Self struct {
 		Href string `json:"href"`
@@ -178,6 +168,7 @@ type Svm struct {
 	Iscsi                  Iscsi         `json:"iscsi,omitempty"`
 	Fcp                    Fcp           `json:"fcp,omitempty"`
 	Nvme                   Nvme          `json:"nvme,omitempty"`
+	S3                     S3Service     `json:"s3,omitempty"`
 	SnapMirror             SnapMirror    `json:"snapmirror,omitempty"`
 	SnapshotPolicy         Resource      `json:"snapshot_policy,omitempty"`
 	VolumeEfficiencyPolicy Resource      `json:"volume_efficiency_policy,omitempty"`

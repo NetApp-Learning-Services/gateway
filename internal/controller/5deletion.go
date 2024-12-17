@@ -5,7 +5,7 @@ package controller
 import (
 	"context"
 	"fmt"
-	gateway "gateway/api/v1beta1"
+	gateway "gateway/api/v1beta2"
 	"gateway/internal/controller/ontap"
 	defaultLog "log"
 
@@ -23,7 +23,7 @@ func (r *StorageVirtualMachineReconciler) reconcileDeletions(ctx context.Context
 	log.Info("STEP 5: Delete SVM in ONTAP and remove custom resource")
 	var currentDeletionPolicy = svmCR.Spec.SvmDeletionPolicy
 	if oc.Debug {
-		defaultLog.Printf("[DEBUG] current deletion policy: " + fmt.Sprintf("%v", currentDeletionPolicy))
+		defaultLog.Printf("%s", "[DEBUG] current deletion policy: "+fmt.Sprintf("%v", currentDeletionPolicy))
 	}
 
 	isSMVMarkedToBeDeleted := svmCR.GetDeletionTimestamp() != nil

@@ -6,7 +6,7 @@ import (
 	"context"
 	"strings"
 
-	gateway "gateway/api/v1beta1"
+	gateway "gateway/api/v1beta2"
 	"gateway/internal/controller/ontap"
 
 	"github.com/go-logr/logr"

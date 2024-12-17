@@ -8,7 +8,7 @@ import (
 	"fmt"
 	defaultLog "log"
 
-	gateway "gateway/api/v1beta1"
+	gateway "gateway/api/v1beta2"
 	"gateway/internal/controller/ontap"
 
 	"github.com/go-logr/logr"
@@ -44,7 +44,7 @@ func (r *StorageVirtualMachineReconciler) reconcileSvmCreation(ctx context.Conte
 	}
 
 	if oc.Debug {
-		defaultLog.Printf("[DEBUG] SVM creation payload: " + fmt.Sprintf("%#v\n", payload))
+		defaultLog.Printf("%s", "[DEBUG] SVM creation payload: "+fmt.Sprintf("%#v\n", payload))
 	}
 
 	jsonPayload, err := json.Marshal(payload)

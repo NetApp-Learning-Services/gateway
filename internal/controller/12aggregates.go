@@ -6,7 +6,7 @@ import (
 	"fmt"
 	defaultLog "log"
 
-	gateway "gateway/api/v1beta1"
+	gateway "gateway/api/v1beta2"
 	"gateway/internal/controller/ontap"
 
 	"github.com/go-logr/logr"
@@ -40,7 +40,7 @@ func (r *StorageVirtualMachineReconciler) reconcileAggregates(ctx context.Contex
 			}
 
 			if oc.Debug {
-				defaultLog.Printf("[DEBUG] SVM aggregates payload: " + fmt.Sprintf("%#v\n", patchSVM))
+				defaultLog.Printf("%s", "[DEBUG] SVM aggregates payload: "+fmt.Sprintf("%#v\n", patchSVM))
 			}
 
 			jsonPayload, err := json.Marshal(patchSVM)

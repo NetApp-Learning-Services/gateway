@@ -9,7 +9,7 @@ import (
 	defaultLog "log"
 	"strconv"
 
-	gateway "gateway/api/v1beta1"
+	gateway "gateway/api/v1beta2"
 	"gateway/internal/controller/ontap"
 
 	"golang.org/x/exp/slices"
@@ -53,7 +53,7 @@ func (r *StorageVirtualMachineReconciler) reconcileManagementLifUpdate(ctx conte
 	nameIndex := slices.IndexFunc(lifs.Records, func(i ontap.IpInterface) bool { return i.Name == svmCR.Spec.ManagementLIF.Name })
 
 	if oc.Debug {
-		defaultLog.Printf("[DEBUG] nameIndex: " + fmt.Sprintf("%v", nameIndex))
+		defaultLog.Printf("%s", "[DEBUG] nameIndex: "+fmt.Sprintf("%v", nameIndex))
 	}
 
 	//IP not returned at least in 9.9.1 vsims - can only check the Name
@@ -81,8 +81,8 @@ func (r *StorageVirtualMachineReconciler) reconcileManagementLifUpdate(ctx conte
 		netmaskAsIP := NetmaskIntToString(netmaskAsInt)
 
 		if oc.Debug {
-			defaultLog.Printf("[DEBUG] netmaskAsInt: " + fmt.Sprintf("%v", netmaskAsInt))
-			defaultLog.Printf("[DEBUG] netmaskAsIP: " + fmt.Sprintf("%v", netmaskAsIP))
+			defaultLog.Printf("%s", "[DEBUG] netmaskAsInt: "+fmt.Sprintf("%v", netmaskAsInt))
+			defaultLog.Printf("%s", "[DEBUG] netmaskAsIP: "+fmt.Sprintf("%v", netmaskAsIP))
 		}
 
 		if netmaskAsIP != svmCR.Spec.ManagementLIF.Netmask {
@@ -112,7 +112,7 @@ func (r *StorageVirtualMachineReconciler) reconcileManagementLifUpdate(ctx conte
 
 	// otherwise changes need to be implemented
 	if oc.Debug {
-		defaultLog.Printf("[DEBUG] SVM management LIF update payload: " + fmt.Sprintf("%#v\n", upsertManagementLif))
+		defaultLog.Printf("%s", "[DEBUG] SVM management LIF update payload: "+fmt.Sprintf("%#v\n", upsertManagementLif))
 	}
 
 	jsonPayload, err := json.Marshal(upsertManagementLif)

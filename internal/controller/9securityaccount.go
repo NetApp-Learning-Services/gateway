@@ -7,7 +7,7 @@ import (
 	"encoding/json"
 	"fmt"
 
-	gateway "gateway/api/v1beta1"
+	gateway "gateway/api/v1beta2"
 	"gateway/internal/controller/ontap"
 	defaultLog "log"
 
@@ -79,7 +79,7 @@ func (r *StorageVirtualMachineReconciler) reconcileSecurityAccount(ctx context.C
 		payload.Locked = &a // always unlock
 
 		if oc.Debug {
-			defaultLog.Printf("[DEBUG] Security account payload: " + fmt.Sprintf("%#v\n", payload))
+			defaultLog.Printf("%s", "[DEBUG] Security account payload: "+fmt.Sprintf("%#v\n", payload))
 		}
 
 		jsonPayload, err := json.Marshal(payload)
@@ -137,7 +137,7 @@ func (r *StorageVirtualMachineReconciler) reconcileSecurityAccount(ctx context.C
 		payload.Password = string(credentials.Data["password"])
 
 		if oc.Debug {
-			defaultLog.Printf("[DEBUG] Security account payload: " + fmt.Sprintf("%#v\n", payload))
+			defaultLog.Printf("%s", "[DEBUG] Security account payload: "+fmt.Sprintf("%#v\n", payload))
 		}
 
 		jsonPayload, err := json.Marshal(payload)

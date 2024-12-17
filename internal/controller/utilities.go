@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"time"
 
-	gateway "gateway/api/v1beta1"
+	gateway "gateway/api/v1beta2"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -43,13 +43,13 @@ func appendCondition(ctx context.Context, reconcilerClient client.Client, object
 		if err != nil {
 			errMessage := "custom resource status update failed"
 			log.Error(err, errMessage)
-			return fmt.Errorf(errMessage)
+			return fmt.Errorf("%s", errMessage)
 		}
 
 	} else {
 		errMessage := "status cannot be set, custom resource doesn't support conditions"
 		log.Info(errMessage)
-		return fmt.Errorf(errMessage)
+		return fmt.Errorf("%s", errMessage)
 	}
 	return nil
 }

@@ -92,5 +92,21 @@ POST /api/network/ip/interfaces { "name": "lif_svm0_786", "ip": { "address": "**
 
 13. Add S3 sub spec to storagevirtualmachine_types and ran make generate and make manifests
 
+14. Create 16s3update.go and ontap/s3.go 
+
+16. Reviewed service policy for S3 LIF and it looks like there is no default service policy, need to create one that looks like this:
+
+          sm-custom-service-policy-nas-s3 
+                                     data-core: 0.0.0.0/0
+                                     data-nfs: 0.0.0.0/0                       
+                                     data-cifs: 0.0.0.0/0
+                                     data-s3-server: 0.0.0.0/0
+                                     data-fpolicy-client: 0.0.0.0/0
+                                     management-dns-client: 0.0.0.0/0
+                                     management-ad-client: 0.0.0.0/0
+                                     management-ldap-client: 0.0.0.0/0
+                                     management-nis-client: 0.0.0.0/0
+                                     data-dns-server: 0.0.0.0/0
+
 
 
