@@ -47,10 +47,10 @@ spec:
     name: svm0
     tls:
       enabled: false
-      certificate:
     http:
       enabled: true
-      port: 80
+    https:
+      enabled: true
     users:
     - name: gateway_s3_user
     interfaces:
