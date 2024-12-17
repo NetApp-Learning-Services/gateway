@@ -88,6 +88,10 @@ type StorageVirtualMachineSpec struct {
 	// Provide optional NVMe configuration
 	// +kubebuilder:validation:Optional
 	NvmeConfig *NvmeSubSpec `json:"nvme,omitempty"`
+
+	// Provide optional S3 configuration
+	// +kubebuilder:validation:Optional
+	S3Config *S3SubSpec `json:"s3,omitempty"`
 }
 
 // StorageVirtualMachineStatus defines the observed state of StorageVirtualMachine

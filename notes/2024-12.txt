@@ -88,3 +88,9 @@ POST /api/network/ip/interfaces { "name": "lif_svm0_786", "ip": { "address": "**
 
 11. Ran go mod tidy to get rid of the unused dependiences
 
+12. Add S3 sub spec to v1beta2 and ran make generate
+
+13. Add S3 sub spec to storagevirtualmachine_types and ran make generate and make manifests
+
+
+
