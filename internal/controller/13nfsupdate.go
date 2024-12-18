@@ -231,7 +231,7 @@ func (r *StorageVirtualMachineReconciler) reconcileNfsUpdate(ctx context.Context
 
 	// Check to see if NFS rules are defined in custom resources
 	if svmCR.Spec.NfsConfig.Export == nil {
-		// If not, exit with no error
+		// If none, exit with no error
 		log.Info("No NFS export rules defined - skipping")
 	} else {
 		createNfsExports := false
