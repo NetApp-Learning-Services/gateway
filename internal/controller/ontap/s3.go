@@ -12,11 +12,24 @@ import (
 type S3Service struct {
 	Svm            SvmRef   `json:"svm,omitempty"`
 	Certificate    Resource `json:"certificate,omitempty"`
-	IsHttpEnabled  bool     `json:"is_http_enabled"`
-	IsHttpsEnabled bool     `json:"is_https_enabled"`
+	IsHttpEnabled  *bool    `json:"is_http_enabled"`
+	IsHttpsEnabled *bool    `json:"is_https_enabled"`
 	Port           int      `json:"port"`
 	SecurePort     int      `json:"secure_port"`
 	Enabled        *bool    `json:"enabled"`
+	Name           *string  `json:"name"`
+}
+
+type UserResponse struct {
+	BaseResponse
+	Records []S3User `json:"records,omitempty"`
+}
+
+type S3User struct {
+	Name      string `json:"name,omitempty"`
+	Svm       SvmRef `json:"svm,omitempty"`
+	AccessKey string `json:"access_key,omitempty"`
+	SecretKey string `json:"secret_key,omitempty"`
 }
 
 const returnS3Qs string = "?return_records=true"
@@ -117,4 +130,39 @@ func (c *Client) CreateS3ServicePolicy(jsonPayload []byte) (err error) {
 		return &apiError{1, err.Error()}
 	}
 	return nil
+}
+
+func (c *Client) CreateS3User(uuid string, jsonPayload []byte) (users UserResponse, err error) {
+	uri := "/api/protocols/s3/services/" + uuid + "/users"
+
+	data, err := c.clientPost(uri, jsonPayload)
+	if err != nil {
+		//fmt.Println("Error: " + err.Error())
+		return users, &apiError{1, err.Error()}
+	}
+
+	var resp UserResponse
+	err = json.Unmarshal(data, &resp)
+	if err != nil {
+		return resp, &apiError{2, err.Error()}
+	}
+
+	return resp, nil
+}
+
+func (c *Client) GetS3UsersBySvmUuid(uuid string) (users UserResponse, err error) {
+	uri := "/api/protocols/s3/services/" + uuid + "/users"
+
+	data, err := c.clientGet(uri)
+	if err != nil {
+		return users, &apiError{1, err.Error()}
+	}
+
+	var resp UserResponse
+	err = json.Unmarshal(data, &resp)
+	if err != nil {
+		return resp, &apiError{2, err.Error()}
+	}
+
+	return resp, nil
 }

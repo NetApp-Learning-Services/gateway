@@ -220,6 +220,13 @@ func (r *StorageVirtualMachineReconciler) Reconcile(ctx context.Context, req ctr
 			if err != nil {
 				return ctrl.Result{RequeueAfter: 30 * time.Second}, err
 			}
+
+			// STEP 16
+			// Reconcile S3 information
+			err = r.reconcileS3Update(ctx, svmCR, svmRetrieved.Uuid, oc, log)
+			if err != nil {
+				return ctrl.Result{RequeueAfter: 30 * time.Second}, err
+			}
 		}
 
 	}
