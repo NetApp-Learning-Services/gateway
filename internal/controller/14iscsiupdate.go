@@ -13,14 +13,14 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-const Iscsi909Type = "default-data-blocks" //magic word
-const Iscsi910Type = "default-data-iscsi"  //magic word
+const Iscsi909ServicePolicy = "default-data-blocks" //magic word
+const Iscsi910ServicePolicy = "default-data-iscsi"  //magic word
 /*
 todo: check on this
 if 9.9.1 - use default-data-blocks
 if 9.10.1+ - use default-data-iscsi
 */
-const IscsiLifScope = "svm" //magic word
+const IscsiLifServicePolicyScope = "svm" //magic word
 
 func (r *StorageVirtualMachineReconciler) reconcileIscsiUpdate(ctx context.Context, svmCR *gateway.StorageVirtualMachine,
 	uuid string, oc *ontap.Client, log logr.Logger) error {
@@ -143,16 +143,16 @@ func (r *StorageVirtualMachineReconciler) reconcileIscsiUpdate(ctx context.Conte
 
 	if err != nil {
 		log.Error(err, "Error getting cluster version")
-		IscsiLifType = Iscsi909Type
+		IscsiLifType = Iscsi909ServicePolicy
 	} else {
 		if cluster.Version.Generation > 8 {
 			if cluster.Version.Major > 9 {
-				IscsiLifType = Iscsi910Type
+				IscsiLifType = Iscsi910ServicePolicy
 			} else {
-				IscsiLifType = Iscsi909Type
+				IscsiLifType = Iscsi909ServicePolicy
 			}
 		} else {
-			IscsiLifType = Iscsi909Type
+			IscsiLifType = Iscsi909ServicePolicy
 		}
 	}
 

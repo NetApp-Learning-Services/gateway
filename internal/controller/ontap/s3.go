@@ -111,17 +111,6 @@ func (c *Client) GetS3InterfacesBySvmUuid(uuid string, servicePolicy string) (li
 	return resp, nil
 }
 
-func (c *Client) GetS3ServicePolicyByName(servicePolicy string) (err error) {
-	uri := "/api/network/ip/service-policies?name=" + servicePolicy
-
-	_, err = c.clientGet(uri)
-	if err != nil {
-		return &apiError{1, err.Error()}
-	}
-
-	return nil
-}
-
 func (c *Client) CreateS3ServicePolicy(jsonPayload []byte) (err error) {
 	uri := "/api/network/ip/service-policies"
 	_, err = c.clientPost(uri, jsonPayload)

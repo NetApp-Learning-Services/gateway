@@ -52,7 +52,7 @@ func CreateLif(lifToCreate gateway.LIF, lifType string, uuid string, oc *ontap.C
 	newLif.Location.BroadcastDomain.Name = lifToCreate.BroacastDomain
 	newLif.Location.HomeNode.Name = lifToCreate.HomeNode
 	newLif.ServicePolicy.Name = lifType
-	newLif.Scope = NfsLifScope
+	newLif.Scope = NfsLifServicePolicyScope
 	newLif.Svm.Uuid = uuid
 
 	jsonPayload, err := json.Marshal(newLif)
@@ -133,4 +133,30 @@ func CreateUser(userToCreate gateway.S3User, uuid string, oc *ontap.Client, log 
 	log.Info(fmt.Sprintf("S3 User creation successful: %v", userToCreate.Name))
 
 	return user, nil
+}
+
+func CreateLifServicePolicy(servicePolicyName string, servicePolicyScope string, uuid string, oc *ontap.Client, log logr.Logger) (err error) {
+	var newServicePolicy ontap.IpServicePolicy
+	newServicePolicy.Name = servicePolicyName
+	newServicePolicy.Scope = servicePolicyScope
+	newServicePolicy.Svm.Uuid = uuid
+	newServicePolicy.Services[0] = "data-core"
+	newServicePolicy.Services[1] = "data-s3-server"
+	newServicePolicy.Services[2] = "data-dns-server"
+
+	jsonPayload, err := json.Marshal(newServicePolicy)
+	if err != nil {
+		//error creating the json body
+		log.Error(err, fmt.Sprintf("Error creating the json payload for LIF S3 Service Policy %v", newServicePolicy.Name))
+		return err
+	}
+	log.Info("LIF service policy creation attempt: " + newServicePolicy.Name)
+	err = oc.CreateInterfaceServicePolicy(jsonPayload)
+	if err != nil {
+		log.Error(err, fmt.Sprintf("Error occurred when creating LIF S3 Service Policy: %v", newServicePolicy.Name))
+		return err
+	}
+	log.Info(fmt.Sprintf("LIF S3 Service Policy creation successful: %v", newServicePolicy.Name))
+
+	return nil
 }

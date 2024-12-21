@@ -47,7 +47,6 @@ type HomeNode struct {
 type ServicePolicy struct {
 	Links SelfLinks `json:"_links,omitempty"`
 	Name  string    `json:"name,omitempty"`
-	Uuid  string    `json:"uuid,omitempty"`
 }
 
 type IpInterfacesResponse struct {
@@ -136,6 +135,40 @@ func (c *Client) DeleteIpInterface(uuid string) (err error) {
 
 	_, err = c.clientDelete(uri)
 	if err != nil {
+		return &apiError{1, err.Error()}
+	}
+
+	return nil
+}
+
+func (c *Client) CheckExistsInterfaceServicePolicyByName(servicePolicy string) (err error) {
+	uri := "/api/network/ip/service-policies?name=" + servicePolicy
+
+	data, err := c.clientGet(uri)
+	if err != nil {
+		//Error in GET request
+		return &apiError{1, err.Error()}
+	}
+	var resp IpServicePolicyResponse
+	err = json.Unmarshal(data, &resp)
+	if err != nil {
+		//Error in response
+		return &apiError{2, err.Error()}
+	}
+	if resp.NumRecords == 0 {
+		//Service Policy not found
+		return &apiError{3, "Lif service policy not found"}
+	}
+
+	// return nil if service policy name exists
+	return nil
+}
+
+func (c *Client) CreateInterfaceServicePolicy(jsonPayload []byte) (err error) {
+	uri := "/api/network/ip/service-policy"
+	_, err = c.clientPost(uri, jsonPayload)
+	if err != nil {
+		//fmt.Println("Error: " + err.Error())
 		return &apiError{1, err.Error()}
 	}
 

@@ -13,8 +13,8 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-const NfsLifType = "default-data-files" //magic word
-const NfsLifScope = "svm"               //magic word
+const NfsLifServicePolicy = "default-data-files" //magic word
+const NfsLifServicePolicyScope = "svm"           //magic word
 
 func (r *StorageVirtualMachineReconciler) reconcileNfsUpdate(ctx context.Context,
 	svmCR *gateway.StorageVirtualMachine, uuid string, oc *ontap.Client, log logr.Logger) error {
@@ -159,7 +159,7 @@ func (r *StorageVirtualMachineReconciler) reconcileNfsUpdate(ctx context.Context
 		if createNfsLifs {
 			//creating lifs
 			for _, val := range svmCR.Spec.NfsConfig.Lifs {
-				err = CreateLif(val, NfsLifType, uuid, oc, log)
+				err = CreateLif(val, NfsLifServicePolicy, uuid, oc, log)
 				if err != nil {
 					_ = r.setConditionNfsLif(ctx, svmCR, CONDITION_STATUS_FALSE)
 					return err
@@ -173,7 +173,7 @@ func (r *StorageVirtualMachineReconciler) reconcileNfsUpdate(ctx context.Context
 				// Check to see if lifs.Records[index] is out of index - if so, need to create LIF
 				if index > lifs.NumRecords-1 {
 					// Need to create LIF for val
-					err = CreateLif(val, NfsLifType, uuid, oc, log)
+					err = CreateLif(val, NfsLifServicePolicy, uuid, oc, log)
 					if err != nil {
 						_ = r.setConditionNfsLif(ctx, svmCR, CONDITION_STATUS_FALSE)
 						r.Recorder.Event(svmCR, "Warning", "NfsCreationLifFailed", "Error: "+err.Error())
@@ -186,7 +186,7 @@ func (r *StorageVirtualMachineReconciler) reconcileNfsUpdate(ctx context.Context
 						break
 					}
 
-					err = UpdateLif(val, lifs.Records[index], NfsLifType, oc, log)
+					err = UpdateLif(val, lifs.Records[index], NfsLifServicePolicy, oc, log)
 					if err != nil {
 						_ = r.setConditionNfsLif(ctx, svmCR, CONDITION_STATUS_FALSE)
 						r.Recorder.Event(svmCR, "Warning", "NfsUpdateLifFailed", "Error: "+err.Error())

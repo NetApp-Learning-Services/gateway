@@ -13,9 +13,9 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-const NvmeLifType = "default-data-nvme-tcp" //magic word
+const NvmeLifServicePolicy = "default-data-nvme-tcp" //magic word
 
-const NvmeLifScope = "svm" //magic word
+const NvmeLifServicePolicyScope = "svm" //magic word
 
 func (r *StorageVirtualMachineReconciler) reconcileNvmeUpdate(ctx context.Context, svmCR *gateway.StorageVirtualMachine,
 	uuid string, oc *ontap.Client, log logr.Logger) error {
@@ -124,7 +124,7 @@ func (r *StorageVirtualMachineReconciler) reconcileNvmeUpdate(ctx context.Contex
 	createNvmeLifs := false
 
 	// Check to see if NVMe interfaces defined and compare to custom resource's definitions
-	lifs, err := oc.GetNvmeInterfacesBySvmUuid(uuid, NvmeLifType)
+	lifs, err := oc.GetNvmeInterfacesBySvmUuid(uuid, NvmeLifServicePolicy)
 	if err != nil {
 		//error creating the json body
 		log.Error(err, "Error getting NVMe service LIFs for SVM: "+uuid)
@@ -145,7 +145,7 @@ func (r *StorageVirtualMachineReconciler) reconcileNvmeUpdate(ctx context.Contex
 		// if lifs.Records[index] is out of index - if so, need to create LIF
 		if createNvmeLifs || index > lifs.NumRecords-1 {
 			// Need to create LIF for val
-			err = CreateLif(val, NvmeLifType, uuid, oc, log)
+			err = CreateLif(val, NvmeLifServicePolicy, uuid, oc, log)
 			if err != nil {
 				_ = r.setConditionNvmeLif(ctx, svmCR, CONDITION_STATUS_FALSE)
 				r.Recorder.Event(svmCR, "Warning", "NvmeCreationLifFailed", "Error: "+err.Error())
@@ -160,7 +160,7 @@ func (r *StorageVirtualMachineReconciler) reconcileNvmeUpdate(ctx context.Contex
 				break
 			}
 
-			err = UpdateLif(val, lifs.Records[index], NvmeLifType, oc, log)
+			err = UpdateLif(val, lifs.Records[index], NvmeLifServicePolicy, oc, log)
 			if err != nil {
 				_ = r.setConditionNvmeLif(ctx, svmCR, CONDITION_STATUS_FALSE)
 				r.Recorder.Event(svmCR, "Warning", "NvmeUpdateLifFailed", "Error: "+err.Error())

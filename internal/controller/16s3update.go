@@ -14,7 +14,8 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-const S3LifType = "" //magic word
+const S3LifServicePolicy = "gateway-custom-service-policy-s3" //magic word
+const S3LifServicePolicyScope = "svm"                         //magic word
 
 func (r *StorageVirtualMachineReconciler) reconcileS3Update(ctx context.Context, svmCR *gateway.StorageVirtualMachine,
 	uuid string, oc *ontap.Client, log logr.Logger) error {
@@ -133,8 +134,19 @@ func (r *StorageVirtualMachineReconciler) reconcileS3Update(ctx context.Context,
 
 		createS3Lifs := false
 
+		// Check for custom S3 LIF service policy
+		err := oc.CheckExistsInterfaceServicePolicyByName(S3LifServicePolicy)
+		if err != nil {
+			log.Info("LIF S3 Service Policy " + S3LifServicePolicy + " does not exist - creating")
+			err := CreateLifServicePolicy(S3LifServicePolicy, S3LifServicePolicyScope, uuid, oc, log)
+			if err != nil {
+				_ = r.setConditionS3Lif(ctx, svmCR, CONDITION_STATUS_FALSE)
+				return err
+			}
+		}
+
 		// Check to see if S3 interfaces defined and compare to custom resource's definitions
-		lifs, err := oc.GetS3InterfacesBySvmUuid(uuid, S3LifType)
+		lifs, err := oc.GetS3InterfacesBySvmUuid(uuid, S3LifServicePolicy)
 		if err != nil {
 			//error creating the json body
 			log.Error(err, "Error getting S3 service LIFs for SVM: "+uuid)
@@ -155,7 +167,7 @@ func (r *StorageVirtualMachineReconciler) reconcileS3Update(ctx context.Context,
 			// if lifs.Records[index] is out of index - if so, need to create LIF
 			if createS3Lifs || index > lifs.NumRecords-1 {
 				// Need to create LIF for val
-				err = CreateLif(val, S3LifType, uuid, oc, log)
+				err = CreateLif(val, S3LifServicePolicy, uuid, oc, log)
 				if err != nil {
 					_ = r.setConditionS3Lif(ctx, svmCR, CONDITION_STATUS_FALSE)
 					r.Recorder.Event(svmCR, "Warning", "S3CreationLifFailed", "Error: "+err.Error())
@@ -170,7 +182,7 @@ func (r *StorageVirtualMachineReconciler) reconcileS3Update(ctx context.Context,
 					break
 				}
 
-				err = UpdateLif(val, lifs.Records[index], S3LifType, oc, log)
+				err = UpdateLif(val, lifs.Records[index], S3LifServicePolicy, oc, log)
 				if err != nil {
 					_ = r.setConditionS3Lif(ctx, svmCR, CONDITION_STATUS_FALSE)
 					r.Recorder.Event(svmCR, "Warning", "S3UpdateLifFailed", "Error: "+err.Error())
@@ -244,7 +256,7 @@ func (r *StorageVirtualMachineReconciler) reconcileS3Update(ctx context.Context,
 					secret := &corev1.Secret{
 						ObjectMeta: metav1.ObjectMeta{
 							Name:      user.Records[0].Name,
-							Namespace: svmCR.Namespace,
+							Namespace: svmCR.Namespace, // Default to the custom resource's namespace
 						},
 						StringData: map[string]string{
 							"accessKeyID":     user.Records[0].AccessKey,
