@@ -1680,6 +1680,26 @@ spec:
               s3:
                 description: Provide optional S3 configuration
                 properties:
+                  buckets:
+                    description: Provides optional buckets definition
+                    items:
+                      properties:
+                        allowed:
+                          description: Provides required S3 bucket vsadmin managementability
+                          type: boolean
+                        name:
+                          description: Provides required S3 bucket name
+                          type: string
+                        size:
+                          description: Provides required S3 bucket size
+                          type: integer
+                        type:
+                          description: Provides required S3 bucket type
+                          type: string
+                      required:
+                      - name
+                      type: object
+                    type: array
                   enabled:
                     description: Provides required S3 enablement
                     type: boolean

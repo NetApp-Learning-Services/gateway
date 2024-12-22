@@ -25,6 +25,10 @@ type S3SubSpec struct {
 	// Provides optional Https definition
 	// +kubebuilder:validation:Optional
 	Https *S3Https `json:"https,omitempty"`
+
+	// Provides optional buckets definition
+	// +kubebuilder:validation:Optional
+	Buckets []S3Bucket `json:"buckets,omitempty"`
 }
 
 type S3User struct {
@@ -59,4 +63,22 @@ type S3Tls struct {
 	// Provides required S3 tls enablement
 	// +kubebuilder:validation:Required
 	Enabled bool `json:"enabled"`
+}
+
+type S3Bucket struct {
+	// Provides required S3 bucket name
+	// +kubebuilder:validation:Required
+	Name string `json:"name"`
+
+	// Provides required S3 bucket vsadmin managementability
+	// +kubebuilder:validation:Optional
+	Allowed bool `json:"allowed,omitempty"`
+
+	// Provides required S3 bucket size
+	// +kubebuilder:validation:Optional
+	Size int `json:"size,omitempty"`
+
+	// Provides required S3 bucket type
+	// +kubebuilder:validation:Optional
+	Type string `json:"type,omitempty"`
 }

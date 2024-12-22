@@ -59,6 +59,11 @@ spec:
       netmask: 255.255.255.0
       broadcastDomain: Default
       homeNode: Cluster1-01
+    buckets:
+    - name: tp-src
+      allowed: true
+      size: 80000000
+      type: s3
   iscsi:
     enabled: true
     alias: testVs
