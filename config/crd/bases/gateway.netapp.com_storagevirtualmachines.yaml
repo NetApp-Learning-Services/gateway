@@ -1019,9 +1019,8 @@ spec:
     name: v1beta1
     schema:
       openAPIV3Schema:
-        description: |-
-          CHECK OUT THIS:  https://www.brendanp.com/pretty-printing-with-kubebuilder/
-          StorageVirtualMachine is the Schema for the storagevirtualmachines API
+        description: StorageVirtualMachine is the Schema for the storagevirtualmachines
+          API
         properties:
           apiVersion:
             description: |-
@@ -1401,7 +1400,7 @@ spec:
             type: object
         type: object
     served: true
-    storage: true
+    storage: false
     subresources:
       status: {}
   - additionalPrinterColumns:

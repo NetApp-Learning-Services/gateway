@@ -55,7 +55,7 @@ spec:
     - name: gateway_s3_user
     interfaces:
     - name: s31
-      ip: 192.168.0.32    
+      ip: 192.168.0.84   
       netmask: 255.255.255.0
       broadcastDomain: Default
       homeNode: Cluster1-01

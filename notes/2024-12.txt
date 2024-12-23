@@ -108,5 +108,6 @@ POST /api/network/ip/interfaces { "name": "lif_svm0_786", "ip": { "address": "**
                                      management-nis-client: 0.0.0.0/0
                                      data-dns-server: 0.0.0.0/0
 
+17.  Removed kubebuilder:storageversion from SVM's definition for all versions except v1beta2
 
-
+18. Removed mirror cache by running notes/deleteMirror.sh

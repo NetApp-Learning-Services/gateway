@@ -1,0 +1,2 @@
+server = "https://registry-1.docker.io"
+host."https://dockreg.labs.lod.netapp.com".capabilities = ["pull", "resolve"]
