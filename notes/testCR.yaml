@@ -18,7 +18,7 @@ stringData:
   username: vsadmin
   password: Netapp1!
 ---
-apiVersion: gateway.netapp.com/v1beta1
+apiVersion: gateway.netapp.com/v1beta2
 kind: StorageVirtualMachine
 metadata:
   name: svmtest
@@ -27,7 +27,7 @@ spec:
   svmName: svmtest
   svmDeletionPolicy: Delete
   clusterHost: 192.168.0.101
-  debug: false
+  debug: true
   aggregates:
   - name: Cluster1_01_FC_1
   management:
@@ -45,8 +45,6 @@ spec:
   s3:
     enabled: true
     name: svm0
-    tls:
-      enabled: false
     http:
       enabled: true
     https:

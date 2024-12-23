@@ -110,4 +110,10 @@ POST /api/network/ip/interfaces { "name": "lif_svm0_786", "ip": { "address": "**
 
 17.  Removed kubebuilder:storageversion from SVM's definition for all versions except v1beta2
 
+TESTING THE OPERATOR
 18. Removed mirror cache by running notes/deleteMirror.sh
+
+19. docker login
+
+20. Run notes/testRemote.sh
+
