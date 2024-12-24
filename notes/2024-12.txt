@@ -115,5 +115,7 @@ TESTING THE OPERATOR
 
 19. docker login
 
-20. Run notes/testRemote.sh
+20. Update code, Run notes/testRemote.sh, review logs, repeat
+
+21.
 

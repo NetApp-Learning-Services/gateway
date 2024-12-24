@@ -57,20 +57,20 @@ func (r *StorageVirtualMachineReconciler) reconcileSecurityAccount(ctx context.C
 			AppType:          ontap.Ssh,
 			SecondAuthMethod: secondAuthMethod,
 		}
-		ssh.AuthMethods = append(ssh.AuthMethods, ontap.Password)
+		ssh.AuthMethods = append(ssh.AuthMethods, ontap.AuthPassword)
 		payload.Applications = append(payload.Applications, ssh)
 		ontapi := ontap.Application{
 			AppType:          ontap.Ontapi,
 			SecondAuthMethod: secondAuthMethod,
 		}
-		ontapi.AuthMethods = append(ontapi.AuthMethods, ontap.Password)
+		ontapi.AuthMethods = append(ontapi.AuthMethods, ontap.AuthPassword)
 		payload.Applications = append(payload.Applications, ontapi)
 
 		http := ontap.Application{
 			AppType:          ontap.Http,
 			SecondAuthMethod: secondAuthMethod,
 		}
-		http.AuthMethods = append(http.AuthMethods, ontap.Password)
+		http.AuthMethods = append(http.AuthMethods, ontap.AuthPassword)
 		payload.Applications = append(payload.Applications, http)
 
 		//payload.Role = ontap.Vsadmin
@@ -117,20 +117,20 @@ func (r *StorageVirtualMachineReconciler) reconcileSecurityAccount(ctx context.C
 			AppType:          ontap.Ssh,
 			SecondAuthMethod: secondAuthMethod,
 		}
-		ssh.AuthMethods = append(ssh.AuthMethods, ontap.Password)
+		ssh.AuthMethods = append(ssh.AuthMethods, ontap.AuthPassword)
 		payload.Applications = append(payload.Applications, ssh)
 		ontapi := ontap.Application{
 			AppType:          ontap.Ontapi,
 			SecondAuthMethod: secondAuthMethod,
 		}
-		ontapi.AuthMethods = append(ontapi.AuthMethods, ontap.Password)
+		ontapi.AuthMethods = append(ontapi.AuthMethods, ontap.AuthPassword)
 		payload.Applications = append(payload.Applications, ontapi)
 
 		http := ontap.Application{
 			AppType:          ontap.Http,
 			SecondAuthMethod: secondAuthMethod,
 		}
-		http.AuthMethods = append(http.AuthMethods, ontap.Password)
+		http.AuthMethods = append(http.AuthMethods, ontap.AuthPassword)
 		payload.Applications = append(payload.Applications, http)
 
 		payload.Role = ontap.Vsadmin
