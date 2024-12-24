@@ -48,8 +48,15 @@ func (r *StorageVirtualMachineReconciler) reconcileS3Update(ctx context.Context,
 
 		upsertS3Service.Svm.Uuid = svmCR.Spec.SvmUuid
 		upsertS3Service.Enabled = &svmCR.Spec.S3Config.Enabled
-		upsertS3Service.IsHttpEnabled = &svmCR.Spec.S3Config.Http.Enabled
-		upsertS3Service.IsHttpsEnabled = &svmCR.Spec.S3Config.Https.Enabled
+
+		if svmCR.Spec.S3Config.Http != nil {
+			upsertS3Service.IsHttpEnabled = &svmCR.Spec.S3Config.Http.Enabled
+			upsertS3Service.Port = svmCR.Spec.S3Config.Http.Port
+		}
+		if svmCR.Spec.S3Config.Https != nil {
+			upsertS3Service.IsHttpsEnabled = &svmCR.Spec.S3Config.Https.Enabled
+			upsertS3Service.SecurePort = svmCR.Spec.S3Config.Https.Port
+		}
 		upsertS3Service.Name = &svmCR.Spec.SvmName
 
 		jsonPayload, err := json.Marshal(upsertS3Service)

@@ -14,8 +14,8 @@ type S3Service struct {
 	Certificate    Resource `json:"certificate,omitempty"`
 	IsHttpEnabled  *bool    `json:"is_http_enabled"`
 	IsHttpsEnabled *bool    `json:"is_https_enabled"`
-	Port           int      `json:"port"`
-	SecurePort     int      `json:"secure_port"`
+	Port           int      `json:"port,omitempty"`
+	SecurePort     int      `json:"secure_port,omitempty"`
 	Enabled        *bool    `json:"enabled"`
 	Name           *string  `json:"name"`
 }
@@ -39,7 +39,7 @@ func (c *Client) GetS3ServiceBySvmUuid(uuid string) (s3Service S3Service, err er
 
 	data, err := c.clientGet(uri)
 	if err != nil {
-		if strings.Contains(err.Error(), "entry doesn't exist") {
+		if strings.Contains(err.Error(), "exist") {
 			return s3Service, errors.NewNotFound(schema.GroupResource{Group: "gatewayv1beta2", Resource: "StorageVirtualMachine"}, "no s3")
 		}
 		return s3Service, &apiError{1, err.Error()}

@@ -1708,8 +1708,13 @@ spec:
                       enabled:
                         description: Provides required S3 http enablement
                         type: boolean
+                      port:
+                        default: 80
+                        description: Provides required S3 http enablement
+                        type: integer
                     required:
                     - enabled
+                    - port
                     type: object
                   https:
                     description: Provides optional Https definition
@@ -1717,8 +1722,13 @@ spec:
                       enabled:
                         description: Provides required S3 https enablement
                         type: boolean
+                      port:
+                        default: 443
+                        description: Provides required S3 https enablement
+                        type: integer
                     required:
                     - enabled
+                    - port
                     type: object
                   interfaces:
                     description: Provides optional S3 LIFs

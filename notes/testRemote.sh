@@ -2,10 +2,17 @@
 # A simple bash script to reset and test the application
 
 kubectl -n gateway-system delete svm svmtest
-kubectl -n gateway-system delete secret ontap-cluster-admin
-kubectl -n gateway-system delete secret ontap-svm-admin
+kubectl -n gateway-system delete secret ontap-cluster1-admins
+kubectl -n gateway-system delete secret ontap-svmtest-admin
 kubectl delete namespace gateway-system 
-git pull origin v1beta2 #need to update when changing feature branches
+#git pull origin v1beta2 #need to update when changing feature branches
+
+sudo apt install sshpass
+sshpass -p Netapp1! ssh root@192.168.0.61 "ctr -n k8s.io i rm docker.io/curtisab/gateway:v1beta2"
+sshpass -p Netapp1! ssh root@192.168.0.62 "ctr -n k8s.io i rm docker.io/curtisab/gateway:v1beta2"
+sshpass -p Netapp1! ssh root@192.168.0.63 "ctr -n k8s.io i rm docker.io/curtisab/gateway:v1beta2"
+sshpass -p Netapp1! ssh root@192.168.0.64 "ctr -n k8s.io i rm docker.io/curtisab/gateway:v1beta2"
+
 make docker-build docker-push
 make deploy
 # kubectl -n gateway-system create secret docker-registry myreg --docker-server=https://docker-registry:30001 --docker-username=admin --docker-password=Netapp1!

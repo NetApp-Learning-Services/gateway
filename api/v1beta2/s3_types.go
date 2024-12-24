@@ -43,9 +43,9 @@ type S3Http struct {
 	Enabled bool `json:"enabled"`
 
 	// Provides required S3 http enablement
-	// +kubebuilder:validation:Optional
+	// +kubebuilder:validation:Required
 	// +kubebuilder:default:=80
-	//Port int `json:"port,omitempty"`
+	Port int `json:"port"`
 }
 
 type S3Https struct {
@@ -54,9 +54,9 @@ type S3Https struct {
 	Enabled bool `json:"enabled"`
 
 	// Provides required S3 https enablement
-	// +kubebuilder:validation:Optional
+	// +kubebuilder:validation:Required
 	// +kubebuilder:default:=443
-	//Port int `json:"port,omitempty"`
+	Port int `json:"port"`
 }
 
 type S3Tls struct {
