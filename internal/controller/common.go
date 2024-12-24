@@ -140,9 +140,8 @@ func CreateLifServicePolicy(servicePolicyName string, servicePolicyScope string,
 	newServicePolicy.Name = servicePolicyName
 	newServicePolicy.Scope = servicePolicyScope
 	newServicePolicy.Svm.Uuid = uuid
-	newServicePolicy.Services[0] = "data-core"
-	newServicePolicy.Services[1] = "data-s3-server"
-	newServicePolicy.Services[2] = "data-dns-server"
+	servicesToAdd := [3]string{"data-core", "data-s3-server", "data-dns-server"}
+	newServicePolicy.Services = servicesToAdd[:]
 
 	jsonPayload, err := json.Marshal(newServicePolicy)
 	if err != nil {

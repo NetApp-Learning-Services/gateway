@@ -165,7 +165,7 @@ func (c *Client) CheckExistsInterfaceServicePolicyByName(servicePolicy string) (
 }
 
 func (c *Client) CreateInterfaceServicePolicy(jsonPayload []byte) (err error) {
-	uri := "/api/network/ip/service-policy"
+	uri := "/api/network/ip/service-policies"
 	_, err = c.clientPost(uri, jsonPayload)
 	if err != nil {
 		//fmt.Println("Error: " + err.Error())

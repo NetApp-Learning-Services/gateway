@@ -229,7 +229,7 @@ func (r *StorageVirtualMachineReconciler) reconcileS3Update(ctx context.Context,
 	// END S3 LIFS
 
 	// S3 Users
-	if svmCR.Spec.S3Config.Users == nil {
+	if svmCR.Spec.S3Config.Users != nil {
 		// If none, exit with no error
 		log.Info("No S3 users defined - skipping")
 	} else {

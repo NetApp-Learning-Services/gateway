@@ -42,7 +42,7 @@ func (c *Client) GetCertificatesBySvmUuid(uuid string, commonName string) (certs
 	return resp, nil
 }
 
-func (c *Client) CreateCertifcate(jsonPayload []byte) (err error) {
+func (c *Client) CreateCertificate(jsonPayload []byte) (err error) {
 	uri := "/api/security/certificates"
 	_, err = c.clientPost(uri, jsonPayload)
 	if err != nil {
