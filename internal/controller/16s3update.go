@@ -266,17 +266,23 @@ func (r *StorageVirtualMachineReconciler) reconcileS3Update(ctx context.Context,
 		// 	}
 		// }
 
-		for _, val := range svmCR.Spec.S3Config.Users {
+		for i, val := range svmCR.Spec.S3Config.Users {
 			user, err := CreateUser(val, uuid, oc, log)
 			if err != nil {
 				_ = r.setConditionS3User(ctx, svmCR, CONDITION_STATUS_FALSE)
 				return err
 			} else {
 				// Create a secret with the access key and secret key
+				var secretNamespace string
+				if svmCR.Spec.S3Config.Users[i].Namespace != nil {
+					secretNamespace = *svmCR.Spec.S3Config.Users[i].Namespace
+				} else {
+					secretNamespace = svmCR.Namespace
+				}
 				secret := &corev1.Secret{
 					ObjectMeta: metav1.ObjectMeta{
 						Name:      user.Records[0].Name,
-						Namespace: svmCR.Namespace, // Default to the custom resource's namespace
+						Namespace: secretNamespace,
 					},
 					StringData: map[string]string{
 						"accessKeyID":     user.Records[0].AccessKey,
