@@ -8,19 +8,30 @@ import (
 )
 
 type Certificate struct {
-	Svm                SvmRef  `json:"svm,omitempty"`
-	Type               *string `json:"type,omitempty"`
-	PublicCertificate  *string `json:"public_certificate,omitempty"`
-	PrivateCertificate *string `json:"private_certificate,omitempty"`
-	KeySize            int     `json:"key_size,omitempty"`
-	ExpiryTime         *string `json:"expiry_time,omitempty"`
-	Name               *string `json:"name"`
-	CommonName         *string `json:"common_name"`
-	SerialNumber       *string `json:"serial_number,omitempty"`
+	Svm                SvmRef `json:"svm,omitempty"`
+	Type               string `json:"type,omitempty"`
+	PublicCertificate  string `json:"public_certificate,omitempty"`
+	PrivateCertificate string `json:"private_certificate,omitempty"`
+	KeySize            int    `json:"key_size,omitempty"`
+	ExpiryTime         string `json:"expiry_time,omitempty"`
+	Name               string `json:"name"`
+	CommonName         string `json:"common_name"`
+	SerialNumber       string `json:"serial_number,omitempty"`
+	Uuid               string `json:"uuid"`
 }
 
 type CertificateSigningRequest struct {
 	SubjectName string `json:"subject_name"`
+}
+
+type CertificateSigningResponse struct {
+	Csr                 string `json:"csr"`
+	GeneratedPrivateKey string `json:"generated_private_key"`
+	SubjectName         string `json:"subject_name"`
+}
+
+type CertificateSign struct {
+	SigningRequest string `json:"signing_request"`
 }
 
 type CertificateResponse struct {
@@ -52,30 +63,42 @@ func (c *Client) GetCertificatesBySvmUuid(uuid string, commonName string) (certs
 	return resp, nil
 }
 
-func (c *Client) CreateCertificate(jsonPayload []byte) (err error) {
+func (c *Client) CreateCertificate(jsonPayload []byte) (cert Certificate, err error) {
 	uri := "/api/security/certificates"
-	_, err = c.clientPost(uri, jsonPayload)
+	data, err := c.clientPost(uri, jsonPayload)
 	if err != nil {
 		//fmt.Println("Error: " + err.Error())
-		return &apiError{1, err.Error()}
+		return cert, &apiError{1, err.Error()}
 	}
 
-	return nil
+	var resp Certificate
+	err = json.Unmarshal(data, &resp)
+	if err != nil {
+		return resp, &apiError{2, err.Error()}
+	}
+
+	return resp, nil
 }
 
-func (c *Client) CreateCertificateSigningRequest(jsonPayload []byte) (err error) {
+func (c *Client) CreateCertificateSigningRequest(jsonPayload []byte) (csr CertificateSigningResponse, err error) {
 	uri := "/api/security/certificate-signing-request"
-	_, err = c.clientPost(uri, jsonPayload)
+	data, err := c.clientPost(uri, jsonPayload)
 	if err != nil {
 		//fmt.Println("Error: " + err.Error())
-		return &apiError{1, err.Error()}
+		return csr, &apiError{1, err.Error()}
 	}
 
-	return nil
+	var resp CertificateSigningResponse
+	err = json.Unmarshal(data, &resp)
+	if err != nil {
+		return resp, &apiError{2, err.Error()}
+	}
+
+	return csr, nil
 }
 
-func (c *Client) CreateSignedCertificate(jsonPayload []byte, uuid string) (err error) {
-	uri := "/api/security/certificate/" + uuid + "/sign"
+func (c *Client) CreateSignedCertificate(jsonPayload []byte, ca_uuid string) (err error) {
+	uri := "/api/security/certificate/" + ca_uuid + "/sign"
 	_, err = c.clientPost(uri, jsonPayload)
 	if err != nil {
 		//fmt.Println("Error: " + err.Error())

@@ -160,7 +160,7 @@ func CreateLifServicePolicy(servicePolicyName string, servicePolicyScope string,
 	return nil
 }
 
-func CheckCertificate(commonName string, catype string, uuid string, svmName string, oc *ontap.Client, log logr.Logger) (err error) {
+func CreateCACertificate(commonName string, catype string, uuid string, svmName string, oc *ontap.Client, log logr.Logger) (err error) {
 
 	createNewCertificate := false
 	//check if exists
@@ -177,9 +177,28 @@ func CheckCertificate(commonName string, catype string, uuid string, svmName str
 	}
 
 	if createNewCertificate {
+		//Need to create the certificate
 		log.Info((fmt.Sprintf("Certificate creation attempt: %v", commonName)))
 
+		// Skipping, using SVM CA cert that is created by default
 		// Create a self-sign root CA certificate
+		// var newCertificate ontap.Certificate
+		// newCertificate.CommonName = svmName
+		// newCertificate.Svm.Uuid = uuid
+		// newCertificate.Type = catype
+		// jsonPayload, err := json.Marshal(newCertificate)
+		// if err != nil {
+		// 	//error creating the json body
+		// 	log.Error(err, fmt.Sprintf("Error creating the json payload for certificate creation %v", newCertificate.CommonName))
+		// 	return err
+		// }
+
+		// log.Info("Certificate creation attempt: " + newCertificate.CommonName)
+		// cert, err := oc.CreateCertificate(jsonPayload)
+		// if err != nil {
+		// 	log.Error(err, fmt.Sprintf("Error occurred when creating certificate: %v", newCertificate.CommonName))
+		// 	return err
+		// }
 
 		// Certificate Signing Request
 		var newCRS ontap.CertificateSigningRequest
@@ -192,11 +211,30 @@ func CheckCertificate(commonName string, catype string, uuid string, svmName str
 		}
 
 		log.Info("Certificate signing request creation attempt: " + newCRS.SubjectName)
-		err = oc.CreateCertificateSigningRequest(jsonPayload)
+		csr, err := oc.CreateCertificateSigningRequest(jsonPayload)
 		if err != nil {
-			log.Error(err, fmt.Sprintf("Error occurred when creating LIF Certificate Signing Request: %v", newCRS.SubjectName))
+			log.Error(err, fmt.Sprintf("Error occurred when creating Certificate Signing Request: %v", newCRS.SubjectName))
 			return err
 		}
+
+		// Sign the CSR using certificate created earlier
+		var newCRSSign ontap.CertificateSign
+		newCRSSign.SigningRequest = csr.Csr
+		jsonPayload, err = json.Marshal(newCRSSign)
+		if err != nil {
+			//error creating the json body
+			log.Error(err, fmt.Sprintf("Error creating the json payload for signing the Certificate Signing Request %v", newCRS.SubjectName))
+			return err
+		}
+
+		log.Info("Certificate Signing Request sign attempt: " + newCRS.SubjectName)
+		err = oc.CreateSignedCertificate(jsonPayload, uuid)
+		if err != nil {
+			log.Error(err, fmt.Sprintf("Error occurred when signing the Certificate Signing Request: %v", newCRS.SubjectName))
+			return err
+		}
+
+		//Install the signed certificate
 	}
 
 	return nil
