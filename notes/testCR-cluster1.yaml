@@ -11,7 +11,7 @@ stringData:
 apiVersion: v1
 kind: Secret
 metadata:
-  name: ontap-svmtest-admin
+  name: ontap-svmsrc-admin
   namespace: gateway-system
 type: kubernetes.io/basic-auth
 stringData:
@@ -21,10 +21,10 @@ stringData:
 apiVersion: gateway.netapp.com/v1beta2
 kind: StorageVirtualMachine
 metadata:
-  name: svmtest
+  name: svmsrc
   namespace: gateway-system
 spec:
-  svmName: svmtest
+  svmName: svmsrc
   svmDeletionPolicy: Delete
   clusterHost: 192.168.0.101
   debug: true
@@ -37,14 +37,14 @@ spec:
     broadcastDomain: Default
     homeNode: Cluster1-01
   vsadminCredentials:
-    name: ontap-svmtest-admin
+    name: ontap-svmsrc-admin
     namespace: gateway-system
   clusterCredentials:
     name: ontap-cluster1-admin
     namespace: gateway-system
   s3:
     enabled: true
-    name: svm0
+    name: svmsrc
     http:
       enabled: true
       port: 80
@@ -66,7 +66,7 @@ spec:
       type: s3
   iscsi:
     enabled: true
-    alias: testVs
+    alias: svmsrc
     interfaces:
     - name: iscsi1
       ip: 192.168.0.32
