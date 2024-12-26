@@ -52,7 +52,8 @@ spec:
       enabled: false
       port: 443
     users:
-    - name: gateway_s3_user2
+    - name: gateway-s3-dst
+      namespace: default
     interfaces:
     - name: s31
       ip: 192.168.0.44   

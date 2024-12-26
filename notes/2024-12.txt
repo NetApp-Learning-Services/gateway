@@ -125,5 +125,5 @@ TESTING THE OPERATOR
 
 20. Update code, Run notes/testRemote.sh, review logs, repeat
 
-21.
+21. v1beta2 code requires the creation of a Kubernetes secret - so updating storagevirtualmachine_controller.go 
 

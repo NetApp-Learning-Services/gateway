@@ -1773,6 +1773,9 @@ spec:
                         name:
                           description: Provides required user name
                           type: string
+                        namespace:
+                          description: Provides optional namespace
+                          type: string
                       required:
                       - name
                       type: object

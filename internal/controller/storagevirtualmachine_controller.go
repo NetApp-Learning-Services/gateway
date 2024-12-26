@@ -1,7 +1,7 @@
 /*
 Copyright 2024.
 Created by Curtis Burchett
-Version: v1beta1
+Version: v1beta2
 */
 
 package controller
@@ -44,7 +44,7 @@ type StorageVirtualMachineReconciler struct {
 
 // ADDED to support access to secrets
 // This helped:  https://github.com/kubernetes-sigs/kubebuilder/issues/549
-// +kubebuilder:rbac:groups=core,resources=secrets,verbs=get;list;watch
+// +kubebuilder:rbac:groups=core,resources=secrets,verbs=get;list;watch;create
 
 // Reconcile is part of the main kubernetes reconciliation loop which aims to
 // move the current state of the cluster closer to the desired state.

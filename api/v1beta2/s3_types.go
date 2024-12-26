@@ -35,6 +35,10 @@ type S3User struct {
 	// Provides required user name
 	// +kubebuilder:validation:Required
 	Name string `json:"name"`
+
+	// Provides optional namespace
+	//+kubebuilder:validation:Optional
+	Namespace *string `json:"namespace,omitempty"`
 }
 
 type S3Http struct {
