@@ -1,0 +1,103 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: ontap-cluster1-admin
+  namespace: gateway-system
+type: kubernetes.io/basic-auth
+stringData:
+  username: admin
+  password: Netapp1!
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: ontap-svmtest-admin
+  namespace: gateway-system
+type: kubernetes.io/basic-auth
+stringData:
+  username: vsadmin
+  password: Netapp1!
+---
+apiVersion: gateway.netapp.com/v1beta2
+kind: StorageVirtualMachine
+metadata:
+  name: svmtest
+  namespace: gateway-system
+spec:
+  svmName: svmtest
+  svmDeletionPolicy: Delete
+  clusterHost: 192.168.0.102
+  debug: true
+  aggregates:
+  - name: Cluster1_01_FC_1
+  management:
+    name: manage1
+    ip: 192.168.0.30
+    netmask: 255.255.255.0
+    broadcastDomain: Default
+    homeNode: Cluster1-01
+  vsadminCredentials:
+    name: ontap-svmtest-admin
+    namespace: gateway-system
+  clusterCredentials:
+    name: ontap-cluster1-admin
+    namespace: gateway-system
+  s3:
+    enabled: true
+    name: svm0
+    http:
+      enabled: true
+      port: 80
+    https:
+      enabled: false
+      port: 443
+    users:
+    - name: gateway_s3_user
+    interfaces:
+    - name: s31
+      ip: 192.168.0.34   
+      netmask: 255.255.255.0
+      broadcastDomain: Default
+      homeNode: Cluster1-01
+    buckets:
+    - name: tp-src
+      allowed: true
+      size: 80000000
+      type: s3
+  iscsi:
+    enabled: true
+    alias: testVs
+    interfaces:
+    - name: iscsi1
+      ip: 192.168.0.32
+      netmask: 255.255.255.0
+      broadcastDomain: Default
+      homeNode: Cluster1-01
+  nvme:
+    enabled: true
+    interfaces:
+    - name: nvme1
+      ip: 192.168.0.33
+      netmask: 255.255.255.0
+      broadcastDomain: Default
+      homeNode: Cluster1-01
+  nfs:
+    enabled: true
+    v3: true
+    v4: true
+    v41: true
+    interfaces:
+    - name: nfs1
+      ip: 192.168.0.31
+      netmask: 255.255.255.0
+      broadcastDomain: Default
+      homeNode: Cluster1-01
+    export:
+      name: default
+      rules:
+      - clients: 0.0.0.0/0
+        protocols: any
+        rw: any
+        ro: any
+        superuser: any
+        anon:  "65534"

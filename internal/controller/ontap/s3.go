@@ -155,3 +155,14 @@ func (c *Client) GetS3UsersBySvmUuid(uuid string) (users UserResponse, err error
 
 	return resp, nil
 }
+
+func (c *Client) DeleteS3User(uuid string, name string) (err error) {
+	uri := "/api/protocols/s3/services/" + uuid + "/users/" + name
+
+	_, err = c.clientDelete(uri)
+	if err != nil {
+		return &apiError{1, err.Error()}
+	}
+
+	return nil
+}

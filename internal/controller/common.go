@@ -116,7 +116,6 @@ func UpdateLif(lifDefinition gateway.LIF, lifToUpdate ontap.IpInterface, lifType
 func CreateUser(userToCreate gateway.S3User, uuid string, oc *ontap.Client, log logr.Logger) (user ontap.UserResponse, err error) {
 	var newUser ontap.S3User
 	newUser.Name = userToCreate.Name
-	newUser.Svm.Uuid = uuid
 
 	jsonPayload, err := json.Marshal(newUser)
 	if err != nil {
@@ -124,7 +123,7 @@ func CreateUser(userToCreate gateway.S3User, uuid string, oc *ontap.Client, log 
 		log.Error(err, fmt.Sprintf("Error creating the json payload for S3 User creation: %v", userToCreate.Name))
 		return user, err
 	}
-	log.Info("LIF creation attempt: " + userToCreate.Name)
+	log.Info("S3 User creation attempt: " + userToCreate.Name)
 	user, err = oc.CreateS3User(uuid, jsonPayload)
 	if err != nil {
 		log.Error(err, fmt.Sprintf("Error occurred when creating S3 User: %v", userToCreate.Name))
