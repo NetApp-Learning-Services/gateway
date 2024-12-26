@@ -14,17 +14,21 @@ type S3SubSpec struct {
 	// +kubebuilder:validation:Optional
 	Lifs []LIF `json:"interfaces,omitempty"`
 
-	// Provides optional user definition
+	// Provides optional S3 user definition
 	// +kubebuilder:validation:Optional
 	Users []S3User `json:"users,omitempty"`
 
-	// Provides optional Http definition
+	// Provides optional S3 Http definition
 	// +kubebuilder:validation:Optional
 	Http *S3Http `json:"http,omitempty"`
 
-	// Provides optional Https definition
+	// Provides optional S3 Https definition
 	// +kubebuilder:validation:Optional
 	Https *S3Https `json:"https,omitempty"`
+
+	// Provides optional S3 Tsl definition
+	// +kubebuilder:validation:Optional
+	Tls *S3Tls `json:"tls,omitempty"`
 
 	// Provides optional buckets definition
 	// +kubebuilder:validation:Optional
@@ -61,12 +65,30 @@ type S3Https struct {
 	// +kubebuilder:validation:Required
 	// +kubebuilder:default:=443
 	Port int `json:"port"`
+
+	// Provides required S3 certificate
+	// +kubebuilder:validation:Required
+	Certificate Certificate `json:"certificate"`
 }
 
 type S3Tls struct {
 	// Provides required S3 tls enablement
 	// +kubebuilder:validation:Required
 	Enabled bool `json:"enabled"`
+
+	// Provides required S3 certificate
+	// +kubebuilder:validation:Required
+	Certificate Certificate `json:"certificate"`
+}
+
+type Certificate struct {
+	// Provides required S3 certificate common name
+	// +kubebuilder:validation:Required
+	CommonName string `json:"common_name"`
+
+	// Provides required S3 certificate type
+	// +kubebuilder:validation:Required
+	Type string `json:"type"`
 }
 
 type S3Bucket struct {

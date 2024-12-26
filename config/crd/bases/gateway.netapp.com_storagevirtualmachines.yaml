@@ -1703,7 +1703,7 @@ spec:
                     description: Provides required S3 enablement
                     type: boolean
                   http:
-                    description: Provides optional Http definition
+                    description: Provides optional S3 Http definition
                     properties:
                       enabled:
                         description: Provides required S3 http enablement
@@ -1717,8 +1717,21 @@ spec:
                     - port
                     type: object
                   https:
-                    description: Provides optional Https definition
+                    description: Provides optional S3 Https definition
                     properties:
+                      certificate:
+                        description: Provides required S3 certificate
+                        properties:
+                          common_name:
+                            description: Provides required S3 certificate common name
+                            type: string
+                          type:
+                            description: Provides required S3 certificate type
+                            type: string
+                        required:
+                        - common_name
+                        - type
+                        type: object
                       enabled:
                         description: Provides required S3 https enablement
                         type: boolean
@@ -1727,6 +1740,7 @@ spec:
                         description: Provides required S3 https enablement
                         type: integer
                     required:
+                    - certificate
                     - enabled
                     - port
                     type: object
@@ -1766,8 +1780,31 @@ spec:
                   name:
                     description: Provides required S3 server name
                     type: string
+                  tls:
+                    description: Provides optional S3 Tsl definition
+                    properties:
+                      certificate:
+                        description: Provides required S3 certificate
+                        properties:
+                          common_name:
+                            description: Provides required S3 certificate common name
+                            type: string
+                          type:
+                            description: Provides required S3 certificate type
+                            type: string
+                        required:
+                        - common_name
+                        - type
+                        type: object
+                      enabled:
+                        description: Provides required S3 tls enablement
+                        type: boolean
+                    required:
+                    - certificate
+                    - enabled
+                    type: object
                   users:
-                    description: Provides optional user definition
+                    description: Provides optional S3 user definition
                     items:
                       properties:
                         name:
