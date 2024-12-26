@@ -1,6 +1,11 @@
 package ontap
 
-import "encoding/json"
+import (
+	"encoding/json"
+
+	"k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/apimachinery/pkg/runtime/schema"
+)
 
 type Certificate struct {
 	Svm                SvmRef  `json:"svm,omitempty"`
@@ -14,8 +19,8 @@ type Certificate struct {
 	SerialNumber       *string `json:"serial_number,omitempty"`
 }
 
-type SelfSigningRequest struct {
-	SubjectName *string `json:"subject_name"`
+type CertificateSigningRequest struct {
+	SubjectName string `json:"subject_name"`
 }
 
 type CertificateResponse struct {
@@ -39,6 +44,11 @@ func (c *Client) GetCertificatesBySvmUuid(uuid string, commonName string) (certs
 		return resp, &apiError{2, err.Error()}
 	}
 
+	if resp.NumRecords == 0 {
+		//No certificate found
+		return resp, errors.NewNotFound(schema.GroupResource{Group: "gateway.netapp.com", Resource: "StorageVirtualMachine"}, "no S3 certificate")
+	}
+
 	return resp, nil
 }
 
@@ -53,7 +63,7 @@ func (c *Client) CreateCertificate(jsonPayload []byte) (err error) {
 	return nil
 }
 
-func (c *Client) CreateSelfSigningRequest(jsonPayload []byte) (err error) {
+func (c *Client) CreateCertificateSigningRequest(jsonPayload []byte) (err error) {
 	uri := "/api/security/certificate-signing-request"
 	_, err = c.clientPost(uri, jsonPayload)
 	if err != nil {

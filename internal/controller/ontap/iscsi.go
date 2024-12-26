@@ -27,7 +27,7 @@ func (c *Client) GetIscsiServiceBySvmUuid(uuid string) (iscsiService IscsiServic
 	data, err := c.clientGet(uri)
 	if err != nil {
 		if strings.Contains(err.Error(), "Cannot find iSCSI service") {
-			return iscsiService, errors.NewNotFound(schema.GroupResource{Group: "gatewayv1alpha2", Resource: "StorageVirtualMachine"}, "no iscsi")
+			return iscsiService, errors.NewNotFound(schema.GroupResource{Group: "gateway.netapp.com", Resource: "StorageVirtualMachine"}, "no iscsi")
 		}
 		return iscsiService, &apiError{1, err.Error()}
 	}

@@ -62,7 +62,7 @@ func (c *Client) GetNfsServiceBySvmUuid(uuid string) (nfsService NFSService, err
 	data, err := c.clientGet(uri)
 	if err != nil {
 		if strings.Contains(err.Error(), "entry doesn't exist") {
-			return nfsService, errors.NewNotFound(schema.GroupResource{Group: "gatewayv1alpha1", Resource: "StorageVirtualMachine"}, "no nfs")
+			return nfsService, errors.NewNotFound(schema.GroupResource{Group: "gateway.netapp.com", Resource: "StorageVirtualMachine"}, "no nfs")
 		}
 		return nfsService, &apiError{1, err.Error()}
 	}

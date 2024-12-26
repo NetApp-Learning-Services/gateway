@@ -256,11 +256,6 @@ func (in *S3SubSpec) DeepCopyInto(out *S3SubSpec) {
 		*out = new(S3Https)
 		**out = **in
 	}
-	if in.Tls != nil {
-		in, out := &in.Tls, &out.Tls
-		*out = new(S3Tls)
-		**out = **in
-	}
 	if in.Buckets != nil {
 		in, out := &in.Buckets, &out.Buckets
 		*out = make([]S3Bucket, len(*in))

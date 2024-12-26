@@ -8,6 +8,7 @@ import (
 	"strconv"
 
 	"github.com/go-logr/logr"
+	"k8s.io/apimachinery/pkg/api/errors"
 )
 
 type apiError struct {
@@ -155,6 +156,48 @@ func CreateLifServicePolicy(servicePolicyName string, servicePolicyScope string,
 		return err
 	}
 	log.Info(fmt.Sprintf("LIF S3 Service Policy creation successful: %v", newServicePolicy.Name))
+
+	return nil
+}
+
+func CheckCertificate(commonName string, catype string, uuid string, svmName string, oc *ontap.Client, log logr.Logger) (err error) {
+
+	createNewCertificate := false
+	//check if exists
+
+	_, err = oc.GetCertificatesBySvmUuid(uuid, commonName)
+	if err != nil && errors.IsNotFound(err) {
+		createNewCertificate = true
+	}
+
+	if err != nil {
+		//unknown error
+		log.Error(err, fmt.Sprintf("Error while checking for the S3 certificate required: %v", err.Error()))
+		return err
+	}
+
+	if createNewCertificate {
+		log.Info((fmt.Sprintf("Certificate creation attempt: %v", commonName)))
+
+		// Create a self-sign root CA certificate
+
+		// Certificate Signing Request
+		var newCRS ontap.CertificateSigningRequest
+		newCRS.SubjectName = "C=US,O=GATEWAY.NETAPP.COM,CN=" + svmName
+		jsonPayload, err := json.Marshal(newCRS)
+		if err != nil {
+			//error creating the json body
+			log.Error(err, fmt.Sprintf("Error creating the json payload for Certificate Signing Request %v", newCRS.SubjectName))
+			return err
+		}
+
+		log.Info("Certificate signing request creation attempt: " + newCRS.SubjectName)
+		err = oc.CreateCertificateSigningRequest(jsonPayload)
+		if err != nil {
+			log.Error(err, fmt.Sprintf("Error occurred when creating LIF Certificate Signing Request: %v", newCRS.SubjectName))
+			return err
+		}
+	}
 
 	return nil
 }

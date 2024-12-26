@@ -40,7 +40,7 @@ func (c *Client) GetS3ServiceBySvmUuid(uuid string) (s3Service S3Service, err er
 	data, err := c.clientGet(uri)
 	if err != nil {
 		if strings.Contains(err.Error(), "exist") {
-			return s3Service, errors.NewNotFound(schema.GroupResource{Group: "gatewayv1beta2", Resource: "StorageVirtualMachine"}, "no s3")
+			return s3Service, errors.NewNotFound(schema.GroupResource{Group: "gateway.netapp.com", Resource: "StorageVirtualMachine"}, "no s3")
 		}
 		return s3Service, &apiError{1, err.Error()}
 	}

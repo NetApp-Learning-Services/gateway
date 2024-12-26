@@ -27,7 +27,7 @@ func (r *StorageVirtualMachineReconciler) reconcileSvmCheck(ctx context.Context,
 	if uuid == "" {
 		log.Info("SVM uuid retrieved from the custom resource is empty, need to create the SVM")
 		_ = r.setConditionSVMFound(ctx, svmCR, CONDITION_STATUS_FALSE)
-		return svm, errors.NewNotFound(schema.GroupResource{Group: "gatewayv1alpha1", Resource: "StorageVirtualMachine"}, "svm")
+		return svm, errors.NewNotFound(schema.GroupResource{Group: "gateway.netapp.com", Resource: "StorageVirtualMachine"}, "svm")
 	} else {
 		log.Info("SVM uuid retrieved from the custom resource: " + uuid + ", attempt to get the SVM")
 

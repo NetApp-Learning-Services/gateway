@@ -26,9 +26,9 @@ type S3SubSpec struct {
 	// +kubebuilder:validation:Optional
 	Https *S3Https `json:"https,omitempty"`
 
-	// Provides optional S3 Tsl definition
-	// +kubebuilder:validation:Optional
-	Tls *S3Tls `json:"tls,omitempty"`
+	/* 	// Provides optional S3 Tsl definition
+	   	// +kubebuilder:validation:Optional
+	   	Tls *S3Tls `json:"tls,omitempty"` */
 
 	// Provides optional buckets definition
 	// +kubebuilder:validation:Optional

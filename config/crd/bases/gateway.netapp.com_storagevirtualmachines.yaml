@@ -1780,29 +1780,6 @@ spec:
                   name:
                     description: Provides required S3 server name
                     type: string
-                  tls:
-                    description: Provides optional S3 Tsl definition
-                    properties:
-                      certificate:
-                        description: Provides required S3 certificate
-                        properties:
-                          common_name:
-                            description: Provides required S3 certificate common name
-                            type: string
-                          type:
-                            description: Provides required S3 certificate type
-                            type: string
-                        required:
-                        - common_name
-                        - type
-                        type: object
-                      enabled:
-                        description: Provides required S3 tls enablement
-                        type: boolean
-                    required:
-                    - certificate
-                    - enabled
-                    type: object
                   users:
                     description: Provides optional S3 user definition
                     items:

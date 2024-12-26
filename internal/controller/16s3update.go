@@ -48,6 +48,7 @@ func (r *StorageVirtualMachineReconciler) reconcileS3Update(ctx context.Context,
 
 		upsertS3Service.Svm.Uuid = svmCR.Spec.SvmUuid
 		upsertS3Service.Enabled = &svmCR.Spec.S3Config.Enabled
+		upsertS3Service.Name = &svmCR.Spec.S3Config.Name
 
 		if svmCR.Spec.S3Config.Http != nil {
 			upsertS3Service.IsHttpEnabled = &svmCR.Spec.S3Config.Http.Enabled
@@ -56,8 +57,8 @@ func (r *StorageVirtualMachineReconciler) reconcileS3Update(ctx context.Context,
 		if svmCR.Spec.S3Config.Https != nil {
 			upsertS3Service.IsHttpsEnabled = &svmCR.Spec.S3Config.Https.Enabled
 			upsertS3Service.SecurePort = svmCR.Spec.S3Config.Https.Port
+			//CheckCertificate()
 		}
-		upsertS3Service.Name = &svmCR.Spec.SvmName
 
 		jsonPayload, err := json.Marshal(upsertS3Service)
 		if err != nil {
@@ -97,6 +98,11 @@ func (r *StorageVirtualMachineReconciler) reconcileS3Update(ctx context.Context,
 		if *S3Service.IsHttpsEnabled != svmCR.Spec.S3Config.Https.Enabled {
 			updateS3Service = true
 			upsertS3Service.IsHttpsEnabled = &svmCR.Spec.S3Config.Https.Enabled
+		}
+
+		if *S3Service.Name != svmCR.Spec.S3Config.Name {
+			updateS3Service = true
+			upsertS3Service.Name = &svmCR.Spec.S3Config.Name
 		}
 
 		if oc.Debug && updateS3Service {
