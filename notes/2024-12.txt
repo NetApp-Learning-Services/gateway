@@ -4,6 +4,7 @@ snap install kubectl --channel=1.29/stable --classic
 code --install-extension ms-kubernetes-tools.vscode-kubernetes-tools
 git repo: https://github.com/NetApp-Learning-Services/gateway
 notes/kubeconfigSetup.sh
+notes/deleteMirror.sh
 
 1. Install docker:  
 
