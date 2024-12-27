@@ -47,17 +47,29 @@ func (r *StorageVirtualMachineReconciler) reconcileS3Update(ctx context.Context,
 		log.Info("No S3 service defined for SVM: " + uuid + " - creating S3 service")
 
 		upsertS3Service.Svm.Uuid = svmCR.Spec.SvmUuid
-		upsertS3Service.Enabled = &svmCR.Spec.S3Config.Enabled
-		upsertS3Service.Name = &svmCR.Spec.S3Config.Name
+		upsertS3Service.Enabled = svmCR.Spec.S3Config.Enabled
+		upsertS3Service.Name = svmCR.Spec.S3Config.Name
 
 		if svmCR.Spec.S3Config.Http != nil {
-			upsertS3Service.IsHttpEnabled = &svmCR.Spec.S3Config.Http.Enabled
+			upsertS3Service.IsHttpEnabled = svmCR.Spec.S3Config.Http.Enabled
 			upsertS3Service.Port = svmCR.Spec.S3Config.Http.Port
+		} else {
+			upsertS3Service.IsHttpEnabled = false
 		}
 		if svmCR.Spec.S3Config.Https != nil {
-			upsertS3Service.IsHttpsEnabled = &svmCR.Spec.S3Config.Https.Enabled
-			upsertS3Service.SecurePort = svmCR.Spec.S3Config.Https.Port
-			//CheckCertificate()
+			upsertS3Service.IsHttpsEnabled = svmCR.Spec.S3Config.Https.Enabled
+			if svmCR.Spec.S3Config.Http.Enabled {
+				upsertS3Service.SecurePort = svmCR.Spec.S3Config.Https.Port
+				cert, err := CreateServerCertificate(svmCR.Spec.S3Config.Https.Certificate.CommonName, svmCR.Spec.S3Config.Https.Certificate.Type, uuid, svmCR.Spec.SvmName, oc, log)
+				if err != nil {
+					_ = r.setConditionS3Cert(ctx, svmCR, CONDITION_STATUS_FALSE)
+					return err
+				}
+				upsertS3Service.Certificate.Name = cert.Name
+				upsertS3Service.Certificate.Uuid = cert.Uuid
+			}
+		} else {
+			upsertS3Service.IsHttpsEnabled = false
 		}
 
 		jsonPayload, err := json.Marshal(upsertS3Service)
@@ -85,24 +97,24 @@ func (r *StorageVirtualMachineReconciler) reconcileS3Update(ctx context.Context,
 		log.Info("S3 service created successful")
 	} else {
 		// Compare enabled to custom resource enabled
-		if *S3Service.Enabled != svmCR.Spec.S3Config.Enabled {
+		if S3Service.Enabled != svmCR.Spec.S3Config.Enabled {
 			updateS3Service = true
-			upsertS3Service.Enabled = &svmCR.Spec.S3Config.Enabled
+			upsertS3Service.Enabled = svmCR.Spec.S3Config.Enabled
 		}
 
-		if *S3Service.IsHttpEnabled != svmCR.Spec.S3Config.Http.Enabled {
+		if S3Service.IsHttpEnabled != svmCR.Spec.S3Config.Http.Enabled {
 			updateS3Service = true
-			upsertS3Service.IsHttpEnabled = &svmCR.Spec.S3Config.Http.Enabled
+			upsertS3Service.IsHttpEnabled = svmCR.Spec.S3Config.Http.Enabled
 		}
 
-		if *S3Service.IsHttpsEnabled != svmCR.Spec.S3Config.Https.Enabled {
+		if S3Service.IsHttpsEnabled != svmCR.Spec.S3Config.Https.Enabled {
 			updateS3Service = true
-			upsertS3Service.IsHttpsEnabled = &svmCR.Spec.S3Config.Https.Enabled
+			upsertS3Service.IsHttpsEnabled = svmCR.Spec.S3Config.Https.Enabled
 		}
 
-		if *S3Service.Name != svmCR.Spec.S3Config.Name {
+		if S3Service.Name != svmCR.Spec.S3Config.Name {
 			updateS3Service = true
-			upsertS3Service.Name = &svmCR.Spec.S3Config.Name
+			upsertS3Service.Name = svmCR.Spec.S3Config.Name
 		}
 
 		if oc.Debug && updateS3Service {
@@ -407,6 +419,30 @@ func (reconciler *StorageVirtualMachineReconciler) setConditionS3UserSecret(ctx 
 	if status == CONDITION_STATUS_FALSE {
 		return appendCondition(ctx, reconciler.Client, svmCR, CONDITION_TYPE_S3_SERVICE, status,
 			CONDITION_REASON_S3_USER, CONDITION_MESSAGE_S3_USERSECRET_FALSE)
+	}
+	return nil
+}
+
+const CONDITION_REASON_S3_CERT = "S3cert"
+const CONDITION_MESSAGE_S3_CERT_TRUE = "S3 cert configuration succeeded"
+const CONDITION_MESSAGE_S3_CERT_FALSE = "S3 cert configuration failed"
+
+func (reconciler *StorageVirtualMachineReconciler) setConditionS3Cert(ctx context.Context,
+	svmCR *gateway.StorageVirtualMachine, status metav1.ConditionStatus) error {
+
+	// I don't want to delete old references to updates to make a history
+	// if reconciler.containsCondition(ctx, svmCR, CONDITION_REASON_S3_LIF) {
+	// 	reconciler.deleteCondition(ctx, svmCR, CONDITION_TYPE_S3_SERVICE, CONDITION_REASON_S3_LIF)
+	// }
+
+	if status == CONDITION_STATUS_TRUE {
+		return appendCondition(ctx, reconciler.Client, svmCR, CONDITION_TYPE_S3_SERVICE, status,
+			CONDITION_REASON_S3_CERT, CONDITION_MESSAGE_S3_CERT_TRUE)
+	}
+
+	if status == CONDITION_STATUS_FALSE {
+		return appendCondition(ctx, reconciler.Client, svmCR, CONDITION_TYPE_S3_SERVICE, status,
+			CONDITION_REASON_S3_CERT, CONDITION_MESSAGE_S3_CERT_FALSE)
 	}
 	return nil
 }

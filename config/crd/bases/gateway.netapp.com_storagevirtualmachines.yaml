@@ -1722,14 +1722,14 @@ spec:
                       certificate:
                         description: Provides required S3 certificate
                         properties:
-                          common_name:
+                          commonName:
                             description: Provides required S3 certificate common name
                             type: string
                           type:
                             description: Provides required S3 certificate type
                             type: string
                         required:
-                        - common_name
+                        - commonName
                         - type
                         type: object
                       enabled:

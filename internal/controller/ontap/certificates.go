@@ -30,8 +30,12 @@ type CertificateSigningResponse struct {
 	SubjectName         string `json:"subject_name"`
 }
 
-type CertificateSign struct {
+type CertificateSignRequest struct {
 	SigningRequest string `json:"signing_request"`
+}
+
+type CertificateSignResponse struct {
+	PublicCertificate string `json:"public_certificate"`
 }
 
 type CertificateResponse struct {
@@ -39,10 +43,10 @@ type CertificateResponse struct {
 	Records []Certificate `json:"records,omitempty"`
 }
 
-//const returnCertificateQs string = "?return_records=true"
+const returnCertificateQs string = "?return_timeout=120&max_records=40&fields="
 
-func (c *Client) GetCertificatesBySvmUuid(uuid string, commonName string) (certs CertificateResponse, err error) {
-	uri := "/api/securtiy/certificates" + qs + "common_name=" + commonName + "&svm.uuid=" + uuid
+func (c *Client) GetCertificatesBySvmUuid(uuid string, commonName string, caType string) (certs CertificateResponse, err error) {
+	uri := "/api/security/certificates" + returnCertificateQs + "common_name=" + commonName + "&svm.uuid=" + uuid + "&type=" + caType
 
 	data, err := c.clientGet(uri)
 	if err != nil {
@@ -94,16 +98,22 @@ func (c *Client) CreateCertificateSigningRequest(jsonPayload []byte) (csr Certif
 		return resp, &apiError{2, err.Error()}
 	}
 
-	return csr, nil
+	return resp, nil
 }
 
-func (c *Client) CreateSignedCertificate(jsonPayload []byte, ca_uuid string) (err error) {
+func (c *Client) CreateSignedCertificate(jsonPayload []byte, ca_uuid string) (cert CertificateSignResponse, err error) {
 	uri := "/api/security/certificate/" + ca_uuid + "/sign"
-	_, err = c.clientPost(uri, jsonPayload)
+	data, err := c.clientPost(uri, jsonPayload)
 	if err != nil {
 		//fmt.Println("Error: " + err.Error())
-		return &apiError{1, err.Error()}
+		return cert, &apiError{1, err.Error()}
 	}
 
-	return nil
+	var resp CertificateSignResponse
+	err = json.Unmarshal(data, &resp)
+	if err != nil {
+		return resp, &apiError{2, err.Error()}
+	}
+
+	return resp, nil
 }

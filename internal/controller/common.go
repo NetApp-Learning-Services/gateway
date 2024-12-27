@@ -160,82 +160,104 @@ func CreateLifServicePolicy(servicePolicyName string, servicePolicyScope string,
 	return nil
 }
 
-func CreateCACertificate(commonName string, catype string, uuid string, svmName string, oc *ontap.Client, log logr.Logger) (err error) {
+func CreateServerCertificate(commonName string, catype string, uuid string, svmName string, oc *ontap.Client, log logr.Logger) (returnCert ontap.Certificate, err error) {
 
-	createNewCertificate := false
+	createNewCACertificate := false
+	var cert ontap.Certificate
 	//check if exists
 
-	_, err = oc.GetCertificatesBySvmUuid(uuid, commonName)
-	if err != nil && errors.IsNotFound(err) {
-		createNewCertificate = true
-	}
+	log.Info("Checking with a CA certificate %v exists", commonName)
+
+	resp, err := oc.GetCertificatesBySvmUuid(uuid, commonName, catype)
 
 	if err != nil {
-		//unknown error
-		log.Error(err, fmt.Sprintf("Error while checking for the S3 certificate required: %v", err.Error()))
-		return err
+		if errors.IsNotFound((err)) {
+			createNewCACertificate = true
+		} else {
+			//unknown error
+			log.Error(err, fmt.Sprintf("Error while checking for the S3 certificate required: %v", err.Error()))
+			return returnCert, err
+		}
 	}
 
-	if createNewCertificate {
-		//Need to create the certificate
-		log.Info((fmt.Sprintf("Certificate creation attempt: %v", commonName)))
+	if resp.NumRecords != 0 {
+		cert = resp.Records[0]
+	}
 
-		// Skipping, using SVM CA cert that is created by default
+	if createNewCACertificate {
+
 		// Create a self-sign root CA certificate
-		// var newCertificate ontap.Certificate
-		// newCertificate.CommonName = svmName
-		// newCertificate.Svm.Uuid = uuid
-		// newCertificate.Type = catype
-		// jsonPayload, err := json.Marshal(newCertificate)
-		// if err != nil {
-		// 	//error creating the json body
-		// 	log.Error(err, fmt.Sprintf("Error creating the json payload for certificate creation %v", newCertificate.CommonName))
-		// 	return err
-		// }
-
-		// log.Info("Certificate creation attempt: " + newCertificate.CommonName)
-		// cert, err := oc.CreateCertificate(jsonPayload)
-		// if err != nil {
-		// 	log.Error(err, fmt.Sprintf("Error occurred when creating certificate: %v", newCertificate.CommonName))
-		// 	return err
-		// }
-
-		// Certificate Signing Request
-		var newCRS ontap.CertificateSigningRequest
-		newCRS.SubjectName = "C=US,O=GATEWAY.NETAPP.COM,CN=" + svmName
-		jsonPayload, err := json.Marshal(newCRS)
+		var newCertificate ontap.Certificate
+		newCertificate.CommonName = svmName
+		newCertificate.Svm.Uuid = uuid
+		newCertificate.Type = catype
+		jsonPayload, err := json.Marshal(newCertificate)
 		if err != nil {
 			//error creating the json body
-			log.Error(err, fmt.Sprintf("Error creating the json payload for Certificate Signing Request %v", newCRS.SubjectName))
-			return err
+			log.Error(err, fmt.Sprintf("Error creating the json payload for CA certificate creation %v", newCertificate.CommonName))
+			return returnCert, err
 		}
 
-		log.Info("Certificate signing request creation attempt: " + newCRS.SubjectName)
-		csr, err := oc.CreateCertificateSigningRequest(jsonPayload)
+		log.Info("CA certificate creation attempt: " + newCertificate.CommonName)
+		cert, err = oc.CreateCertificate(jsonPayload)
 		if err != nil {
-			log.Error(err, fmt.Sprintf("Error occurred when creating Certificate Signing Request: %v", newCRS.SubjectName))
-			return err
+			log.Error(err, fmt.Sprintf("Error occurred when creating CA certificate: %v", newCertificate.CommonName))
+			return returnCert, err
 		}
-
-		// Sign the CSR using certificate created earlier
-		var newCRSSign ontap.CertificateSign
-		newCRSSign.SigningRequest = csr.Csr
-		jsonPayload, err = json.Marshal(newCRSSign)
-		if err != nil {
-			//error creating the json body
-			log.Error(err, fmt.Sprintf("Error creating the json payload for signing the Certificate Signing Request %v", newCRS.SubjectName))
-			return err
-		}
-
-		log.Info("Certificate Signing Request sign attempt: " + newCRS.SubjectName)
-		err = oc.CreateSignedCertificate(jsonPayload, uuid)
-		if err != nil {
-			log.Error(err, fmt.Sprintf("Error occurred when signing the Certificate Signing Request: %v", newCRS.SubjectName))
-			return err
-		}
-
-		//Install the signed certificate
 	}
 
-	return nil
+	// Certificate Signing Request
+	var newCRS ontap.CertificateSigningRequest
+	newCRS.SubjectName = "C=US,O=GATEWAY.NETAPP.COM,CN=" + svmName
+	jsonPayload, err := json.Marshal(newCRS)
+	if err != nil {
+		//error creating the json body
+		log.Error(err, fmt.Sprintf("Error creating the json payload for Certificate Signing Request %v", newCRS.SubjectName))
+		return returnCert, err
+	}
+
+	log.Info("Certificate signing request creation attempt: " + newCRS.SubjectName)
+	csr, err := oc.CreateCertificateSigningRequest(jsonPayload)
+	if err != nil {
+		log.Error(err, fmt.Sprintf("Error occurred when creating Certificate Signing Request: %v", newCRS.SubjectName))
+		return returnCert, err
+	}
+
+	// Sign the CSR using certificate created earlier
+	var newCRSSign ontap.CertificateSignRequest
+	newCRSSign.SigningRequest = csr.Csr
+	jsonPayload, err = json.Marshal(newCRSSign)
+	if err != nil {
+		//error creating the json body
+		log.Error(err, fmt.Sprintf("Error creating the json payload for signing the Certificate Signing Request %v", newCRS.SubjectName))
+		return returnCert, err
+	}
+
+	log.Info("Certificate Signing Request sign attempt: " + newCRS.SubjectName)
+	signedCert, err := oc.CreateSignedCertificate(jsonPayload, cert.Uuid)
+	if err != nil {
+		log.Error(err, fmt.Sprintf("Error occurred when signing the Certificate Signing Request: %v", newCRS.SubjectName))
+		return returnCert, err
+	}
+
+	//Install the signed certificate
+	var newServerCertificate ontap.Certificate
+	newServerCertificate.PublicCertificate = signedCert.PublicCertificate
+	newServerCertificate.Svm.Uuid = uuid
+	newServerCertificate.Type = "server" //magic words
+	jsonPayload, err = json.Marshal(newServerCertificate)
+	if err != nil {
+		//error creating the json body
+		log.Error(err, "Error creating the json payload for server certificate creation")
+		return returnCert, err
+	}
+
+	log.Info("Server certificate creation attempt")
+	finalCert, err := oc.CreateCertificate(jsonPayload)
+	if err != nil {
+		log.Error(err, "Error occurred when creating server certificate")
+		return returnCert, err
+	}
+
+	return finalCert, nil
 }

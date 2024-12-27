@@ -84,7 +84,7 @@ type S3Tls struct {
 type Certificate struct {
 	// Provides required S3 certificate common name
 	// +kubebuilder:validation:Required
-	CommonName string `json:"common_name"`
+	CommonName string `json:"commonName"`
 
 	// Provides required S3 certificate type
 	// +kubebuilder:validation:Required

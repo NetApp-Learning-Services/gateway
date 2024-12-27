@@ -1,7 +1,7 @@
 #!/bin/bash
 # A simple bash script to reset and test the application
 kubectl config use-context source-admin@source
-kubectl -n gateway-system delete svm svmtest
+kubectl -n gateway-system delete svm svmsrc
 # kubectl -n gateway-system delete secret ontap-cluster1-admin
 # kubectl -n gateway-system delete secret ontap-svmtest-admin
 # kubectl delete namespace gateway-system 

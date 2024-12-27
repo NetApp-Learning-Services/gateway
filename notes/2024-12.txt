@@ -6,6 +6,8 @@ git repo: https://github.com/NetApp-Learning-Services/gateway
 notes/kubeconfigSetup.sh
 notes/deleteMirror.sh
 
+if you need to edit yamls: export KUBE_EDITOR='code --wait'
+
 1. Install docker:  
 
 sudo apt update

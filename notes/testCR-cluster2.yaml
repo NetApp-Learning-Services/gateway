@@ -51,9 +51,12 @@ spec:
     https:
       enabled: false
       port: 443
+      certificate:
+        commonName: svmdst
+        type: root-ca
     users:
     - name: gateway-s3-dst
-      namespace: default
+      namespace: gateway-system
     interfaces:
     - name: s31
       ip: 192.168.0.44   

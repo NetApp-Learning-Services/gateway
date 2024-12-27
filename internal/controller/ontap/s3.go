@@ -12,12 +12,12 @@ import (
 type S3Service struct {
 	Svm            SvmRef   `json:"svm,omitempty"`
 	Certificate    Resource `json:"certificate,omitempty"`
-	IsHttpEnabled  *bool    `json:"is_http_enabled"`
-	IsHttpsEnabled *bool    `json:"is_https_enabled"`
+	IsHttpEnabled  bool     `json:"is_http_enabled"`
+	IsHttpsEnabled bool     `json:"is_https_enabled"`
 	Port           int      `json:"port,omitempty"`
 	SecurePort     int      `json:"secure_port,omitempty"`
-	Enabled        *bool    `json:"enabled"`
-	Name           *string  `json:"name"`
+	Enabled        bool     `json:"enabled"`
+	Name           string   `json:"name"`
 }
 
 type UserResponse struct {
