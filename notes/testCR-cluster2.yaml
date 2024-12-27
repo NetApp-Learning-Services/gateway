@@ -51,9 +51,10 @@ spec:
     https:
       enabled: false
       port: 443
-      certificate:
-        commonName: svmdst
+      caCertificate:
+        commonName: svmdst-ca
         type: root-ca
+        expiryTime: P725DT
     users:
     - name: gateway-s3-dst
       namespace: gateway-system

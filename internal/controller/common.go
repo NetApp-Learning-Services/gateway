@@ -160,13 +160,13 @@ func CreateLifServicePolicy(servicePolicyName string, servicePolicyScope string,
 	return nil
 }
 
-func CreateServerCertificate(commonName string, catype string, uuid string, svmName string, oc *ontap.Client, log logr.Logger) (returnCert ontap.Certificate, err error) {
+func CreateServerCertificate(commonName string, catype string, expiryTime string, uuid string, svmName string, oc *ontap.Client, log logr.Logger) (returnCert ontap.Certificate, err error) {
 
 	createNewCACertificate := false
 	var cert ontap.Certificate
 	//check if exists
 
-	log.Info("Checking with a CA certificate %v exists", commonName)
+	log.Info("Checking for a CA certificate " + commonName)
 
 	resp, err := oc.GetCertificatesBySvmUuid(uuid, commonName, catype)
 
@@ -188,9 +188,15 @@ func CreateServerCertificate(commonName string, catype string, uuid string, svmN
 
 		// Create a self-sign root CA certificate
 		var newCertificate ontap.Certificate
-		newCertificate.CommonName = svmName
+		newCertificate.CommonName = commonName
 		newCertificate.Svm.Uuid = uuid
 		newCertificate.Type = catype
+		if expiryTime != "" {
+			newCertificate.ExpiryTime = expiryTime
+		} else {
+			newCertificate.ExpiryTime = "P725DT" //magic words
+		}
+
 		jsonPayload, err := json.Marshal(newCertificate)
 		if err != nil {
 			//error creating the json body
@@ -199,10 +205,13 @@ func CreateServerCertificate(commonName string, catype string, uuid string, svmN
 		}
 
 		log.Info("CA certificate creation attempt: " + newCertificate.CommonName)
-		cert, err = oc.CreateCertificate(jsonPayload)
+		resp, err = oc.CreateCertificate(jsonPayload)
 		if err != nil {
 			log.Error(err, fmt.Sprintf("Error occurred when creating CA certificate: %v", newCertificate.CommonName))
 			return returnCert, err
+		}
+		if resp.NumRecords != 0 {
+			cert = resp.Records[0]
 		}
 	}
 
@@ -245,6 +254,7 @@ func CreateServerCertificate(commonName string, catype string, uuid string, svmN
 	newServerCertificate.PublicCertificate = signedCert.PublicCertificate
 	newServerCertificate.Svm.Uuid = uuid
 	newServerCertificate.Type = "server" //magic words
+	newServerCertificate.PrivateKey = csr.GeneratedPrivateKey
 	jsonPayload, err = json.Marshal(newServerCertificate)
 	if err != nil {
 		//error creating the json body
@@ -253,10 +263,14 @@ func CreateServerCertificate(commonName string, catype string, uuid string, svmN
 	}
 
 	log.Info("Server certificate creation attempt")
-	finalCert, err := oc.CreateCertificate(jsonPayload)
+	resp, err = oc.CreateCertificate(jsonPayload)
 	if err != nil {
 		log.Error(err, "Error occurred when creating server certificate")
 		return returnCert, err
+	}
+	var finalCert ontap.Certificate
+	if resp.NumRecords != 0 {
+		finalCert = resp.Records[0]
 	}
 
 	return finalCert, nil

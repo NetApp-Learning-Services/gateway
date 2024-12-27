@@ -60,10 +60,12 @@ func (r *StorageVirtualMachineReconciler) reconcileS3Update(ctx context.Context,
 			upsertS3Service.IsHttpsEnabled = svmCR.Spec.S3Config.Https.Enabled
 			if svmCR.Spec.S3Config.Http.Enabled {
 				upsertS3Service.SecurePort = svmCR.Spec.S3Config.Https.Port
-				cert, err := CreateServerCertificate(svmCR.Spec.S3Config.Https.Certificate.CommonName, svmCR.Spec.S3Config.Https.Certificate.Type, uuid, svmCR.Spec.SvmName, oc, log)
+				cert, err := CreateServerCertificate(svmCR.Spec.S3Config.Https.Certificate.CommonName, svmCR.Spec.S3Config.Https.Certificate.Type, svmCR.Spec.S3Config.Https.Certificate.ExpiryTime, uuid, svmCR.Spec.SvmName, oc, log)
 				if err != nil {
 					_ = r.setConditionS3Cert(ctx, svmCR, CONDITION_STATUS_FALSE)
 					return err
+				} else {
+					_ = r.setConditionS3Cert(ctx, svmCR, CONDITION_STATUS_TRUE)
 				}
 				upsertS3Service.Certificate.Name = cert.Name
 				upsertS3Service.Certificate.Uuid = cert.Uuid
@@ -110,6 +112,18 @@ func (r *StorageVirtualMachineReconciler) reconcileS3Update(ctx context.Context,
 		if S3Service.IsHttpsEnabled != svmCR.Spec.S3Config.Https.Enabled {
 			updateS3Service = true
 			upsertS3Service.IsHttpsEnabled = svmCR.Spec.S3Config.Https.Enabled
+			if svmCR.Spec.S3Config.Https.Enabled {
+				upsertS3Service.SecurePort = svmCR.Spec.S3Config.Https.Port
+				cert, err := CreateServerCertificate(svmCR.Spec.S3Config.Https.Certificate.CommonName, svmCR.Spec.S3Config.Https.Certificate.Type, svmCR.Spec.S3Config.Https.Certificate.ExpiryTime, uuid, svmCR.Spec.SvmName, oc, log)
+				if err != nil {
+					_ = r.setConditionS3Cert(ctx, svmCR, CONDITION_STATUS_FALSE)
+					return err
+				} else {
+					_ = r.setConditionS3Cert(ctx, svmCR, CONDITION_STATUS_TRUE)
+				}
+				upsertS3Service.Certificate.Name = cert.Name
+				upsertS3Service.Certificate.Uuid = cert.Uuid
+			}
 		}
 
 		if S3Service.Name != svmCR.Spec.S3Config.Name {
@@ -288,6 +302,7 @@ func (r *StorageVirtualMachineReconciler) reconcileS3Update(ctx context.Context,
 			user, err := CreateUser(val, uuid, oc, log)
 			if err != nil {
 				_ = r.setConditionS3User(ctx, svmCR, CONDITION_STATUS_FALSE)
+				r.Recorder.Event(svmCR, "Warning", "S3UserFailed", "Error: "+err.Error())
 				return err
 			} else {
 				// Create a secret with the access key and secret key
@@ -311,12 +326,16 @@ func (r *StorageVirtualMachineReconciler) reconcileS3Update(ctx context.Context,
 				err = r.Create(ctx, secret)
 				if err != nil {
 					_ = r.setConditionS3UserSecret(ctx, svmCR, CONDITION_STATUS_FALSE)
+					r.Recorder.Event(svmCR, "Warning", "S3UserFailed", "Error: "+err.Error())
 					log.Error(err, "Error creating S3 user secret for SVM: "+uuid+" and user: "+user.Records[0].Name+" with access key: "+user.Records[0].AccessKey+" and secret key: "+user.Records[0].SecretKey)
 				} else {
 					log.Info("S3 User and secret creation succesful: " + val.Name)
 				}
+
 			}
 		}
+		_ = r.setConditionS3User(ctx, svmCR, CONDITION_STATUS_TRUE)
+		r.Recorder.Event(svmCR, "Normal", "S3UserSucceeded", "Created S3 user(s) successfully")
 
 	}
 

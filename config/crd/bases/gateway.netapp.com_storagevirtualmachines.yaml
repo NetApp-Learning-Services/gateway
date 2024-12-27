@@ -1719,17 +1719,21 @@ spec:
                   https:
                     description: Provides optional S3 Https definition
                     properties:
-                      certificate:
+                      caCertificate:
                         description: Provides required S3 certificate
                         properties:
                           commonName:
                             description: Provides required S3 certificate common name
+                            type: string
+                          expiryTime:
+                            description: Provides required S3 certificate expiry_date
                             type: string
                           type:
                             description: Provides required S3 certificate type
                             type: string
                         required:
                         - commonName
+                        - expiryTime
                         - type
                         type: object
                       enabled:
@@ -1740,7 +1744,7 @@ spec:
                         description: Provides required S3 https enablement
                         type: integer
                     required:
-                    - certificate
+                    - caCertificate
                     - enabled
                     - port
                     type: object

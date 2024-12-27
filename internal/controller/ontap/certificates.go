@@ -8,16 +8,16 @@ import (
 )
 
 type Certificate struct {
-	Svm                SvmRef `json:"svm,omitempty"`
-	Type               string `json:"type,omitempty"`
-	PublicCertificate  string `json:"public_certificate,omitempty"`
-	PrivateCertificate string `json:"private_certificate,omitempty"`
-	KeySize            int    `json:"key_size,omitempty"`
-	ExpiryTime         string `json:"expiry_time,omitempty"`
-	Name               string `json:"name"`
-	CommonName         string `json:"common_name"`
-	SerialNumber       string `json:"serial_number,omitempty"`
-	Uuid               string `json:"uuid"`
+	Svm               SvmRef `json:"svm,omitempty"`
+	Type              string `json:"type,omitempty"`
+	PublicCertificate string `json:"public_certificate,omitempty"`
+	PrivateKey        string `json:"private_key,omitempty"`
+	KeySize           int    `json:"key_size,omitempty"`
+	ExpiryTime        string `json:"expiry_time,omitempty"`
+	Name              string `json:"name,omitempty"`
+	CommonName        string `json:"common_name,omitempty"`
+	SerialNumber      string `json:"serial_number,omitempty"`
+	Uuid              string `json:"uuid,omitempty"`
 }
 
 type CertificateSigningRequest struct {
@@ -43,10 +43,10 @@ type CertificateResponse struct {
 	Records []Certificate `json:"records,omitempty"`
 }
 
-const returnCertificateQs string = "?return_timeout=120&max_records=40&fields="
+//const returnCertificateQs string = "?return_timeout=120&max_records=40&fields="
 
 func (c *Client) GetCertificatesBySvmUuid(uuid string, commonName string, caType string) (certs CertificateResponse, err error) {
-	uri := "/api/security/certificates" + returnCertificateQs + "common_name=" + commonName + "&svm.uuid=" + uuid + "&type=" + caType
+	uri := "/api/security/certificates?common_name=" + commonName + "&svm.uuid=" + uuid + "&type=" + caType
 
 	data, err := c.clientGet(uri)
 	if err != nil {
@@ -61,21 +61,21 @@ func (c *Client) GetCertificatesBySvmUuid(uuid string, commonName string, caType
 
 	if resp.NumRecords == 0 {
 		//No certificate found
-		return resp, errors.NewNotFound(schema.GroupResource{Group: "gateway.netapp.com", Resource: "StorageVirtualMachine"}, "no S3 certificate")
+		return resp, errors.NewNotFound(schema.GroupResource{Group: "gateway.netapp.com", Resource: "StorageVirtualMachine"}, "no certificate")
 	}
 
 	return resp, nil
 }
 
-func (c *Client) CreateCertificate(jsonPayload []byte) (cert Certificate, err error) {
-	uri := "/api/security/certificates"
+func (c *Client) CreateCertificate(jsonPayload []byte) (cert CertificateResponse, err error) {
+	uri := "/api/security/certificates?return_records=true"
 	data, err := c.clientPost(uri, jsonPayload)
 	if err != nil {
 		//fmt.Println("Error: " + err.Error())
 		return cert, &apiError{1, err.Error()}
 	}
 
-	var resp Certificate
+	var resp CertificateResponse
 	err = json.Unmarshal(data, &resp)
 	if err != nil {
 		return resp, &apiError{2, err.Error()}
@@ -102,7 +102,7 @@ func (c *Client) CreateCertificateSigningRequest(jsonPayload []byte) (csr Certif
 }
 
 func (c *Client) CreateSignedCertificate(jsonPayload []byte, ca_uuid string) (cert CertificateSignResponse, err error) {
-	uri := "/api/security/certificate/" + ca_uuid + "/sign"
+	uri := "/api/security/certificates/" + ca_uuid + "/sign"
 	data, err := c.clientPost(uri, jsonPayload)
 	if err != nil {
 		//fmt.Println("Error: " + err.Error())

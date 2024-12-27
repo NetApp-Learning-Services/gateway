@@ -26,10 +26,6 @@ type S3SubSpec struct {
 	// +kubebuilder:validation:Optional
 	Https *S3Https `json:"https,omitempty"`
 
-	/* 	// Provides optional S3 Tsl definition
-	   	// +kubebuilder:validation:Optional
-	   	Tls *S3Tls `json:"tls,omitempty"` */
-
 	// Provides optional buckets definition
 	// +kubebuilder:validation:Optional
 	Buckets []S3Bucket `json:"buckets,omitempty"`
@@ -68,17 +64,7 @@ type S3Https struct {
 
 	// Provides required S3 certificate
 	// +kubebuilder:validation:Required
-	Certificate Certificate `json:"certificate"`
-}
-
-type S3Tls struct {
-	// Provides required S3 tls enablement
-	// +kubebuilder:validation:Required
-	Enabled bool `json:"enabled"`
-
-	// Provides required S3 certificate
-	// +kubebuilder:validation:Required
-	Certificate Certificate `json:"certificate"`
+	Certificate Certificate `json:"caCertificate"`
 }
 
 type Certificate struct {
@@ -89,6 +75,10 @@ type Certificate struct {
 	// Provides required S3 certificate type
 	// +kubebuilder:validation:Required
 	Type string `json:"type"`
+
+	// Provides required S3 certificate expiry_date
+	// +kubebuilder:validation:Required
+	ExpiryTime string `json:"expiryTime"`
 }
 
 type S3Bucket struct {

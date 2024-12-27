@@ -10,8 +10,8 @@ kubectl delete namespace gateway-system
 #Uncomment below to install for the first time
 #sudo apt install sshpass
 #sshpass -p Netapp1! ssh root@192.168.0.96 "ctr -n k8s.io i rm docker.io/curtisab/gateway:v1beta2"
-sshpass -p Netapp1! ssh root@192.168.0.97 "ctr -n k8s.io i rm docker.io/curtisab/gateway:v1beta2"
-sshpass -p Netapp1! ssh root@192.168.0.98 "ctr -n k8s.io i rm docker.io/curtisab/gateway:v1beta2"
+sshpass -p Netapp1! ssh -o StrictHostKeyChecking=no root@192.168.0.97 "ctr -n k8s.io i rm docker.io/curtisab/gateway:v1beta2"
+sshpass -p Netapp1! ssh -o StrictHostKeyChecking=no root@192.168.0.98 "ctr -n k8s.io i rm docker.io/curtisab/gateway:v1beta2"
 
 make docker-build docker-push
 make deploy

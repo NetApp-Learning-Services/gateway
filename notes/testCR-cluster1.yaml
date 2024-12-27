@@ -51,9 +51,10 @@ spec:
     https:
       enabled: true
       port: 443
-      certificate:
-        commonName: svmsrc
+      caCertificate:
+        commonName: svmsrc-ca
         type: root-ca
+        expiryTime: P725DT
     users:
     - name: gateway-s3-src
       namespace: gateway-system
