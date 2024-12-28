@@ -38,7 +38,7 @@ import (
 	gatewayv1alpha3 "gateway/api/v1alpha3"
 	gatewayv1beta1 "gateway/api/v1beta1"
 	gatewayv1beta2 "gateway/api/v1beta2"
-	"gateway/internal/controller"
+	svmcontroller "gateway/internal/controller/storagevirtualmachine"
 	//+kubebuilder:scaffold:imports
 )
 
@@ -106,7 +106,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	if err = (&controller.StorageVirtualMachineReconciler{
+	if err = (&svmcontroller.StorageVirtualMachineReconciler{
 		Client: mgr.GetClient(),
 		Scheme: mgr.GetScheme(),
 		// Added to support events
