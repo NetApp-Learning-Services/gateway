@@ -29,7 +29,7 @@ func (r *StorageVirtualMachineReconciler) reconcileDeletions(ctx context.Context
 	isSMVMarkedToBeDeleted := svmCR.GetDeletionTimestamp() != nil
 	if isSMVMarkedToBeDeleted {
 		if controllerutil.ContainsFinalizer(svmCR, finalizerName) {
-			if err := r.finalizeSVM(svmCR, oc); err != nil {
+			if err := r.finalizeSVM(svmCR, oc, log); err != nil {
 				log.Error(err, "Error during deletionpolicy implementation - requeuing")
 				_ = r.setConditionSVMDeleted(ctx, svmCR, CONDITION_STATUS_FALSE)
 				return ctrl.Result{}, err
@@ -59,10 +59,29 @@ func (r *StorageVirtualMachineReconciler) reconcileDeletions(ctx context.Context
 }
 
 func (r *StorageVirtualMachineReconciler) finalizeSVM(
-	svmCR *gateway.StorageVirtualMachine, oc *ontap.Client) error {
+	svmCR *gateway.StorageVirtualMachine, oc *ontap.Client, log logr.Logger) error {
 
 	if svmCR.Spec.SvmDeletionPolicy == gateway.DeletionPolicyDelete {
-		err := oc.DeleteStorageVM(svmCR.Spec.SvmUuid)
+
+		//check to see if S3 buckets are presenty
+		bucketsRetrieved, err := oc.GetS3BucketsBySvmUuid(svmCR.Spec.SvmUuid)
+
+		if err != nil {
+			log.Error(err, "Error retrieving S3 buckets list from SVM: "+svmCR.Spec.SvmName)
+		}
+
+		if bucketsRetrieved.NumRecords != 0 {
+			for i := 0; i < bucketsRetrieved.NumRecords; i++ {
+				err = oc.DeleteS3Bucket(svmCR.Spec.SvmUuid, bucketsRetrieved.Records[i].Uuid)
+
+				if err != nil {
+					log.Error(err, "Error deleting S3 bucket: "+bucketsRetrieved.Records[i].Name)
+				}
+			}
+
+		}
+
+		err = oc.DeleteStorageVM(svmCR.Spec.SvmUuid)
 		if err != nil {
 			return fmt.Errorf("SVM not deleted yet")
 		}

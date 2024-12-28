@@ -233,8 +233,8 @@ func (c *Client) CreateS3Bucket(uuid string, jsonPayload []byte) (err error) {
 	return nil
 }
 
-func (c *Client) DeleteS3Bucket(uuid string, name string) (err error) {
-	uri := "/api/protocols/s3/services/" + uuid + "/buckets/" + name
+func (c *Client) DeleteS3Bucket(uuid string, bucketUuid string) (err error) {
+	uri := "/api/protocols/s3/services/" + uuid + "/buckets/" + bucketUuid
 
 	_, err = c.clientDelete(uri)
 	if err != nil {
