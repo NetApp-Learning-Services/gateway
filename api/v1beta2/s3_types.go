@@ -86,15 +86,15 @@ type S3Bucket struct {
 	// +kubebuilder:validation:Required
 	Name string `json:"name"`
 
-	// Provides required S3 bucket vsadmin managementability
-	// +kubebuilder:validation:Optional
-	Allowed bool `json:"allowed,omitempty"`
-
-	// Provides required S3 bucket size
+	// Provides optional S3 bucket size
 	// +kubebuilder:validation:Optional
 	Size int `json:"size,omitempty"`
 
-	// Provides required S3 bucket type
+	// Provides optional S3 bucket comment
+	// +kubebuilder:validation:Optional
+	Comment string `json:"comment,omitempty"`
+
+	// Provides optional S3 bucket type
 	// +kubebuilder:validation:Optional
 	Type string `json:"type,omitempty"`
 }

@@ -114,7 +114,7 @@ func UpdateLif(lifDefinition gateway.LIF, lifToUpdate ontap.IpInterface, lifType
 	return nil
 }
 
-func CreateUser(userToCreate gateway.S3User, uuid string, oc *ontap.Client, log logr.Logger) (user ontap.UserResponse, err error) {
+func CreateUser(userToCreate gateway.S3User, uuid string, oc *ontap.Client, log logr.Logger) (user ontap.S3UsersResponse, err error) {
 	var newUser ontap.S3User
 	newUser.Name = userToCreate.Name
 

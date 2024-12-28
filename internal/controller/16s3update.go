@@ -260,7 +260,7 @@ func (r *StorageVirtualMachineReconciler) reconcileS3Update(ctx context.Context,
 
 	// END S3 LIFS
 
-	// S3 Users
+	// S3 USERS
 	if svmCR.Spec.S3Config.Users == nil {
 		// If none, exit with no error
 		log.Info("No S3 users defined - skipping")
@@ -338,6 +338,79 @@ func (r *StorageVirtualMachineReconciler) reconcileS3Update(ctx context.Context,
 		r.Recorder.Event(svmCR, "Normal", "S3UserSucceeded", "Created S3 user(s) successfully")
 
 	}
+	//END S3 USERS
+
+	//S3 BUCKETS
+
+	if svmCR.Spec.S3Config.Buckets == nil {
+		// If none, exit with no error
+		log.Info("No S3 buckets defined - skipping")
+	} else {
+
+		//Check to see if S3 buckets defined and compare to custom resource
+		bucketsRetrieved, err := oc.GetS3BucketsBySvmUuid(uuid)
+		if err != nil {
+			//error creating the json body
+			log.Error(err, "Error getting S3 buckets for SVM: "+uuid+" - requeuing")
+			_ = r.setConditionS3Bucket(ctx, svmCR, CONDITION_STATUS_FALSE)
+			return err
+		}
+
+		if bucketsRetrieved.NumRecords == 0 {
+			// No exports for the SVM provided in UUID
+			// create new export(s)
+			log.Info("No S3 buckets defined for SVM: " + uuid + " - creating S3 bucket(s)")
+		}
+
+		for i, val := range svmCR.Spec.S3Config.Buckets {
+
+			createBucket := true
+			currentBucket := val
+
+			for j := 0; i < bucketsRetrieved.NumRecords; j++ {
+
+				if currentBucket.Name == bucketsRetrieved.Records[i].Name {
+					createBucket = false
+				}
+			}
+
+			if createBucket {
+				var newBucket ontap.S3Bucket
+				newBucket.Name = currentBucket.Name
+				if currentBucket.Type != "" {
+					newBucket.Type = currentBucket.Type
+				} else {
+					newBucket.Type = "s3" //magic word
+				}
+
+				if currentBucket.Size != 0 {
+					newBucket.Size = currentBucket.Size
+				} else {
+					newBucket.Size = 81000000 //magic word - 81MB
+				}
+
+				newBucket.Comment = currentBucket.Comment
+
+				jsonPayload, err := json.Marshal(newBucket)
+				if err != nil {
+					//error creating the json body
+					log.Error(err, fmt.Sprintf("Error creating the json payload for S3 bucket %v", newBucket.Name))
+					return err
+				}
+
+				log.Info("S3 bucket creation attempt: " + newBucket.Name)
+				_, err = oc.CreateS3Bucket(uuid, jsonPayload)
+				if err != nil {
+					log.Error(err, fmt.Sprintf("Error occurred when creating S3 bucket: %v", newBucket.Name))
+					return err
+				}
+			}
+		}
+		_ = r.setConditionS3Bucket(ctx, svmCR, CONDITION_STATUS_TRUE)
+		r.Recorder.Event(svmCR, "Normal", "S3BucketSucceeded", "Created S3 bucket(s) successfully")
+	}
+
+	//END S3 BUCKETS
 
 	return nil
 }
@@ -462,6 +535,30 @@ func (reconciler *StorageVirtualMachineReconciler) setConditionS3Cert(ctx contex
 	if status == CONDITION_STATUS_FALSE {
 		return appendCondition(ctx, reconciler.Client, svmCR, CONDITION_TYPE_S3_SERVICE, status,
 			CONDITION_REASON_S3_CERT, CONDITION_MESSAGE_S3_CERT_FALSE)
+	}
+	return nil
+}
+
+const CONDITION_REASON_S3_BUCKET = "S3bucket"
+const CONDITION_MESSAGE_S3_BUCKET_TRUE = "S3 bucket configuration succeeded"
+const CONDITION_MESSAGE_S3_BUCKET_FALSE = "S3 bucket configuration failed"
+
+func (reconciler *StorageVirtualMachineReconciler) setConditionS3Bucket(ctx context.Context,
+	svmCR *gateway.StorageVirtualMachine, status metav1.ConditionStatus) error {
+
+	// I don't want to delete old references to updates to make a history
+	// if reconciler.containsCondition(ctx, svmCR, CONDITION_REASON_S3_LIF) {
+	// 	reconciler.deleteCondition(ctx, svmCR, CONDITION_TYPE_S3_SERVICE, CONDITION_REASON_S3_LIF)
+	// }
+
+	if status == CONDITION_STATUS_TRUE {
+		return appendCondition(ctx, reconciler.Client, svmCR, CONDITION_TYPE_S3_SERVICE, status,
+			CONDITION_REASON_S3_BUCKET, CONDITION_MESSAGE_S3_BUCKET_TRUE)
+	}
+
+	if status == CONDITION_STATUS_FALSE {
+		return appendCondition(ctx, reconciler.Client, svmCR, CONDITION_TYPE_S3_SERVICE, status,
+			CONDITION_REASON_S3_BUCKET, CONDITION_MESSAGE_S3_BUCKET_FALSE)
 	}
 	return nil
 }

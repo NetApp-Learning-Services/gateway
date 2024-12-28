@@ -20,16 +20,35 @@ type S3Service struct {
 	Name           string   `json:"name"`
 }
 
-type UserResponse struct {
-	BaseResponse
-	Records []S3User `json:"records,omitempty"`
-}
-
 type S3User struct {
 	Name      string `json:"name,omitempty"`
 	Svm       SvmRef `json:"svm,omitempty"`
 	AccessKey string `json:"access_key,omitempty"`
 	SecretKey string `json:"secret_key,omitempty"`
+}
+
+type S3UsersResponse struct {
+	BaseResponse
+	Records []S3User `json:"records,omitempty"`
+}
+
+type S3Bucket struct {
+	Name    string `json:"name,omitempty"`
+	Svm     SvmRef `json:"svm,omitempty"`
+	Size    int    `json:"size,omitempty"`
+	Type    string `json:"type,omitempty"`
+	Comment string `json:"comment,omitempty"`
+	Uuid    string `json:"uuid,omitempty"`
+}
+
+type S3BucketsResponse struct {
+	BaseResponse
+	Records []S3Bucket `json:"records,omitempty"`
+}
+
+type S3BucketJobResponse struct {
+	JobResponse
+	Uuid string `json:"uuid,omitempty"`
 }
 
 const returnS3Qs string = "?return_records=true"
@@ -58,7 +77,6 @@ func (c *Client) CreateS3Service(jsonPayload []byte) (err error) {
 	uri := "/api/protocols/s3/services" + returnS3Qs
 	_, err = c.clientPost(uri, jsonPayload)
 	if err != nil {
-		//fmt.Println("Error: " + err.Error())
 		return &apiError{1, err.Error()}
 	}
 
@@ -115,22 +133,20 @@ func (c *Client) CreateS3ServicePolicy(jsonPayload []byte) (err error) {
 	uri := "/api/network/ip/service-policies"
 	_, err = c.clientPost(uri, jsonPayload)
 	if err != nil {
-		//fmt.Println("Error: " + err.Error())
 		return &apiError{1, err.Error()}
 	}
 	return nil
 }
 
-func (c *Client) CreateS3User(uuid string, jsonPayload []byte) (users UserResponse, err error) {
+func (c *Client) GetS3UsersBySvmUuid(uuid string) (users S3UsersResponse, err error) {
 	uri := "/api/protocols/s3/services/" + uuid + "/users"
 
-	data, err := c.clientPost(uri, jsonPayload)
+	data, err := c.clientGet(uri)
 	if err != nil {
-		//fmt.Println("Error: " + err.Error())
 		return users, &apiError{1, err.Error()}
 	}
 
-	var resp UserResponse
+	var resp S3UsersResponse
 	err = json.Unmarshal(data, &resp)
 	if err != nil {
 		return resp, &apiError{2, err.Error()}
@@ -139,15 +155,15 @@ func (c *Client) CreateS3User(uuid string, jsonPayload []byte) (users UserRespon
 	return resp, nil
 }
 
-func (c *Client) GetS3UsersBySvmUuid(uuid string) (users UserResponse, err error) {
+func (c *Client) CreateS3User(uuid string, jsonPayload []byte) (users S3UsersResponse, err error) {
 	uri := "/api/protocols/s3/services/" + uuid + "/users"
 
-	data, err := c.clientGet(uri)
+	data, err := c.clientPost(uri, jsonPayload)
 	if err != nil {
 		return users, &apiError{1, err.Error()}
 	}
 
-	var resp UserResponse
+	var resp S3UsersResponse
 	err = json.Unmarshal(data, &resp)
 	if err != nil {
 		return resp, &apiError{2, err.Error()}
@@ -158,6 +174,51 @@ func (c *Client) GetS3UsersBySvmUuid(uuid string) (users UserResponse, err error
 
 func (c *Client) DeleteS3User(uuid string, name string) (err error) {
 	uri := "/api/protocols/s3/services/" + uuid + "/users/" + name
+
+	_, err = c.clientDelete(uri)
+	if err != nil {
+		return &apiError{1, err.Error()}
+	}
+
+	return nil
+}
+
+func (c *Client) GetS3BucketsBySvmUuid(uuid string) (users S3BucketsResponse, err error) {
+	uri := "/api/protocols/s3/services/" + uuid + "/buckets"
+
+	data, err := c.clientGet(uri)
+	if err != nil {
+		return users, &apiError{1, err.Error()}
+	}
+
+	var resp S3BucketsResponse
+	err = json.Unmarshal(data, &resp)
+	if err != nil {
+		return resp, &apiError{2, err.Error()}
+	}
+
+	return resp, nil
+}
+
+func (c *Client) CreateS3Bucket(uuid string, jsonPayload []byte) (users S3BucketJobResponse, err error) {
+	uri := "/api/protocols/s3/services/" + uuid + "/buckets"
+
+	data, err := c.clientPost(uri, jsonPayload)
+	if err != nil {
+		return users, &apiError{1, err.Error()}
+	}
+
+	var resp S3BucketJobResponse
+	err = json.Unmarshal(data, &resp)
+	if err != nil {
+		return resp, &apiError{2, err.Error()}
+	}
+
+	return resp, nil
+}
+
+func (c *Client) DeleteS3Bucket(uuid string, name string) (err error) {
+	uri := "/api/protocols/s3/services/" + uuid + "/buckets/" + name
 
 	_, err = c.clientDelete(uri)
 	if err != nil {
