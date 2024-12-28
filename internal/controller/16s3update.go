@@ -383,13 +383,17 @@ func (r *StorageVirtualMachineReconciler) reconcileS3Update(ctx context.Context,
 					newBucket.Type = "s3" //magic word
 				}
 
-				if currentBucket.Size != 0 {
+				if currentBucket.Size > 102005473280 {
 					newBucket.Size = currentBucket.Size
 				} else {
-					newBucket.Size = 81000000 //magic word - 81MB
+					newBucket.Size = 102005473280 //magic word - 95GiB
 				}
 
-				newBucket.Comment = currentBucket.Comment
+				if currentBucket.Comment != "" {
+					newBucket.Comment = currentBucket.Comment
+				} else {
+					newBucket.Comment = "Gateway created" //magic word
+				}
 
 				jsonPayload, err := json.Marshal(newBucket)
 				if err != nil {
@@ -399,7 +403,7 @@ func (r *StorageVirtualMachineReconciler) reconcileS3Update(ctx context.Context,
 				}
 
 				log.Info("S3 bucket creation attempt: " + newBucket.Name)
-				_, err = oc.CreateS3Bucket(uuid, jsonPayload)
+				err = oc.CreateS3Bucket(uuid, jsonPayload)
 				if err != nil {
 					log.Error(err, fmt.Sprintf("Error occurred when creating S3 bucket: %v", newBucket.Name))
 					return err

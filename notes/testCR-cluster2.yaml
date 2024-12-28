@@ -30,6 +30,7 @@ spec:
   debug: true
   aggregates:
   - name: Cluster2_01_FC_1
+  - name: Cluster2_01_FC_2
   management:
     name: manage1
     ip: 192.168.0.40
@@ -66,8 +67,7 @@ spec:
       homeNode: Cluster2-01
     buckets:
     - name: tp-dst
-      allowed: true
-      size: 80000000
+      size: 102005473280
       type: s3
   iscsi:
     enabled: true

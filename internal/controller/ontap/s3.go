@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"strings"
+	"time"
 
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime/schema"
@@ -200,21 +201,36 @@ func (c *Client) GetS3BucketsBySvmUuid(uuid string) (users S3BucketsResponse, er
 	return resp, nil
 }
 
-func (c *Client) CreateS3Bucket(uuid string, jsonPayload []byte) (users S3BucketJobResponse, err error) {
+func (c *Client) CreateS3Bucket(uuid string, jsonPayload []byte) (err error) {
 	uri := "/api/protocols/s3/services/" + uuid + "/buckets"
 
 	data, err := c.clientPost(uri, jsonPayload)
 	if err != nil {
-		return users, &apiError{1, err.Error()}
+		return &apiError{1, err.Error()}
 	}
 
-	var resp S3BucketJobResponse
-	err = json.Unmarshal(data, &resp)
-	if err != nil {
-		return resp, &apiError{2, err.Error()}
+	var result JobResponse
+	json.Unmarshal(data, &result)
+
+	url := result.Job.Selflink.Self.Href
+
+	createJob, _ := c.GetJob(url)
+
+	for createJob.State == "running" {
+		time.Sleep(time.Second * 2)
+		createJob, _ = c.GetJob(url)
 	}
 
-	return resp, nil
+	if createJob.State == "failure" {
+		return &apiError{int64(createJob.Code), createJob.Message}
+	}
+
+	if createJob.State == "success" {
+		//_, err = ParseUUID(createJob.Description, "/")
+		return err
+	}
+
+	return nil
 }
 
 func (c *Client) DeleteS3Bucket(uuid string, name string) (err error) {
