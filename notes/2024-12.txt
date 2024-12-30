@@ -129,9 +129,9 @@ TESTING THE OPERATOR
 
 21. v1beta2 code requires the creation of a Kubernetes secret - so updating storagevirtualmachine_controller.go 
 
-22. reorganized StorageVirtualMachine kind to a sub folder under internal/controller
+22. Reorganized StorageVirtualMachine kind to a sub folder under internal/controller
 
-23. in main.go, rename controller to svmcontroller and modified path to internal/controller/storagevirtualmachine
+23. In main.go, rename controller to svmcontroller and modified path to internal/controller/storagevirtualmachine
 
-24. Create a new king StorageVirtualMachineMirrorRelationship:  operator-sdk create api --group gateway --version v1beta2 --kind StorageVirtualMachineMirrorRelationship --resource --controller
+24. Added peer subspec
 

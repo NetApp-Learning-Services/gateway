@@ -1,7 +1,0 @@
-apiVersion: gateway.netapp.com/v1beta2
-kind: StorageVirtualMachineMirror
-metadata:
-  name: mirrorSvmSrcSvmDst
-  namespace: gateway-system
-spec:
-  name: 
