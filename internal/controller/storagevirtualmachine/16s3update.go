@@ -206,7 +206,7 @@ func (r *StorageVirtualMachineReconciler) reconcileS3Update(ctx context.Context,
 			// if lifs.Records[index] is out of index - if so, need to create LIF
 			if createS3Lifs || index > lifs.NumRecords-1 {
 				// Need to create LIF for val
-				err = CreateLif(val, S3LifServicePolicy, uuid, oc, log)
+				err = CreateLif(val, S3LifServicePolicy, S3LifServicePolicyScope, uuid, oc, log)
 				if err != nil {
 					_ = r.setConditionS3Lif(ctx, svmCR, CONDITION_STATUS_FALSE)
 					r.Recorder.Event(svmCR, "Warning", "S3CreationLifFailed", "Error: "+err.Error())

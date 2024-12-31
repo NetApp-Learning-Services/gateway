@@ -4,10 +4,12 @@ type S3SubSpec struct {
 
 	// Provides required S3 enablement
 	// +kubebuilder:validation:Required
+	// +kubebuilder:validation:Enum="true";"false"
 	Enabled bool `json:"enabled"`
 
 	// Provides required S3 server name
 	// +kubebuilder:validation:Required
+	// +kubebuilder:validation:Format:=string
 	Name string `json:"name"`
 
 	// Provides optional S3 LIFs
@@ -34,6 +36,7 @@ type S3SubSpec struct {
 type S3User struct {
 	// Provides required user name
 	// +kubebuilder:validation:Required
+	// +kubebuilder:validation:Format:=string
 	Name string `json:"name"`
 
 	// Provides optional namespace
@@ -70,20 +73,24 @@ type S3Https struct {
 type Certificate struct {
 	// Provides required S3 certificate common name
 	// +kubebuilder:validation:Required
+	// +kubebuilder:validation:Format:=string
 	CommonName string `json:"commonName"`
 
 	// Provides required S3 certificate type
 	// +kubebuilder:validation:Required
+	// +kubebuilder:validation:Format:=string
 	Type string `json:"type"`
 
 	// Provides required S3 certificate expiry_date
 	// +kubebuilder:validation:Required
+	// +kubebuilder:validation:Format:=string
 	ExpiryTime string `json:"expiryTime"`
 }
 
 type S3Bucket struct {
 	// Provides required S3 bucket name
 	// +kubebuilder:validation:Required
+	// +kubebuilder:validation:Format:=string
 	Name string `json:"name"`
 
 	// Provides optional S3 bucket size
@@ -92,9 +99,11 @@ type S3Bucket struct {
 
 	// Provides optional S3 bucket comment
 	// +kubebuilder:validation:Optional
+	// +kubebuilder:validation:Format:=string
 	Comment string `json:"comment,omitempty"`
 
 	// Provides optional S3 bucket type
 	// +kubebuilder:validation:Optional
+	// +kubebuilder:validation:Format:=string
 	Type string `json:"type,omitempty"`
 }

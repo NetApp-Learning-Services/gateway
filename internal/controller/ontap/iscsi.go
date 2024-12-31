@@ -19,7 +19,7 @@ type IscsiTarget struct {
 	Alias string `json:"alias,omitempty"`
 }
 
-const returnIscsiQs string = "?return_records=true"
+const returnIscsiRecords string = "?return_records=true"
 
 func (c *Client) GetIscsiServiceBySvmUuid(uuid string) (iscsiService IscsiService, err error) {
 	uri := "/api/protocols/san/iscsi/services/" + uuid
@@ -42,7 +42,7 @@ func (c *Client) GetIscsiServiceBySvmUuid(uuid string) (iscsiService IscsiServic
 }
 
 func (c *Client) CreateIscsiService(jsonPayload []byte) (err error) {
-	uri := "/api/protocols/san/iscsi/services" + returnIscsiQs
+	uri := "/api/protocols/san/iscsi/services" + returnIscsiRecords
 	_, err = c.clientPost(uri, jsonPayload)
 	if err != nil {
 		//fmt.Println("Error: " + err.Error())
@@ -82,7 +82,7 @@ func (c *Client) DeleteIscsiService(uuid string) (err error) {
 }
 
 func (c *Client) GetIscsiInterfacesBySvmUuid(uuid string, servicePolicy string) (lifs IpInterfacesResponse, err error) {
-	uri := "/api/network/ip/interfaces" + qs + "&service_policy.name=" + servicePolicy + "&svm.uuid=" + uuid
+	uri := "/api/network/ip/interfaces" + returnNFSRecords + "&service_policy.name=" + servicePolicy + "&svm.uuid=" + uuid
 
 	data, err := c.clientGet(uri)
 	if err != nil {

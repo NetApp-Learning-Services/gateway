@@ -109,13 +109,13 @@ spec:
   peer:
     name: cluster1-cluster2
     passphrase: specialphrase
-    encryption: true
+    encryption: tls-psk
     applications: 
-    - app: SnapMirror
+    - app: snapmirror
     remote:
       ipAddresses: 
       - ip: 192.168.0.115
-      name: Cluster2
+      clusterName: Cluster2
     interfaces:
     - name: intercluster1
       ip: 192.168.0.110

@@ -52,7 +52,7 @@ type S3BucketJobResponse struct {
 	Uuid string `json:"uuid,omitempty"`
 }
 
-const returnS3Qs string = "?return_records=true"
+const returnS3Records string = "?return_records=true"
 
 func (c *Client) GetS3ServiceBySvmUuid(uuid string) (s3Service S3Service, err error) {
 	uri := "/api/protocols/s3/services/" + uuid
@@ -75,7 +75,7 @@ func (c *Client) GetS3ServiceBySvmUuid(uuid string) (s3Service S3Service, err er
 }
 
 func (c *Client) CreateS3Service(jsonPayload []byte) (err error) {
-	uri := "/api/protocols/s3/services" + returnS3Qs
+	uri := "/api/protocols/s3/services" + returnS3Records
 	_, err = c.clientPost(uri, jsonPayload)
 	if err != nil {
 		return &apiError{1, err.Error()}
@@ -114,7 +114,7 @@ func (c *Client) DeleteS3Service(uuid string) (err error) {
 }
 
 func (c *Client) GetS3InterfacesBySvmUuid(uuid string, servicePolicy string) (lifs IpInterfacesResponse, err error) {
-	uri := "/api/network/ip/interfaces" + qs + "&service_policy.name=" + servicePolicy + "&svm.uuid=" + uuid
+	uri := "/api/network/ip/interfaces" + returnNFSRecords + "&service_policy.name=" + servicePolicy + "&svm.uuid=" + uuid
 
 	data, err := c.clientGet(uri)
 	if err != nil {

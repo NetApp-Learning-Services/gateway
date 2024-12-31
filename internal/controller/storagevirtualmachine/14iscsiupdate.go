@@ -138,30 +138,30 @@ func (r *StorageVirtualMachineReconciler) reconcileIscsiUpdate(ctx context.Conte
 	// Check to see if cluster version is less than 9.10 and assign the correct
 	// LIF service policy
 
-	var IscsiLifType string
+	var IscsiLifServicePolicy string
 	cluster, err := oc.GetCluster()
 
 	if err != nil {
 		log.Error(err, "Error getting cluster version")
-		IscsiLifType = Iscsi909ServicePolicy
+		IscsiLifServicePolicy = Iscsi909ServicePolicy
 	} else {
 		if cluster.Version.Generation > 8 {
 			if cluster.Version.Major > 9 {
-				IscsiLifType = Iscsi910ServicePolicy
+				IscsiLifServicePolicy = Iscsi910ServicePolicy
 			} else {
-				IscsiLifType = Iscsi909ServicePolicy
+				IscsiLifServicePolicy = Iscsi909ServicePolicy
 			}
 		} else {
-			IscsiLifType = Iscsi909ServicePolicy
+			IscsiLifServicePolicy = Iscsi909ServicePolicy
 		}
 	}
 
-	log.Info("Using iSCSI LIF service policy as: " + IscsiLifType)
+	log.Info("Using iSCSI LIF service policy as: " + IscsiLifServicePolicy)
 
 	createIscsiLifs := false
 
 	// Check to see if iSCSI interfaces defined and compare to custom resource's definitions
-	lifs, err := oc.GetIscsiInterfacesBySvmUuid(uuid, IscsiLifType)
+	lifs, err := oc.GetIscsiInterfacesBySvmUuid(uuid, IscsiLifServicePolicy)
 	if err != nil {
 		//error creating the json body
 		log.Error(err, "Error getting iSCSI service LIFs for SVM: "+uuid)
@@ -182,7 +182,7 @@ func (r *StorageVirtualMachineReconciler) reconcileIscsiUpdate(ctx context.Conte
 		// if lifs.Records[index] is out of index - if so, need to create LIF
 		if createIscsiLifs || index > lifs.NumRecords-1 {
 			// Need to create LIF for val
-			err = CreateLif(val, IscsiLifType, uuid, oc, log)
+			err = CreateLif(val, IscsiLifServicePolicy, IscsiLifServicePolicyScope, uuid, oc, log)
 			if err != nil {
 				_ = r.setConditionIscsiLif(ctx, svmCR, CONDITION_STATUS_FALSE)
 				r.Recorder.Event(svmCR, "Warning", "IscsiCreationLifFailed", "Error: "+err.Error())
@@ -197,7 +197,7 @@ func (r *StorageVirtualMachineReconciler) reconcileIscsiUpdate(ctx context.Conte
 				break
 			}
 
-			err = UpdateLif(val, lifs.Records[index], IscsiLifType, oc, log)
+			err = UpdateLif(val, lifs.Records[index], IscsiLifServicePolicy, oc, log)
 			if err != nil {
 				_ = r.setConditionIscsiLif(ctx, svmCR, CONDITION_STATUS_FALSE)
 				r.Recorder.Event(svmCR, "Warning", "IscsiUpdateLifFailed", "Error: "+err.Error())

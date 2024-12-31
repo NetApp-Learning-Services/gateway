@@ -84,6 +84,23 @@ func (c *Client) GetIpInterfacesBySvmUuid(uuid string) (lifs IpInterfacesRespons
 	return resp, nil
 }
 
+func (c *Client) GetIpInterfacesByServicePolicy(servicePolicy string) (lifs IpInterfacesResponse, err error) {
+	uri := "/api/network/ip/interfaces?service_policy.name=" + servicePolicy
+
+	data, err := c.clientGet(uri)
+	if err != nil {
+		return lifs, &apiError{1, err.Error()}
+	}
+
+	var resp IpInterfacesResponse
+	err = json.Unmarshal(data, &resp)
+	if err != nil {
+		return resp, &apiError{2, err.Error()}
+	}
+
+	return resp, nil
+}
+
 func (c *Client) GetIpInterfaceByLifUuid(uuid string) (lif IpInterface, err error) {
 	uri := "/api/network/ip/interfaces/" + uuid
 

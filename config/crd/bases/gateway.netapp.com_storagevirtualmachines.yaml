@@ -1676,6 +1676,102 @@ spec:
                 required:
                 - enabled
                 type: object
+              peer:
+                description: Provide optional SVM peering configuration
+                properties:
+                  applications:
+                    description: Provides optional peer applications
+                    items:
+                      properties:
+                        app:
+                          description: Provides required peering application
+                          enum:
+                          - snapmirror
+                          - flexcache
+                          type: string
+                      required:
+                      - app
+                      type: object
+                    type: array
+                  encryption:
+                    default: tls-psk
+                    description: Provides required peering encryption
+                    enum:
+                    - none
+                    - tls-psk
+                    type: string
+                  interfaces:
+                    description: Provides optional intercluster LIFs
+                    items:
+                      description: LIF contains parameters regarding the SVM's LIFs
+                      properties:
+                        broadcastDomain:
+                          description: Provides LIF broadcast domain
+                          format: string
+                          type: string
+                        homeNode:
+                          description: Provides LIF home node
+                          format: string
+                          type: string
+                        ip:
+                          description: Provides LIF IP address
+                          pattern: ((^\s*((([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5]))\s*$)|(^\s*((([0-9A-Fa-f]{1,4}:){7}([0-9A-Fa-f]{1,4}|:))|(([0-9A-Fa-f]{1,4}:){6}(:[0-9A-Fa-f]{1,4}|((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3})|:))|(([0-9A-Fa-f]{1,4}:){5}(((:[0-9A-Fa-f]{1,4}){1,2})|:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3})|:))|(([0-9A-Fa-f]{1,4}:){4}(((:[0-9A-Fa-f]{1,4}){1,3})|((:[0-9A-Fa-f]{1,4})?:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){3}(((:[0-9A-Fa-f]{1,4}){1,4})|((:[0-9A-Fa-f]{1,4}){0,2}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){2}(((:[0-9A-Fa-f]{1,4}){1,5})|((:[0-9A-Fa-f]{1,4}){0,3}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){1}(((:[0-9A-Fa-f]{1,4}){1,6})|((:[0-9A-Fa-f]{1,4}){0,4}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(:(((:[0-9A-Fa-f]{1,4}){1,7})|((:[0-9A-Fa-f]{1,4}){0,5}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:)))(%.+)?\s*$))
+                          type: string
+                        name:
+                          description: Provides LIF name
+                          format: string
+                          type: string
+                        netmask:
+                          description: Provides LIF netmask
+                          pattern: ((^\s*((([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5]))\s*$)|(^\s*((([0-9A-Fa-f]{1,4}:){7}([0-9A-Fa-f]{1,4}|:))|(([0-9A-Fa-f]{1,4}:){6}(:[0-9A-Fa-f]{1,4}|((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3})|:))|(([0-9A-Fa-f]{1,4}:){5}(((:[0-9A-Fa-f]{1,4}){1,2})|:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3})|:))|(([0-9A-Fa-f]{1,4}:){4}(((:[0-9A-Fa-f]{1,4}){1,3})|((:[0-9A-Fa-f]{1,4})?:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){3}(((:[0-9A-Fa-f]{1,4}){1,4})|((:[0-9A-Fa-f]{1,4}){0,2}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){2}(((:[0-9A-Fa-f]{1,4}){1,5})|((:[0-9A-Fa-f]{1,4}){0,3}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){1}(((:[0-9A-Fa-f]{1,4}){1,6})|((:[0-9A-Fa-f]{1,4}){0,4}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(:(((:[0-9A-Fa-f]{1,4}){1,7})|((:[0-9A-Fa-f]{1,4}){0,5}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:)))(%.+)?\s*$))
+                          type: string
+                      required:
+                      - broadcastDomain
+                      - homeNode
+                      - ip
+                      - name
+                      - netmask
+                      type: object
+                    type: array
+                  name:
+                    description: Provides required peering relationship name
+                    format: string
+                    type: string
+                  passphrase:
+                    description: Provides required peering relationship passphrase
+                    format: string
+                    type: string
+                  remote:
+                    description: Provides optional remote peer cluster
+                    properties:
+                      clusterName:
+                        description: Provides required remote cluster name
+                        format: string
+                        type: string
+                      ipAddresses:
+                        description: Provides required remote cluster intercluster
+                          LIF(s)
+                        items:
+                          properties:
+                            ip:
+                              description: Provides Remote cluster intercluster IP
+                                address
+                              pattern: ((^\s*((([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5]))\s*$)|(^\s*((([0-9A-Fa-f]{1,4}:){7}([0-9A-Fa-f]{1,4}|:))|(([0-9A-Fa-f]{1,4}:){6}(:[0-9A-Fa-f]{1,4}|((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3})|:))|(([0-9A-Fa-f]{1,4}:){5}(((:[0-9A-Fa-f]{1,4}){1,2})|:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3})|:))|(([0-9A-Fa-f]{1,4}:){4}(((:[0-9A-Fa-f]{1,4}){1,3})|((:[0-9A-Fa-f]{1,4})?:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){3}(((:[0-9A-Fa-f]{1,4}){1,4})|((:[0-9A-Fa-f]{1,4}){0,2}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){2}(((:[0-9A-Fa-f]{1,4}){1,5})|((:[0-9A-Fa-f]{1,4}){0,3}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){1}(((:[0-9A-Fa-f]{1,4}){1,6})|((:[0-9A-Fa-f]{1,4}){0,4}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(:(((:[0-9A-Fa-f]{1,4}){1,7})|((:[0-9A-Fa-f]{1,4}){0,5}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:)))(%.+)?\s*$))
+                              type: string
+                          required:
+                          - ip
+                          type: object
+                        minItems: 1
+                        type: array
+                    required:
+                    - clusterName
+                    - ipAddresses
+                    type: object
+                required:
+                - encryption
+                - name
+                - passphrase
+                type: object
               s3:
                 description: Provide optional S3 configuration
                 properties:
@@ -1685,15 +1781,18 @@ spec:
                       properties:
                         comment:
                           description: Provides optional S3 bucket comment
+                          format: string
                           type: string
                         name:
                           description: Provides required S3 bucket name
+                          format: string
                           type: string
                         size:
                           description: Provides optional S3 bucket size
                           type: integer
                         type:
                           description: Provides optional S3 bucket type
+                          format: string
                           type: string
                       required:
                       - name
@@ -1701,6 +1800,9 @@ spec:
                     type: array
                   enabled:
                     description: Provides required S3 enablement
+                    enum:
+                    - "true"
+                    - "false"
                     type: boolean
                   http:
                     description: Provides optional S3 Http definition
@@ -1724,12 +1826,15 @@ spec:
                         properties:
                           commonName:
                             description: Provides required S3 certificate common name
+                            format: string
                             type: string
                           expiryTime:
                             description: Provides required S3 certificate expiry_date
+                            format: string
                             type: string
                           type:
                             description: Provides required S3 certificate type
+                            format: string
                             type: string
                         required:
                         - commonName
@@ -1783,6 +1888,7 @@ spec:
                     type: array
                   name:
                     description: Provides required S3 server name
+                    format: string
                     type: string
                   users:
                     description: Provides optional S3 user definition
@@ -1790,6 +1896,7 @@ spec:
                       properties:
                         name:
                           description: Provides required user name
+                          format: string
                           type: string
                         namespace:
                           description: Provides optional namespace

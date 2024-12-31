@@ -159,7 +159,7 @@ func (r *StorageVirtualMachineReconciler) reconcileNfsUpdate(ctx context.Context
 		if createNfsLifs {
 			//creating lifs
 			for _, val := range svmCR.Spec.NfsConfig.Lifs {
-				err = CreateLif(val, NfsLifServicePolicy, uuid, oc, log)
+				err = CreateLif(val, NfsLifServicePolicy, NfsLifServicePolicyScope, uuid, oc, log)
 				if err != nil {
 					_ = r.setConditionNfsLif(ctx, svmCR, CONDITION_STATUS_FALSE)
 					return err
@@ -173,7 +173,7 @@ func (r *StorageVirtualMachineReconciler) reconcileNfsUpdate(ctx context.Context
 				// Check to see if lifs.Records[index] is out of index - if so, need to create LIF
 				if index > lifs.NumRecords-1 {
 					// Need to create LIF for val
-					err = CreateLif(val, NfsLifServicePolicy, uuid, oc, log)
+					err = CreateLif(val, NfsLifServicePolicy, NfsLifServicePolicyScope, uuid, oc, log)
 					if err != nil {
 						_ = r.setConditionNfsLif(ctx, svmCR, CONDITION_STATUS_FALSE)
 						r.Recorder.Event(svmCR, "Warning", "NfsCreationLifFailed", "Error: "+err.Error())

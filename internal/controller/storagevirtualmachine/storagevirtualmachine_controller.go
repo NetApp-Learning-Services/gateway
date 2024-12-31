@@ -227,6 +227,13 @@ func (r *StorageVirtualMachineReconciler) Reconcile(ctx context.Context, req ctr
 			if err != nil {
 				return ctrl.Result{RequeueAfter: 30 * time.Second}, err
 			}
+
+			// STEP 17
+			// Reconcile Peer information
+			err = r.reconcilePeerUpdate(ctx, svmCR, svmRetrieved.Uuid, oc, log)
+			if err != nil {
+				return ctrl.Result{RequeueAfter: 30 * time.Second}, err
+			}
 		}
 
 	}

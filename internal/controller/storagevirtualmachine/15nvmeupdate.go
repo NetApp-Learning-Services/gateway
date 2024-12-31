@@ -145,7 +145,7 @@ func (r *StorageVirtualMachineReconciler) reconcileNvmeUpdate(ctx context.Contex
 		// if lifs.Records[index] is out of index - if so, need to create LIF
 		if createNvmeLifs || index > lifs.NumRecords-1 {
 			// Need to create LIF for val
-			err = CreateLif(val, NvmeLifServicePolicy, uuid, oc, log)
+			err = CreateLif(val, NvmeLifServicePolicy, NvmeLifServicePolicyScope, uuid, oc, log)
 			if err != nil {
 				_ = r.setConditionNvmeLif(ctx, svmCR, CONDITION_STATUS_FALSE)
 				r.Recorder.Event(svmCR, "Warning", "NvmeCreationLifFailed", "Error: "+err.Error())

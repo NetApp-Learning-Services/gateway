@@ -27,9 +27,6 @@ const (
 	DeletionPolicyDelete DeletionPolicy = "Delete"
 )
 
-// EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
-// NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
-
 // StorageVirtualMachineSpec defines the desired state of StorageVirtualMachine
 type StorageVirtualMachineSpec struct {
 	// Provides required SVM name
@@ -92,6 +89,10 @@ type StorageVirtualMachineSpec struct {
 	// Provide optional S3 configuration
 	// +kubebuilder:validation:Optional
 	S3Config *S3SubSpec `json:"s3,omitempty"`
+
+	// Provide optional SVM peering configuration
+	// +kubebuilder:validation:Optional
+	PeerConfig *PeerSubSpec `json:"peer,omitempty"`
 }
 
 // StorageVirtualMachineStatus defines the observed state of StorageVirtualMachine
