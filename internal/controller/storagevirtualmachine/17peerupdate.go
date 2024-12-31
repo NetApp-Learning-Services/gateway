@@ -142,6 +142,13 @@ func (r *StorageVirtualMachineReconciler) reconcilePeerUpdate(ctx context.Contex
 		for _, val := range svmCR.Spec.PeerConfig.Remote.Ipaddresses {
 			upsertPeerService.Remote.Addresses = append(upsertPeerService.Remote.Addresses, val.IPAddress)
 		}
+		var localSVM ontap.SvmRef
+		localSVM.Name = svmCR.Spec.SvmName
+		if svmCR.Spec.SvmUuid != "" {
+			localSVM.Uuid = svmCR.Spec.SvmUuid
+		}
+
+		upsertPeerService.InitialAllowedSVMs = append(upsertPeerService.InitialAllowedSVMs, localSVM)
 
 		jsonPayload, err := json.Marshal(upsertPeerService)
 		if err != nil {
