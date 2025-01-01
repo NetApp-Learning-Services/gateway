@@ -23,6 +23,7 @@ type IpInterface struct {
 	Scope         string        `json:"scope,omitempty"`
 	Enabled       bool          `json:"enabled,omitempty"`
 	Svm           SvmRef        `json:"svm,omitempty"`
+	Ipspace       Ref           `json:"ipspace,omitempty"`
 }
 
 type Ip struct {

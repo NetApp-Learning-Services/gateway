@@ -114,16 +114,17 @@ spec:
     - app: snapmirror
     remote:
       ipAddresses: 
-      - ip: 192.168.0.111
-      clusterName: Cluster1
+      - ip: 192.168.0.131
     interfaces:
     - name: intercluster1
-      ip: 192.168.0.115
+      ip: 192.168.0.135
       netmask: 255.255.255.0
       broadcastDomain: Default
       homeNode: Cluster2-01
+      ipspace: Default
     - name: intercluster2
-      ip: 192.168.0.116
+      ip: 192.168.0.136
       netmask: 255.255.255.0
       broadcastDomain: Default
       homeNode: Cluster2-01
+      ipspace: Default

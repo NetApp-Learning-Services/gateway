@@ -4,7 +4,6 @@ type S3SubSpec struct {
 
 	// Provides required S3 enablement
 	// +kubebuilder:validation:Required
-	// +kubebuilder:validation:Enum="true";"false"
 	Enabled bool `json:"enabled"`
 
 	// Provides required S3 server name

@@ -19,7 +19,8 @@ type ClusterPeerService struct {
 }
 
 type PeerRemote struct {
-	Name      string   `json:"name"`
+	Name      string   `json:"name,omitempty"`
+	Uuid      string   `json:"uuid,omitempty"`
 	Addresses []string `json:"ip_addresses,omitempty"`
 }
 
@@ -46,8 +47,8 @@ type ClusterPeersResponse struct {
 
 const returnPeerRecords string = "?return_records=true"
 
-func (c *Client) GetClusterPeerServicesForCluster(clustername string) (clusterPeers ClusterPeersResponse, err error) {
-	uri := "/api/cluster/peers?remote.name=" + clustername
+func (c *Client) GetClusterPeerServicesForCluster(remoteIp string) (clusterPeers ClusterPeersResponse, err error) {
+	uri := "/api/cluster/peers?ip_address=" + remoteIp
 
 	data, err := c.clientGet(uri)
 	if err != nil {
@@ -68,7 +69,7 @@ func (c *Client) GetClusterPeerServicesForCluster(clustername string) (clusterPe
 }
 
 func (c *Client) CreateClusterPeerService(jsonPayload []byte) (err error) {
-	uri := "/api/cluster/peers" + returnPeerRecords
+	uri := "/api/cluster/peers"
 	_, err = c.clientPost(uri, jsonPayload)
 	if err != nil {
 		//fmt.Println("Error: " + err.Error())

@@ -54,7 +54,17 @@ func CreateLif(lifToCreate gateway.LIF, lifServicePolicy string, lifServicePolic
 	newLif.Location.HomeNode.Name = lifToCreate.HomeNode
 	newLif.ServicePolicy.Name = lifServicePolicy
 	newLif.Scope = lifServicePolicyScope
-	newLif.Svm.Uuid = uuid
+	if lifServicePolicyScope == "cluster" { //magic word
+		if lifToCreate.Ipspace != "" {
+			newLif.Ipspace.Name = lifToCreate.Ipspace
+		} else {
+			//required for cluster-scoped lifs
+			newLif.Ipspace.Name = "Default" //magic word
+		}
+	} else {
+		//scope is svm
+		newLif.Svm.Uuid = uuid
+	}
 
 	jsonPayload, err := json.Marshal(newLif)
 	if err != nil {

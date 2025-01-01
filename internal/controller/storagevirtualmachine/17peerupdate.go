@@ -122,7 +122,7 @@ func (r *StorageVirtualMachineReconciler) reconcilePeerUpdate(ctx context.Contex
 	establishedPeeringService := false
 	clusterPeerName := ""
 
-	clusterPeerServices, err := oc.GetClusterPeerServicesForCluster(svmCR.Spec.PeerConfig.Remote.Clustername)
+	clusterPeerServices, err := oc.GetClusterPeerServicesForCluster(svmCR.Spec.PeerConfig.Remote.Ipaddresses[0].IPAddress)
 	if err != nil && errors.IsNotFound(err) {
 		createPeeringService = true
 	} else if err != nil {
@@ -141,7 +141,6 @@ func (r *StorageVirtualMachineReconciler) reconcilePeerUpdate(ctx context.Contex
 		for _, val := range svmCR.Spec.PeerConfig.Applications {
 			upsertPeerService.Applications = append(upsertPeerService.Applications, val.App)
 		}
-		upsertPeerService.Remote.Name = svmCR.Spec.PeerConfig.Remote.Clustername
 		for _, val := range svmCR.Spec.PeerConfig.Remote.Ipaddresses {
 			upsertPeerService.Remote.Addresses = append(upsertPeerService.Remote.Addresses, val.IPAddress)
 		}
@@ -176,7 +175,7 @@ func (r *StorageVirtualMachineReconciler) reconcilePeerUpdate(ctx context.Contex
 
 	//Cluster Peering service already created
 
-	if clusterPeerServices.NumRecords != 0 && svmCR.Spec.PeerConfig.Remote.ClusterUuid == "" {
+	if clusterPeerServices.NumRecords != 0 && svmCR.Spec.PeerConfig.Remote.Clustername == "" {
 		//Check to see if peer state is available
 		for _, val := range clusterPeerServices.Records {
 			if val.Status.State == ClusterPeerAvailable {
@@ -186,7 +185,7 @@ func (r *StorageVirtualMachineReconciler) reconcilePeerUpdate(ctx context.Contex
 
 				//Aadd the remote cluster uuid to CR
 				patch := client.MergeFrom(svmCR.DeepCopy())
-				svmCR.Spec.PeerConfig.Remote.ClusterUuid = val.Uuid
+				svmCR.Spec.PeerConfig.Remote.Clustername = val.Remote.Name
 				err = r.Patch(ctx, svmCR, patch)
 				if err != nil {
 					log.Error(err, "Error patching the new cluster peer uuid in the custom resource - requeuing")

@@ -40,14 +40,9 @@ type PeerApplication struct {
 
 type PeerRemote struct {
 	// Provides required remote cluster name
-	// +kubebuilder:validation:Required
-	// +kubebuilder:validation:Format:=string
-	Clustername string `json:"clusterName"`
-
-	// Provides optional remote cluster uuid
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:validation:Format:=string
-	ClusterUuid string `json:"uuid,omitempty"`
+	Clustername string `json:"clusterName,omitempty"`
 
 	// Provides required remote cluster intercluster LIF(s)
 	// +kubebuilder:validation:Required

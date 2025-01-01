@@ -49,6 +49,11 @@ type LIF struct {
 	// +kubebuilder:validation:Format:=string
 	BroacastDomain string `json:"broadcastDomain"`
 
+	// Provides LIF optional ipspace - required for cluster-scoped LIFs
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:validation:Format:=string
+	Ipspace string `json:"ipspace,omitempty"`
+
 	// Provides LIF home node
 	// +kubebuilder:validation:Required
 	// +kubebuilder:validation:Format:=string
