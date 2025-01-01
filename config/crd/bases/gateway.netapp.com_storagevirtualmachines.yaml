@@ -1763,6 +1763,10 @@ spec:
                           type: object
                         minItems: 1
                         type: array
+                      uuid:
+                        description: Provides optional remote cluster uuid
+                        format: string
+                        type: string
                     required:
                     - clusterName
                     - ipAddresses

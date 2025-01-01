@@ -106,3 +106,24 @@ spec:
         ro: any
         superuser: any
         anon:  "65534"
+  peer:
+    name: cluster2-cluster1
+    passphrase: specialphrase
+    encryption: tls-psk
+    applications: 
+    - app: snapmirror
+    remote:
+      ipAddresses: 
+      - ip: 192.168.0.111
+      clusterName: Cluster1
+    interfaces:
+    - name: intercluster1
+      ip: 192.168.0.115
+      netmask: 255.255.255.0
+      broadcastDomain: Default
+      homeNode: Cluster2-01
+    - name: intercluster2
+      ip: 192.168.0.116
+      netmask: 255.255.255.0
+      broadcastDomain: Default
+      homeNode: Cluster2-01

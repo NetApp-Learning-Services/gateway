@@ -11,10 +11,12 @@ import (
 	"github.com/go-logr/logr"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 const InterclusterLifServicePolicy = "default-intercluster" //magic word
 const InterclusterLifServicePolicyScope = "cluster"         //magic word
+const ClusterPeerAvailable = "available"                    //magic word
 
 func (r *StorageVirtualMachineReconciler) reconcilePeerUpdate(ctx context.Context, svmCR *gateway.StorageVirtualMachine,
 	uuid string, oc *ontap.Client, log logr.Logger) error {
@@ -117,9 +119,10 @@ func (r *StorageVirtualMachineReconciler) reconcilePeerUpdate(ctx context.Contex
 	// CLUSTER PEERING SERVICE
 
 	createPeeringService := false
-	updatePeeringService := false
+	establishedPeeringService := false
+	clusterPeerName := ""
 
-	clusterPeerService, err := oc.GetS3ServiceBySvmUuid(uuid)
+	clusterPeerServices, err := oc.GetClusterPeerServicesForCluster(svmCR.Spec.PeerConfig.Remote.Clustername)
 	if err != nil && errors.IsNotFound(err) {
 		createPeeringService = true
 	} else if err != nil {
@@ -147,14 +150,13 @@ func (r *StorageVirtualMachineReconciler) reconcilePeerUpdate(ctx context.Contex
 		if svmCR.Spec.SvmUuid != "" {
 			localSVM.Uuid = svmCR.Spec.SvmUuid
 		}
-
 		upsertPeerService.InitialAllowedSVMs = append(upsertPeerService.InitialAllowedSVMs, localSVM)
 
 		jsonPayload, err := json.Marshal(upsertPeerService)
 		if err != nil {
 			//error creating the json body
 			log.Error(err, "Error creating the json payload for cluster peer service creation - requeuing")
-			_ = r.setConditionPeerService(ctx, svmCR, CONDITION_STATUS_FALSE)
+			_ = r.setConditionPeerClusterService(ctx, svmCR, CONDITION_STATUS_FALSE)
 			return err
 		}
 
@@ -165,16 +167,50 @@ func (r *StorageVirtualMachineReconciler) reconcilePeerUpdate(ctx context.Contex
 		err = oc.CreateClusterPeerService(jsonPayload)
 		if err != nil {
 			log.Error(err, "Error creating the cluster peer service - requeuing")
-			_ = r.setConditionPeerService(ctx, svmCR, CONDITION_STATUS_FALSE)
+			_ = r.setConditionPeerClusterService(ctx, svmCR, CONDITION_STATUS_FALSE)
 			r.Recorder.Event(svmCR, "Warning", "PeerCreationFailed", "Error: "+err.Error())
 			return err
 		}
-		_ = r.setConditionPeerService(ctx, svmCR, CONDITION_STATUS_TRUE)
-		r.Recorder.Event(svmCR, "Normal", "PeerCreationSucceeded", "Created cluster peer service successfully")
-		log.Info("Cluster peer service created successful")
-	} else {
-		//Cluster Peering service already created
+		log.Info("Cluster peer request created successful")
 	}
+
+	//Cluster Peering service already created
+
+	if clusterPeerServices.NumRecords != 0 && svmCR.Spec.PeerConfig.Remote.ClusterUuid == "" {
+		//Check to see if peer state is available
+		for _, val := range clusterPeerServices.Records {
+			if val.Status.State == ClusterPeerAvailable {
+				log.Info("Remote cluster " + val.Remote.Name + " accepted")
+				clusterPeerName = val.Remote.Name
+				establishedPeeringService = true
+
+				//Aadd the remote cluster uuid to CR
+				patch := client.MergeFrom(svmCR.DeepCopy())
+				svmCR.Spec.PeerConfig.Remote.ClusterUuid = val.Uuid
+				err = r.Patch(ctx, svmCR, patch)
+				if err != nil {
+					log.Error(err, "Error patching the new cluster peer uuid in the custom resource - requeuing")
+					r.Recorder.Event(svmCR, "Warning", "PeerCreationFailed", "Error: "+err.Error())
+					_ = r.setConditionSVMCreation(ctx, svmCR, CONDITION_STATUS_FALSE)
+					return err
+				}
+
+				_ = r.setConditionPeerClusterService(ctx, svmCR, CONDITION_STATUS_TRUE)
+				r.Recorder.Event(svmCR, "Normal", "ClusterPeerCreationSucceeded", "Created cluster peer service successfully")
+				log.Info("Cluster peer service created successful with remote cluster " + clusterPeerName)
+			}
+		}
+	}
+
+	if !establishedPeeringService {
+		//need to requeue or recheck
+		err = errors.NewInvalid(svmCR.GroupVersionKind().GroupKind(), "Peer requested - waiting for respond", nil)
+		log.Error(err, "Error - peer has NOT responded - requeuing")
+		return err
+	}
+
+	// Should have an available cluster peer relationship
+	log.Info("Proceeding with SVM peering")
 
 	// END CLUSTER PEERING SERVICE
 
@@ -185,11 +221,11 @@ func (r *StorageVirtualMachineReconciler) reconcilePeerUpdate(ctx context.Contex
 // Peer update
 // Note: Status of PEER_SERVICE can only be true or false
 const CONDITION_TYPE_PEER_SERVICE = "17Peerservice"
-const CONDITION_REASON_PEER_SERVICE = "Peerservice"
-const CONDITION_MESSAGE_PEER_SERVICE_TRUE = "Peer service configuration succeeded"
-const CONDITION_MESSAGE_PEER_SERVICE_FALSE = "Peer service configuration failed"
+const CONDITION_REASON_PEER_SERVICE = "PeerClusterservice"
+const CONDITION_MESSAGE_PEER_SERVICE_TRUE = "Cluster peer service configuration succeeded"
+const CONDITION_MESSAGE_PEER_SERVICE_FALSE = "Cluster peer service configuration failed"
 
-func (reconciler *StorageVirtualMachineReconciler) setConditionPeerService(ctx context.Context,
+func (reconciler *StorageVirtualMachineReconciler) setConditionPeerClusterService(ctx context.Context,
 	svmCR *gateway.StorageVirtualMachine, status metav1.ConditionStatus) error {
 
 	// I don't want to delete old references to updates to make a history

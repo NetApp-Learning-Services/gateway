@@ -44,6 +44,11 @@ type PeerRemote struct {
 	// +kubebuilder:validation:Format:=string
 	Clustername string `json:"clusterName"`
 
+	// Provides optional remote cluster uuid
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:validation:Format:=string
+	ClusterUuid string `json:"uuid,omitempty"`
+
 	// Provides required remote cluster intercluster LIF(s)
 	// +kubebuilder:validation:Required
 	// +kubebuilder:validation:MinItems:=1

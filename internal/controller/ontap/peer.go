@@ -46,8 +46,8 @@ type ClusterPeersResponse struct {
 
 const returnPeerRecords string = "?return_records=true"
 
-func (c *Client) GetPeeringServices() (clusterPeers ClusterPeersResponse, err error) {
-	uri := "/api/cluster/peers"
+func (c *Client) GetClusterPeerServicesForCluster(clustername string) (clusterPeers ClusterPeersResponse, err error) {
+	uri := "/api/cluster/peers?remote.name=" + clustername
 
 	data, err := c.clientGet(uri)
 	if err != nil {
