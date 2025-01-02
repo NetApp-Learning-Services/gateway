@@ -266,72 +266,69 @@ func (r *StorageVirtualMachineReconciler) reconcileS3Update(ctx context.Context,
 		log.Info("No S3 users defined - skipping")
 	} else {
 		log.Info("Starting S3 users reconcillation")
-		// //Check to see if S3 users defined and compare to custom resource
-		// usersRetrieved, err := oc.GetS3UsersBySvmUuid(uuid)
-		// if err != nil {
-		// 	//error creating the json body
-		// 	log.Error(err, "Error getting S3 users for SVM: "+uuid+" - requeuing")
-		// 	_ = r.setConditionS3User(ctx, svmCR, CONDITION_STATUS_FALSE)
-		// 	return err
-		// }
 
-		// if usersRetrieved.NumRecords == 0 {
-		// 	// No exports for the SVM provided in UUID
-		// 	// create new export(s)
-		// 	log.Info("No S3 users defined for SVM: " + uuid + " - creating S3 user(s)")
-		// 	createS3Users = true
-		// }
+		//Check to see if S3 users defined and compare to custom resource
+		usersRetrieved, err := oc.GetS3UsersBySvmUuid(uuid)
+		if err != nil {
+			//error creating the json body
+			log.Error(err, "Error getting S3 users for SVM: "+uuid+" - requeuing")
+			_ = r.setConditionS3User(ctx, svmCR, CONDITION_STATUS_FALSE)
+			return err
+		}
 
-		// for i := 0; i < usersRetrieved.NumRecords; i++ {
-		// 	if usersRetrieved.Records[i].Name != "root" {
-		// 		//delete all users except root
-		// 		log.Info("S3 user delete attempt: " + usersRetrieved.Records[i].Name)
-		// 		err = oc.DeleteS3User(uuid, usersRetrieved.Records[i].Name)
-		// 		if err != nil {
-		// 			log.Error(err, "Error occurred when deleting S3 user: "+usersRetrieved.Records[i].Name+" - requeuing")
-		// 			// no condition error
-		// 			// don't requeue on failed delete request
-		// 			// return err
-		// 		} else {
-		// 			log.Info("S3 user delete successful: " + usersRetrieved.Records[i].Name)
-		// 		}
-		// 	}
-		// }
+		if usersRetrieved.NumRecords == 0 {
+			// No exports for the SVM provided in UUID
+			// create new export(s)
+			log.Info("No S3 users defined for SVM: " + uuid + " - creating S3 user(s)")
+		}
+
+		createS3User := true //default to create
 
 		for i, val := range svmCR.Spec.S3Config.Users {
-			user, err := CreateUser(val, uuid, oc, log)
-			if err != nil {
-				_ = r.setConditionS3User(ctx, svmCR, CONDITION_STATUS_FALSE)
-				r.Recorder.Event(svmCR, "Warning", "S3UserFailed", "Error: "+err.Error())
-				return err
-			} else {
-				// Create a secret with the access key and secret key
-				var secretNamespace string
-				if svmCR.Spec.S3Config.Users[i].Namespace != nil {
-					secretNamespace = *svmCR.Spec.S3Config.Users[i].Namespace
-				} else {
-					secretNamespace = svmCR.Namespace
+			for j := 0; j < usersRetrieved.NumRecords; j++ {
+				if val.Name == usersRetrieved.Records[j].Name {
+					//skip this one
+					createS3User = false
 				}
-				secret := &corev1.Secret{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      user.Records[0].Name,
-						Namespace: secretNamespace,
-					},
-					StringData: map[string]string{
-						"accessKeyID":     user.Records[0].AccessKey,
-						"secretAccessKey": user.Records[0].SecretKey,
-					},
-					Type: corev1.SecretTypeOpaque,
-				}
-				err = r.Create(ctx, secret)
+			}
+			if createS3User {
+				user, err := CreateUser(val, uuid, oc, log)
 				if err != nil {
-					_ = r.setConditionS3UserSecret(ctx, svmCR, CONDITION_STATUS_FALSE)
+					_ = r.setConditionS3User(ctx, svmCR, CONDITION_STATUS_FALSE)
 					r.Recorder.Event(svmCR, "Warning", "S3UserFailed", "Error: "+err.Error())
-					log.Error(err, "Error creating S3 user secret for SVM: "+uuid+" and user: "+user.Records[0].Name+" with access key: "+user.Records[0].AccessKey+" and secret key: "+user.Records[0].SecretKey)
+					return err
 				} else {
-					log.Info("S3 User and secret creation succesful: " + val.Name)
+					// Create a secret with the access key and secret key
+					var secretNamespace string
+					if svmCR.Spec.S3Config.Users[i].Namespace != nil {
+						secretNamespace = *svmCR.Spec.S3Config.Users[i].Namespace
+					} else {
+						secretNamespace = svmCR.Namespace
+					}
+					secret := &corev1.Secret{
+						ObjectMeta: metav1.ObjectMeta{
+							Name:      user.Records[0].Name,
+							Namespace: secretNamespace,
+						},
+						StringData: map[string]string{
+							"accessKeyID":     user.Records[0].AccessKey,
+							"secretAccessKey": user.Records[0].SecretKey,
+						},
+						Type: corev1.SecretTypeOpaque,
+					}
+					err = r.Create(ctx, secret)
+					if err != nil {
+						_ = r.setConditionS3UserSecret(ctx, svmCR, CONDITION_STATUS_FALSE)
+						r.Recorder.Event(svmCR, "Warning", "S3UserFailed", "Error: "+err.Error())
+						log.Error(err, "Error creating S3 user secret for SVM: "+uuid+" and user: "+user.Records[0].Name+" with access key: "+user.Records[0].AccessKey+" and secret key: "+user.Records[0].SecretKey)
+					} else {
+						log.Info("S3 User and secret creation successful: " + val.Name)
+					}
 				}
-
+			} else {
+				//reset default back to true
+				createS3User = true
+				log.Info("S3 user already created: " + val.Name)
 			}
 		}
 		_ = r.setConditionS3User(ctx, svmCR, CONDITION_STATUS_TRUE)

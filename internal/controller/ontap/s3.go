@@ -156,6 +156,23 @@ func (c *Client) GetS3UsersBySvmUuid(uuid string) (users S3UsersResponse, err er
 	return resp, nil
 }
 
+func (c *Client) GetS3UserByNameAndSvmUuid(userName string, uuid string) (users S3UsersResponse, err error) {
+	uri := "/api/protocols/s3/services/" + uuid + "/users?name=" + userName
+
+	data, err := c.clientGet(uri)
+	if err != nil {
+		return users, &apiError{1, err.Error()}
+	}
+
+	var resp S3UsersResponse
+	err = json.Unmarshal(data, &resp)
+	if err != nil {
+		return resp, &apiError{2, err.Error()}
+	}
+
+	return resp, nil
+}
+
 func (c *Client) CreateS3User(uuid string, jsonPayload []byte) (users S3UsersResponse, err error) {
 	uri := "/api/protocols/s3/services/" + uuid + "/users"
 

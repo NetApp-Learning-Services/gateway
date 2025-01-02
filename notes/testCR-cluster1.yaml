@@ -117,13 +117,13 @@ spec:
       - ip: 192.168.0.135
     interfaces:
     - name: intercluster1
-      ip: 192.168.0.130
+      ip: 192.168.0.131
       netmask: 255.255.255.0
       broadcastDomain: Default
       homeNode: Cluster1-01
       ipspace: Default
     - name: intercluster2
-      ip: 192.168.0.131
+      ip: 192.168.0.132
       netmask: 255.255.255.0
       broadcastDomain: Default
       homeNode: Cluster1-01

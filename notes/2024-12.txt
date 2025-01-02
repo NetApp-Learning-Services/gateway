@@ -135,3 +135,28 @@ TESTING THE OPERATOR
 
 24. Added peer subspec
 
+25. REST APIs:
+
+Initial cluster request request:
+POST /api/cluster/peers { "initial_allowed_svms": [ { "name": "*" } ], "authentication": { "passphrase": "***", "in_use": "ok" }, "encryption": { "proposed": "tls_psk" }, "ipspace": { "name": "Default" }, "remote": { "ip_addresses": "***" }, "peer_applications": [ "flexcache", "snapmirror" ] }(0.289s)
+GET /api/network/ip/interfaces?order_by=state&fields=state%2Cuuid%2Cenabled%2Cname%2Csvm%2Cservices%2Cservice_policy%2Cvip%2Cscope%2Cipspace.name%2Cip.address%2Clocation.is_home%2Clocation.node.name%2Clocation.port.name%2Clocation.home_node.name%2Clocation.home_port.name%2Clocation.home_port.uuid%2Clocation.home_port.node%2Cmetric.throughput.total&return_timeout=120(0.268s)
+GET /api/network/fc/interfaces?order_by=state&fields=state%2Cuuid%2Cenabled%2Cname%2Cwwpn%2Cdata_protocol%2Csvm.name%2Clocation.node.name%2Clocation.port.name%2Clocation.is_home%2Clocation.home_node.name%2Clocation.home_port.name%2Clocation.home_port.uuid%2Cmetric.throughput.total&return_timeout=120(0.119s)
+GET /api/protocols/san/portsets?fields=uuid%2Cname%2Cinterfaces&return_timeout=120(0.203s)
+GET /api/network/ipspaces?fields=name&order_by=name&return_timeout=120(0.113s)
+GET /api/svm/svms?order_by=name&fields=name%2Cipspace&ipspace.name=!null&return_timeout=120(0.217s)
+GET /api/network/ethernet/broadcast-domains?order_by=name&fields=name%2Cipspace&return_timeout=120(0.159s)
+GET /api/network/ethernet/broadcast-domains?fields=name%2Cmtu%2Cports%2Cipspace&order_by=name&return_timeout=120(0.114s)
+POST /api/private/cluster/usage(0.047s)
+GET /api/cluster/schedules?return_timeout=120&order_by=name&max_records=100&fields=type%2Ccron%2Cinterval%2Cname%2Cuuid&name=!pg-*(0.106s)
+GET /api/cloud/targets?owner=snapmirror%2Cs3_snapmirror&provider_type=sgws%2Contap_s3%2Caws_s3%2Cs3_compatible&fields=server%2Caccess_key%2Ccontainer%2Cused%2Cipspace%2Csvm%2Cprovider_type%2Csnapmirror_use%2Cport%2Cssl_enabled%2Ccertificate_validation_enabled%2Cowner%2Cscope&return_timeout=120(0.137s)
+GET /api/network/ip/interfaces?services=intercluster_core&fields=ipspace%2Cip%2Clocation%2Cstate&return_timeout=120(0.352s)
+GET /api/cluster/peers?order_by=name&fields=name%2Cstatus%2Cipspace%2Cremote%2Cauthentication%2Cuuid%2Cversion&return_timeout=120(0.175s)
+GET /api/cluster/peers?order_by=name&fields=name%2Cstatus%2Cipspace%2Cremote%2Cauthentication%2Cuuid%2Cversion&return_timeout=120(0.203s)
+GET /api/cluster/peers?order_by=name&fields=name%2Cstatus%2Cipspace%2Cremote%2Cauthentication%2Cuuid%2Cversion&return_timeout=120(0.32s)
+GET /api/network/ipspaces?order_by=name&fields=name&return_timeout=120(0.309s)
+GET /api/cluster/mediators?fields=ip_address%2Cpeer_cluster%2Cport%2Creachable%2Cuuid&return_timeout=120(0.243s)
+GET /api/svm/peers?fields=name%2Cpeer.cluster.name%2Cpeer.cluster.uuid%2Cpeer.svm.uuid%2Cpeer.svm.name%2Cstate%2Csvm%2Capplications%2Cuuid&return_timeout=120(0.334s)
+GET /api/snapmirror/relationships?fields=uuid%2Cstate%2Chealthy%2Ctransfer%2Csource%2Cdestination%2Cfabriclink.pending_work_task_count&return_timeout=120(0.308s)
+GET /api/snapmirror/relationships?fields=uuid%2Csource%2Cdestination&list_destinations_only=true&return_timeout=120(0.363s)
+GET /api/network/ip/interfaces?services=intercluster_core&fields=ipspace%2Cip%2Clocation%2Cstate&return_timeout=120(0.262s)
+

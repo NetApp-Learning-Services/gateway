@@ -6,7 +6,6 @@ import (
 	"fmt"
 	gateway "gateway/api/v1beta2"
 	"gateway/internal/controller/ontap"
-	"reflect"
 
 	"github.com/go-logr/logr"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -67,10 +66,16 @@ func (r *StorageVirtualMachineReconciler) reconcilePeerUpdate(ctx context.Contex
 
 		} else {
 			// update LIFs
+			createLif := true
 			for index, val := range svmCR.Spec.PeerConfig.Lifs {
+				for _, lif := range lifs.Records {
+					if val.IPAddress == lif.Ip.Address {
+						//skip this one
+						createLif = false
+					}
+				}
 
-				// Check to see if lifs.Records[index] is out of index - if so, need to create LIF
-				if index > lifs.NumRecords-1 {
+				if createLif {
 					// Need to create LIF for val
 					err = CreateLif(val, InterclusterLifServicePolicy, InterclusterLifServicePolicyScope, uuid, oc, log)
 					if err != nil {
@@ -80,11 +85,7 @@ func (r *StorageVirtualMachineReconciler) reconcilePeerUpdate(ctx context.Contex
 					}
 
 				} else {
-
-					if reflect.ValueOf(lifs.Records[index]).IsZero() {
-						break
-					}
-
+					createLif = true
 					err = UpdateLif(val, lifs.Records[index], InterclusterLifServicePolicy, oc, log)
 					if err != nil {
 						_ = r.setConditionPeerLif(ctx, svmCR, CONDITION_STATUS_FALSE)

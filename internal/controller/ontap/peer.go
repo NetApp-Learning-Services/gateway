@@ -69,7 +69,7 @@ func (c *Client) GetClusterPeerServicesForCluster(remoteIp string) (clusterPeers
 }
 
 func (c *Client) CreateClusterPeerService(jsonPayload []byte) (err error) {
-	uri := "/api/cluster/peers"
+	uri := "/api/cluster/peers?return_timeout=120"
 	_, err = c.clientPost(uri, jsonPayload)
 	if err != nil {
 		//fmt.Println("Error: " + err.Error())
