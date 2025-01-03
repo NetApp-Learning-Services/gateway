@@ -67,11 +67,14 @@ func (r *StorageVirtualMachineReconciler) reconcilePeerUpdate(ctx context.Contex
 		} else {
 			// update LIFs
 			createLif := true
-			for index, val := range svmCR.Spec.PeerConfig.Lifs {
-				for _, lif := range lifs.Records {
+			currentLifIndex := -1
+			for _, val := range svmCR.Spec.PeerConfig.Lifs {
+				for i, lif := range lifs.Records {
 					if val.IPAddress == lif.Ip.Address {
 						//skip this one
 						createLif = false
+						currentLifIndex = i
+						log.Info("Intercluster lif " + val.Name + " with IP address " + val.IPAddress + " exists. Skipping.")
 					}
 				}
 
@@ -85,13 +88,14 @@ func (r *StorageVirtualMachineReconciler) reconcilePeerUpdate(ctx context.Contex
 					}
 
 				} else {
-					createLif = true
-					err = UpdateLif(val, lifs.Records[index], InterclusterLifServicePolicy, oc, log)
+					err = UpdateLif(val, lifs.Records[currentLifIndex], InterclusterLifServicePolicy, oc, log)
 					if err != nil {
 						_ = r.setConditionPeerLif(ctx, svmCR, CONDITION_STATUS_FALSE)
 						r.Recorder.Event(svmCR, "Warning", "PeerUpdateLifFailed", "Error: "+err.Error())
 						return err
 					}
+					createLif = true
+					currentLifIndex = -1
 				}
 
 			} // Need looping through Intercluster LIF definitions in custom resource
