@@ -12,6 +12,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 const S3LifServicePolicy = "gateway-custom-service-policy-s3" //magic word
@@ -299,6 +300,7 @@ func (r *StorageVirtualMachineReconciler) reconcileS3Update(ctx context.Context,
 					return err
 				} else {
 					// Create a secret with the access key and secret key
+
 					var secretNamespace string
 					if svmCR.Spec.S3Config.Users[i].Namespace != nil {
 						secretNamespace = *svmCR.Spec.S3Config.Users[i].Namespace
@@ -316,14 +318,31 @@ func (r *StorageVirtualMachineReconciler) reconcileS3Update(ctx context.Context,
 						},
 						Type: corev1.SecretTypeOpaque,
 					}
-					err = r.Create(ctx, secret)
-					if err != nil {
-						_ = r.setConditionS3UserSecret(ctx, svmCR, CONDITION_STATUS_FALSE)
-						r.Recorder.Event(svmCR, "Warning", "S3UserFailed", "Error: "+err.Error())
-						log.Error(err, "Error creating S3 user secret for SVM: "+uuid+" and user: "+user.Records[0].Name+" with access key: "+user.Records[0].AccessKey+" and secret key: "+user.Records[0].SecretKey)
-					} else {
-						log.Info("S3 User and secret creation successful: " + val.Name)
+					namespaceName := client.ObjectKey{
+						Name:      user.Records[0].Name,
+						Namespace: secretNamespace,
 					}
+					secretCheck := &corev1.Secret{}
+					err = r.Get(ctx, namespaceName, secretCheck)
+					if err != nil {
+						if errors.IsNotFound(err) {
+							//create it
+							err = r.Create(ctx, secret)
+							if err != nil {
+								_ = r.setConditionS3UserSecret(ctx, svmCR, CONDITION_STATUS_FALSE)
+								r.Recorder.Event(svmCR, "Warning", "S3UserFailed", "Error: "+err.Error())
+								log.Error(err, "Error creating S3 user secret for SVM: "+uuid+" and user: "+user.Records[0].Name+" with access key: "+user.Records[0].AccessKey+" and secret key: "+user.Records[0].SecretKey)
+							} else {
+								log.Info("S3 User and secret creation successful: " + val.Name)
+							}
+						} else {
+							_ = r.setConditionS3UserSecret(ctx, svmCR, CONDITION_STATUS_FALSE)
+							r.Recorder.Event(svmCR, "Warning", "S3UserFailed", "Error: "+err.Error())
+							log.Error(err, "Error checking S3 user secret for SVM: "+uuid+" and user: "+user.Records[0].Name+" with access key: "+user.Records[0].AccessKey+" and secret key: "+user.Records[0].SecretKey)
+						}
+
+					}
+
 				}
 			} else {
 				//reset default back to true

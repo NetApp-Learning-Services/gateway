@@ -6,6 +6,7 @@ import (
 	"fmt"
 	gateway "gateway/api/v1beta2"
 	"gateway/internal/controller/ontap"
+	"strings"
 
 	"github.com/go-logr/logr"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -69,12 +70,13 @@ func (r *StorageVirtualMachineReconciler) reconcilePeerUpdate(ctx context.Contex
 			createLif := true
 			currentLifIndex := -1
 			for _, val := range svmCR.Spec.PeerConfig.Lifs {
+
 				for i, lif := range lifs.Records {
-					if val.IPAddress == lif.Ip.Address {
+					if val.Name == lif.Name {
 						//skip this one
 						createLif = false
 						currentLifIndex = i
-						log.Info("Intercluster lif " + val.Name + " with IP address " + val.IPAddress + " exists. Skipping.")
+						log.Info("Intercluster lif " + val.Name + " with IP address " + val.IPAddress + " exists. Updating.")
 					}
 				}
 
@@ -98,21 +100,7 @@ func (r *StorageVirtualMachineReconciler) reconcilePeerUpdate(ctx context.Contex
 					currentLifIndex = -1
 				}
 
-			} // Need looping through Intercluster LIF definitions in custom resource
-
-			// // Delete all SVM Intercluster LIFs that are not defined in the custom resource
-			// for i := len(svmCR.Spec.PeerConfig.Lifs); i < lifs.NumRecords; i++ {
-			// 	log.Info("Intercluster LIF delete attempt: " + lifs.Records[i].Name)
-			// 	oc.DeleteIpInterface(lifs.Records[i].Uuid)
-			// 	if err != nil {
-			// 		log.Error(err, "Error occurred when deleting Intercluster LIF: "+lifs.Records[i].Name)
-			// 		// don't requeue on failed delete request
-			// 		// no condition error
-			// 		// return err
-			// 	} else {
-			// 		log.Info("Intercluster LIF delete successful: " + lifs.Records[i].Name)
-			// 	}
-			// }
+			}
 
 		} // Checking for NFS LIFs updates
 		_ = r.setConditionPeerLif(ctx, svmCR, CONDITION_STATUS_TRUE)
@@ -123,8 +111,8 @@ func (r *StorageVirtualMachineReconciler) reconcilePeerUpdate(ctx context.Contex
 
 	// CLUSTER PEERING SERVICE
 
+	log.Info("Proceeding with Cluster peering")
 	createPeeringService := false
-	establishedPeeringService := false
 	clusterPeerName := ""
 
 	//TODO:  Eliminate [0]
@@ -152,9 +140,6 @@ func (r *StorageVirtualMachineReconciler) reconcilePeerUpdate(ctx context.Contex
 		}
 		var localSVM ontap.SvmRef
 		localSVM.Name = svmCR.Spec.SvmName
-		if svmCR.Spec.SvmUuid != "" {
-			localSVM.Uuid = svmCR.Spec.SvmUuid
-		}
 		upsertPeerService.InitialAllowedSVMs = append(upsertPeerService.InitialAllowedSVMs, localSVM)
 
 		jsonPayload, err := json.Marshal(upsertPeerService)
@@ -171,10 +156,16 @@ func (r *StorageVirtualMachineReconciler) reconcilePeerUpdate(ctx context.Contex
 
 		err = oc.CreateClusterPeerService(jsonPayload)
 		if err != nil {
-			log.Error(err, "Error creating the cluster peer service - requeuing")
-			_ = r.setConditionPeerClusterService(ctx, svmCR, CONDITION_STATUS_FALSE)
-			r.Recorder.Event(svmCR, "Warning", "PeerCreationFailed", "Error: "+err.Error())
-			return err
+			if strings.Contains(err.Error(), "context deadline exceeded") || strings.Contains(err.Error(), "An introductory RPC to the peer address") {
+				log.Info("Waiting on peer to respond")
+				return err
+			} else {
+				log.Error(err, "Error creating the cluster peer service - requeuing")
+				_ = r.setConditionPeerClusterService(ctx, svmCR, CONDITION_STATUS_FALSE)
+				r.Recorder.Event(svmCR, "Warning", "PeerCreationFailed", "Error: "+err.Error())
+				return err
+			}
+
 		}
 		log.Info("Cluster peer request created successful")
 	}
@@ -187,7 +178,6 @@ func (r *StorageVirtualMachineReconciler) reconcilePeerUpdate(ctx context.Contex
 			if val.Status.State == ClusterPeerAvailable {
 				log.Info("Remote cluster " + val.Remote.Name + " accepted")
 				clusterPeerName = val.Remote.Name
-				establishedPeeringService = true
 
 				//Aadd the remote cluster uuid to CR
 				patch := client.MergeFrom(svmCR.DeepCopy())
@@ -205,13 +195,6 @@ func (r *StorageVirtualMachineReconciler) reconcilePeerUpdate(ctx context.Contex
 				log.Info("Cluster peer service created successful with remote cluster " + clusterPeerName)
 			}
 		}
-	}
-
-	if !establishedPeeringService {
-		//need to requeue or recheck
-		err = errors.NewInvalid(svmCR.GroupVersionKind().GroupKind(), "Peer requested - waiting for respond", nil)
-		log.Error(err, "Error - peer has NOT responded - requeuing")
-		return err
 	}
 
 	// Should have an available cluster peer relationship

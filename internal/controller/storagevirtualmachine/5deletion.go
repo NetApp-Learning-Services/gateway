@@ -10,8 +10,11 @@ import (
 	defaultLog "log"
 
 	"github.com/go-logr/logr"
+	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	ctrl "sigs.k8s.io/controller-runtime"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 )
 
@@ -29,7 +32,7 @@ func (r *StorageVirtualMachineReconciler) reconcileDeletions(ctx context.Context
 	isSMVMarkedToBeDeleted := svmCR.GetDeletionTimestamp() != nil
 	if isSMVMarkedToBeDeleted {
 		if controllerutil.ContainsFinalizer(svmCR, finalizerName) {
-			if err := r.finalizeSVM(svmCR, oc, log); err != nil {
+			if err := r.finalizeSVM(ctx, svmCR, oc, log); err != nil {
 				log.Error(err, "Error during deletionpolicy implementation - requeuing")
 				_ = r.setConditionSVMDeleted(ctx, svmCR, CONDITION_STATUS_FALSE)
 				return ctrl.Result{}, err
@@ -58,7 +61,7 @@ func (r *StorageVirtualMachineReconciler) reconcileDeletions(ctx context.Context
 	return ctrl.Result{}, nil
 }
 
-func (r *StorageVirtualMachineReconciler) finalizeSVM(
+func (r *StorageVirtualMachineReconciler) finalizeSVM(ctx context.Context,
 	svmCR *gateway.StorageVirtualMachine, oc *ontap.Client, log logr.Logger) error {
 
 	if svmCR.Spec.SvmDeletionPolicy == gateway.DeletionPolicyDelete {
@@ -103,7 +106,7 @@ func (r *StorageVirtualMachineReconciler) finalizeSVM(
 
 			for _, crLif := range svmCR.Spec.PeerConfig.Lifs {
 				for _, clusterLif := range lifs.Records {
-					if crLif.IPAddress == clusterLif.Ip.Address {
+					if crLif.Name == clusterLif.Name {
 						//delete this LIF
 						err = oc.DeleteIpInterface(clusterLif.Uuid)
 						if err != nil {
@@ -112,6 +115,38 @@ func (r *StorageVirtualMachineReconciler) finalizeSVM(
 					}
 				}
 			}
+		}
+
+		//check to see if secret was created and delete it
+		if svmCR.Spec.S3Config != nil {
+			for _, user := range svmCR.Spec.S3Config.Users {
+				var secretNamespace string
+				if user.Namespace != nil {
+					secretNamespace = *user.Namespace
+				} else {
+					secretNamespace = svmCR.Namespace
+				}
+
+				namespaceName := client.ObjectKey{
+					Name:      user.Name,
+					Namespace: secretNamespace,
+				}
+				secretCheck := &corev1.Secret{}
+				err = r.Get(ctx, namespaceName, secretCheck)
+				if err != nil {
+					if errors.IsNotFound(err) {
+						//skip this because not present
+					} else {
+						log.Error(err, "Error retrieving an S3 user secret defined in the custom resource: "+user.Name+" with namespace: "+*user.Namespace)
+					}
+				} else {
+					err = r.Delete(ctx, secretCheck)
+					if err != nil {
+						log.Error(err, "Error deleting an S3 user secret defined in the custom resource: "+user.Name+" with namespace: "+*user.Namespace)
+					}
+				}
+			}
+
 		}
 
 		err = oc.DeleteStorageVM(svmCR.Spec.SvmUuid)

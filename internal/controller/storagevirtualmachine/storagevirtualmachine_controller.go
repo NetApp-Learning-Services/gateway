@@ -44,7 +44,7 @@ type StorageVirtualMachineReconciler struct {
 
 // ADDED to support access to secrets
 // This helped:  https://github.com/kubernetes-sigs/kubebuilder/issues/549
-// +kubebuilder:rbac:groups=core,resources=secrets,verbs=get;list;watch;create
+// +kubebuilder:rbac:groups=core,resources=secrets,verbs=get;list;watch;create;delete
 
 // Reconcile is part of the main kubernetes reconciliation loop which aims to
 // move the current state of the cluster closer to the desired state.
@@ -232,6 +232,9 @@ func (r *StorageVirtualMachineReconciler) Reconcile(ctx context.Context, req ctr
 			// Reconcile Peer information
 			err = r.reconcilePeerUpdate(ctx, svmCR, svmRetrieved.Uuid, oc, log)
 			if err != nil {
+				if strings.Contains(err.Error(), "context deadline exceeded") || strings.Contains(err.Error(), "An introductory RPC to the peer address") {
+					return ctrl.Result{RequeueAfter: 30 * time.Second}, nil
+				}
 				return ctrl.Result{RequeueAfter: 30 * time.Second}, err
 			}
 		}

@@ -45,7 +45,7 @@ type ClusterPeersResponse struct {
 	Records []ClusterPeerService `json:"records,omitempty"`
 }
 
-const returnPeerRecords string = "?return_records=true"
+//const returnPeerRecords string = "?return_records=true"
 
 func (c *Client) GetClusterPeerServicesForCluster(remoteIp string) (clusterPeers ClusterPeersResponse, err error) {
 	uri := "/api/cluster/peers?ip_address=" + remoteIp
@@ -69,7 +69,7 @@ func (c *Client) GetClusterPeerServicesForCluster(remoteIp string) (clusterPeers
 }
 
 func (c *Client) CreateClusterPeerService(jsonPayload []byte) (err error) {
-	uri := "/api/cluster/peers?return_timeout=120"
+	uri := "/api/cluster/peers"
 	_, err = c.clientPost(uri, jsonPayload)
 	if err != nil {
 		//fmt.Println("Error: " + err.Error())
