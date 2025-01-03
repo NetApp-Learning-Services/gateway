@@ -359,12 +359,11 @@ func (r *StorageVirtualMachineReconciler) reconcileS3Update(ctx context.Context,
 			log.Info("No S3 buckets defined for SVM: " + uuid + " - creating S3 bucket(s)")
 		}
 
-		for i, val := range svmCR.Spec.S3Config.Buckets {
+		for _, currentBucket := range svmCR.Spec.S3Config.Buckets {
 
 			createBucket := true
-			currentBucket := val
 
-			for j := 0; i < bucketsRetrieved.NumRecords; j++ {
+			for j := 0; j < bucketsRetrieved.NumRecords; j++ {
 
 				if currentBucket.Name == bucketsRetrieved.Records[j].Name {
 					createBucket = false
@@ -410,9 +409,10 @@ func (r *StorageVirtualMachineReconciler) reconcileS3Update(ctx context.Context,
 				}
 
 			}
-			_ = r.setConditionS3Bucket(ctx, svmCR, CONDITION_STATUS_TRUE)
-			r.Recorder.Event(svmCR, "Normal", "S3BucketSucceeded", "Created S3 bucket(s) successfully")
+
 		}
+		_ = r.setConditionS3Bucket(ctx, svmCR, CONDITION_STATUS_TRUE)
+		r.Recorder.Event(svmCR, "Normal", "S3BucketSucceeded", "Created S3 bucket(s) successfully")
 
 	}
 
