@@ -63,7 +63,7 @@ func (r *StorageVirtualMachineReconciler) finalizeSVM(
 
 	if svmCR.Spec.SvmDeletionPolicy == gateway.DeletionPolicyDelete {
 
-		//check to see if S3 buckets are presenty
+		//check to see if S3 buckets are present
 		bucketsRetrieved, err := oc.GetS3BucketsBySvmUuid(svmCR.Spec.SvmUuid)
 
 		if err != nil {
@@ -79,6 +79,39 @@ func (r *StorageVirtualMachineReconciler) finalizeSVM(
 				}
 			}
 
+		}
+
+		//check to see if cluster peering is present and defined by custom resource
+		//TODO:  Eliminate [0]
+		if svmCR.Spec.PeerConfig != nil {
+			clusterPeerServices, err := oc.GetClusterPeerServicesForCluster(svmCR.Spec.PeerConfig.Remote.Ipaddresses[0].IPAddress)
+			if err == nil || clusterPeerServices.NumRecords != 0 {
+				//delete the peer relationship
+				for _, peer := range clusterPeerServices.Records {
+					oc.DeleteClusterPeer(peer.Uuid)
+				}
+			}
+		}
+
+		//check to see if intercluster Lifs are present and defined by custom resource
+		if svmCR.Spec.PeerConfig != nil {
+			lifs, err := oc.GetIpInterfacesByServicePolicy(InterclusterLifServicePolicy)
+			if err != nil {
+				//error creating the json body
+				log.Error(err, "Error getting Intercluster LIFs for cluster: "+svmCR.Spec.ClusterManagementHost)
+			}
+
+			for _, crLif := range svmCR.Spec.PeerConfig.Lifs {
+				for _, clusterLif := range lifs.Records {
+					if crLif.IPAddress == clusterLif.Ip.Address {
+						//delete this LIF
+						err = oc.DeleteIpInterface(clusterLif.Uuid)
+						if err != nil {
+							log.Error(err, "Error deleting an intercluster Lif defined in the custom resource: "+clusterLif.Ip.Address)
+						}
+					}
+				}
+			}
 		}
 
 		err = oc.DeleteStorageVM(svmCR.Spec.SvmUuid)

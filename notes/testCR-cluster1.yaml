@@ -27,7 +27,7 @@ spec:
   svmName: svmsrc
   svmDeletionPolicy: Delete
   clusterHost: 192.168.0.101
-  debug: true
+  debug: false
   aggregates:
   - name: Cluster1_01_FC_1
   - name: Cluster1_01_FC_2

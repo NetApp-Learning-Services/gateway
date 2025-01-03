@@ -78,3 +78,14 @@ func (c *Client) CreateClusterPeerService(jsonPayload []byte) (err error) {
 
 	return nil
 }
+
+func (c *Client) DeleteClusterPeer(uuid string) (err error) {
+	uri := "/api/cluster/peers/" + uuid
+
+	_, err = c.clientDelete(uri)
+	if err != nil {
+		return &apiError{1, err.Error()}
+	}
+
+	return nil
+}

@@ -366,8 +366,9 @@ func (r *StorageVirtualMachineReconciler) reconcileS3Update(ctx context.Context,
 
 			for j := 0; i < bucketsRetrieved.NumRecords; j++ {
 
-				if currentBucket.Name == bucketsRetrieved.Records[i].Name {
+				if currentBucket.Name == bucketsRetrieved.Records[j].Name {
 					createBucket = false
+					log.Info("S3 bucket already present: " + bucketsRetrieved.Records[j].Name)
 				}
 			}
 
@@ -403,12 +404,16 @@ func (r *StorageVirtualMachineReconciler) reconcileS3Update(ctx context.Context,
 				err = oc.CreateS3Bucket(uuid, jsonPayload)
 				if err != nil {
 					log.Error(err, fmt.Sprintf("Error occurred when creating S3 bucket: %v", newBucket.Name))
+					_ = r.setConditionS3Bucket(ctx, svmCR, CONDITION_STATUS_FALSE)
+					r.Recorder.Event(svmCR, "Normal", "S3BucketFailed", "Failed to create S3 bucket: "+newBucket.Name)
 					return err
 				}
+
 			}
+			_ = r.setConditionS3Bucket(ctx, svmCR, CONDITION_STATUS_TRUE)
+			r.Recorder.Event(svmCR, "Normal", "S3BucketSucceeded", "Created S3 bucket(s) successfully")
 		}
-		_ = r.setConditionS3Bucket(ctx, svmCR, CONDITION_STATUS_TRUE)
-		r.Recorder.Event(svmCR, "Normal", "S3BucketSucceeded", "Created S3 bucket(s) successfully")
+
 	}
 
 	//END S3 BUCKETS
