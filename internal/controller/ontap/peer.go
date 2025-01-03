@@ -7,7 +7,7 @@ import (
 	"k8s.io/apimachinery/pkg/runtime/schema"
 )
 
-type ClusterPeerService struct {
+type ClusterPeer struct {
 	Name               string             `json:"name"`
 	Uuid               string             `json:"uuid,omitempty"`
 	InitialAllowedSVMs []SvmRef           `json:"initial_allowed_svms,omitempty"`
@@ -42,12 +42,41 @@ type PeerAuthentication struct {
 
 type ClusterPeersResponse struct {
 	BaseResponse
-	Records []ClusterPeerService `json:"records,omitempty"`
+	Records []ClusterPeer `json:"records,omitempty"`
+}
+
+type SvmPeer struct {
+	Name         string           `json:"name"`
+	Uuid         string           `json:"uuid,omitempty"`
+	LocalSvm     SvmRef           `json:"svm,omitempty"`
+	State        string           `json:"state,omitempty"`
+	Applications []string         `json:"applications,omitempty"`
+	Peer         PeerRelationship `json:"peer,omitempty"`
+}
+
+type PeerRelationship struct {
+	Svm     SvmRef     `json:"svm,omitempty"`
+	Cluster ClusterRef `json:"cluster,omitempty"`
+}
+
+type ClusterRef struct {
+	Name  string `json:"name"`
+	UUID  string `json:"uuid"`
+	Links struct {
+		Self struct {
+			Href string `json:"href"`
+		} `json:"self"`
+	} `json:"_links"`
+}
+
+type SvmPeersResponse struct {
+	BaseResponse
+	Records []SvmPeer `json:"records,omitempty"`
 }
 
 //const returnPeerRecords string = "?return_records=true"
 
-func (c *Client) GetClusterPeerServicesForCluster(remoteIp string) (clusterPeers ClusterPeersResponse, err error) {
+func (c *Client) GetClusterPeer(remoteIp string) (clusterPeers ClusterPeersResponse, err error) {
 	uri := "/api/cluster/peers?ip_address=" + remoteIp
 
 	data, err := c.clientGet(uri)
@@ -62,17 +91,16 @@ func (c *Client) GetClusterPeerServicesForCluster(remoteIp string) (clusterPeers
 	}
 
 	if resp.NumRecords == 0 {
-		return clusterPeers, errors.NewNotFound(schema.GroupResource{Group: "gateway.netapp.com", Resource: "StorageVirtualMachine"}, "no peers")
+		return clusterPeers, errors.NewNotFound(schema.GroupResource{Group: "gateway.netapp.com", Resource: "StorageVirtualMachine"}, "no cluster peers")
 	}
 
 	return resp, nil
 }
 
-func (c *Client) CreateClusterPeerService(jsonPayload []byte) (err error) {
+func (c *Client) CreateClusterPeer(jsonPayload []byte) (err error) {
 	uri := "/api/cluster/peers"
 	_, err = c.clientPost(uri, jsonPayload)
 	if err != nil {
-		//fmt.Println("Error: " + err.Error())
 		return &apiError{1, err.Error()}
 	}
 
@@ -81,6 +109,48 @@ func (c *Client) CreateClusterPeerService(jsonPayload []byte) (err error) {
 
 func (c *Client) DeleteClusterPeer(uuid string) (err error) {
 	uri := "/api/cluster/peers/" + uuid
+
+	_, err = c.clientDelete(uri)
+	if err != nil {
+		return &apiError{1, err.Error()}
+	}
+
+	return nil
+}
+
+func (c *Client) GetSvmPeer(localSvm string) (svmPeers SvmPeersResponse, err error) {
+	uri := "/api/svm/peers?svm.name=" + localSvm
+
+	data, err := c.clientGet(uri)
+	if err != nil {
+		return svmPeers, &apiError{1, err.Error()}
+	}
+
+	var resp SvmPeersResponse
+	err = json.Unmarshal(data, &resp)
+	if err != nil {
+		return resp, &apiError{2, err.Error()}
+	}
+
+	if resp.NumRecords == 0 {
+		return svmPeers, errors.NewNotFound(schema.GroupResource{Group: "gateway.netapp.com", Resource: "StorageVirtualMachine"}, "no svm peers")
+	}
+
+	return resp, nil
+}
+
+func (c *Client) CreateSvmPeer(jsonPayload []byte) (err error) {
+	uri := "/api/svm/peers"
+	_, err = c.clientPost(uri, jsonPayload)
+	if err != nil {
+		return &apiError{1, err.Error()}
+	}
+
+	return nil
+}
+
+func (c *Client) DeleteSvmPeer(uuid string) (err error) {
+	uri := "/api/svm/peers/" + uuid
 
 	_, err = c.clientDelete(uri)
 	if err != nil {

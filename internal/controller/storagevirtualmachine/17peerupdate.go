@@ -116,7 +116,7 @@ func (r *StorageVirtualMachineReconciler) reconcilePeerUpdate(ctx context.Contex
 	clusterPeerName := ""
 
 	//TODO:  Eliminate [0]
-	clusterPeerServices, err := oc.GetClusterPeerServicesForCluster(svmCR.Spec.PeerConfig.Remote.Ipaddresses[0].IPAddress)
+	clusterPeerServices, err := oc.GetClusterPeer(svmCR.Spec.PeerConfig.Remote.Ipaddresses[0].IPAddress)
 	if err != nil && errors.IsNotFound(err) {
 		createPeeringService = true
 	} else if err != nil {
@@ -125,7 +125,7 @@ func (r *StorageVirtualMachineReconciler) reconcilePeerUpdate(ctx context.Contex
 		return err
 	}
 
-	var upsertPeerService ontap.ClusterPeerService
+	var upsertPeerService ontap.ClusterPeer
 
 	if createPeeringService {
 		log.Info("No Cluster peering service defined for cluster: " + svmCR.Spec.PeerConfig.Remote.Clustername + " - creating Peer service")
@@ -154,7 +154,7 @@ func (r *StorageVirtualMachineReconciler) reconcilePeerUpdate(ctx context.Contex
 			log.Info("[DEBUG] Cluster Peer service creation payload: " + fmt.Sprintf("%#v\n", upsertPeerService))
 		}
 
-		err = oc.CreateClusterPeerService(jsonPayload)
+		err = oc.CreateClusterPeer(jsonPayload)
 		if err != nil {
 			if strings.Contains(err.Error(), "context deadline exceeded") || strings.Contains(err.Error(), "An introductory RPC to the peer address") {
 				log.Info("Waiting on peer to respond")
