@@ -74,6 +74,10 @@ type SvmPeersResponse struct {
 	Records []SvmPeer `json:"records,omitempty"`
 }
 
+type SvmPeerPatch struct {
+	State string `json:"state"`
+}
+
 //const returnPeerRecords string = "?return_records=true"
 
 func (c *Client) GetClusterPeer(remoteIp string) (clusterPeers ClusterPeersResponse, err error) {
@@ -153,6 +157,17 @@ func (c *Client) DeleteSvmPeer(uuid string) (err error) {
 	uri := "/api/svm/peers/" + uuid
 
 	_, err = c.clientDelete(uri)
+	if err != nil {
+		return &apiError{1, err.Error()}
+	}
+
+	return nil
+}
+
+func (c *Client) PatchSvmPeer(jsonPayload []byte, uuid string) (err error) {
+	uri := "/api/svm/peers/" + uuid
+
+	_, err = c.clientPatch(uri, jsonPayload)
 	if err != nil {
 		return &apiError{1, err.Error()}
 	}

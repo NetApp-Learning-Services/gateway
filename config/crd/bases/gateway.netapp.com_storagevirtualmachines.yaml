@@ -1770,7 +1770,7 @@ spec:
                     description: Provides optional remote peer cluster
                     properties:
                       clusterName:
-                        description: Provides required remote cluster name
+                        description: Provides optional remote cluster name
                         format: string
                         type: string
                       ipAddresses:
@@ -1788,6 +1788,10 @@ spec:
                           type: object
                         minItems: 1
                         type: array
+                      svmName:
+                        description: Provides required remote svm name
+                        format: string
+                        type: string
                     required:
                     - ipAddresses
                     type: object

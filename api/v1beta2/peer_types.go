@@ -39,7 +39,7 @@ type PeerApplication struct {
 }
 
 type PeerRemote struct {
-	// Provides required remote cluster name
+	// Provides optional remote cluster name
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:validation:Format:=string
 	Clustername string `json:"clusterName,omitempty"`
@@ -48,6 +48,11 @@ type PeerRemote struct {
 	// +kubebuilder:validation:Required
 	// +kubebuilder:validation:MinItems:=1
 	Ipaddresses []PeerRemoteAddress `json:"ipAddresses"`
+
+	// Provides required remote svm name
+	// +kubebuilder:validation:Required
+	// +kubebuilder:validation:Format:=string
+	Svmname string `json:"svmName,omitempty"`
 }
 
 type PeerRemoteAddress struct {
