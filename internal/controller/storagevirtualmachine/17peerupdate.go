@@ -118,7 +118,7 @@ func (r *StorageVirtualMachineReconciler) reconcilePeerUpdate(ctx context.Contex
 	clusterPeerName := ""
 
 	//TODO:  Eliminate [0]
-	clusterPeers, err := oc.GetClusterPeer(svmCR.Spec.PeerConfig.Remote.Ipaddresses[0].IPAddress)
+	clusterPeers, err := oc.GetClusterPeerByName(svmCR.Spec.PeerConfig.Name)
 	if err != nil && errors.IsNotFound(err) {
 		createClusterPeer = true
 	} else if err != nil {

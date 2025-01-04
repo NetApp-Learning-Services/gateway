@@ -80,8 +80,29 @@ type SvmPeerPatch struct {
 
 //const returnPeerRecords string = "?return_records=true"
 
-func (c *Client) GetClusterPeer(remoteIp string) (clusterPeers ClusterPeersResponse, err error) {
+func (c *Client) GetClusterPeerByIp(remoteIp string) (clusterPeers ClusterPeersResponse, err error) {
 	uri := "/api/cluster/peers?ip_address=" + remoteIp
+
+	data, err := c.clientGet(uri)
+	if err != nil {
+		return clusterPeers, &apiError{1, err.Error()}
+	}
+
+	var resp ClusterPeersResponse
+	err = json.Unmarshal(data, &resp)
+	if err != nil {
+		return resp, &apiError{2, err.Error()}
+	}
+
+	if resp.NumRecords == 0 {
+		return clusterPeers, errors.NewNotFound(schema.GroupResource{Group: "gateway.netapp.com", Resource: "StorageVirtualMachine"}, "no cluster peers")
+	}
+
+	return resp, nil
+}
+
+func (c *Client) GetClusterPeerByName(relationshipName string) (clusterPeers ClusterPeersResponse, err error) {
+	uri := "/api/cluster/peers?name=" + relationshipName
 
 	data, err := c.clientGet(uri)
 	if err != nil {

@@ -87,8 +87,15 @@ func (r *StorageVirtualMachineReconciler) finalizeSVM(ctx context.Context,
 		//check to see if cluster peering is present and defined by custom resource
 		//TODO:  Eliminate [0]
 		if svmCR.Spec.PeerConfig != nil {
-			clusterPeerServices, err := oc.GetClusterPeer(svmCR.Spec.PeerConfig.Remote.Ipaddresses[0].IPAddress)
-			if err == nil || clusterPeerServices.NumRecords != 0 {
+			clusterPeerServices, err := oc.GetClusterPeerByName(svmCR.Spec.PeerConfig.Name)
+			if err != nil && errors.IsNotFound(err) {
+				log.Info("No cluster peers found - continuing with deletion")
+			}
+			if err != nil {
+				log.Error(err, "Error get cluster peers")
+			}
+			if clusterPeerServices.NumRecords != 0 {
+				log.Info(fmt.Sprintf("Deleting %v cluster peers", clusterPeerServices.NumRecords))
 				//delete the peer relationship
 				for _, peer := range clusterPeerServices.Records {
 					oc.DeleteClusterPeer(peer.Uuid)
@@ -151,7 +158,8 @@ func (r *StorageVirtualMachineReconciler) finalizeSVM(ctx context.Context,
 
 		err = oc.DeleteStorageVM(svmCR.Spec.SvmUuid)
 		if err != nil {
-			return fmt.Errorf("SVM not deleted yet")
+			log.Error(err, "SVM not deleted yet")
+			return err
 		}
 	}
 
