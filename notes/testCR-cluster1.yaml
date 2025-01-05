@@ -113,8 +113,7 @@ spec:
     applications: 
     - app: snapmirror
     remote:
-      ipAddresses: 
-      - ip: 192.168.0.135
+      ipAddress: 192.168.0.135
       svmName: svmdst
     interfaces:
     - name: intercluster1

@@ -60,13 +60,8 @@ type PeerRelationship struct {
 }
 
 type ClusterRef struct {
-	Name  string `json:"name"`
-	UUID  string `json:"uuid"`
-	Links struct {
-		Self struct {
-			Href string `json:"href"`
-		} `json:"self"`
-	} `json:"_links"`
+	Name string `json:"name,omitempty"`
+	UUID string `json:"uuid,omitempty"`
 }
 
 type SvmPeersResponse struct {
@@ -80,29 +75,8 @@ type SvmPeerPatch struct {
 
 //const returnPeerRecords string = "?return_records=true"
 
-func (c *Client) GetClusterPeerByIp(remoteIp string) (clusterPeers ClusterPeersResponse, err error) {
-	uri := "/api/cluster/peers?ip_address=" + remoteIp
-
-	data, err := c.clientGet(uri)
-	if err != nil {
-		return clusterPeers, &apiError{1, err.Error()}
-	}
-
-	var resp ClusterPeersResponse
-	err = json.Unmarshal(data, &resp)
-	if err != nil {
-		return resp, &apiError{2, err.Error()}
-	}
-
-	if resp.NumRecords == 0 {
-		return clusterPeers, errors.NewNotFound(schema.GroupResource{Group: "gateway.netapp.com", Resource: "StorageVirtualMachine"}, "no cluster peers")
-	}
-
-	return resp, nil
-}
-
-func (c *Client) GetClusterPeerByName(relationshipName string) (clusterPeers ClusterPeersResponse, err error) {
-	uri := "/api/cluster/peers?name=" + relationshipName
+func (c *Client) GetClusterPeers() (clusterPeers ClusterPeersResponse, err error) {
+	uri := "/api/cluster/peers?order_by=name&fields=remote,status,uuid,authentication,encryption"
 
 	data, err := c.clientGet(uri)
 	if err != nil {

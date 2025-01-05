@@ -11,6 +11,7 @@ import (
 	"github.com/go-logr/logr"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
@@ -113,12 +114,10 @@ func (r *StorageVirtualMachineReconciler) reconcilePeerUpdate(ctx context.Contex
 
 	// CLUSTER PEERING
 
-	log.Info("Proceeding with Cluster peering")
-	createClusterPeer := false
-	clusterPeerName := ""
+	log.Info("Check Cluster peer relationship")
+	createClusterPeer := true //default true
 
-	//TODO:  Eliminate [0]
-	clusterPeers, err := oc.GetClusterPeerByName(svmCR.Spec.PeerConfig.Name)
+	clusterPeers, err := oc.GetClusterPeers()
 	if err != nil && errors.IsNotFound(err) {
 		createClusterPeer = true
 	} else if err != nil {
@@ -127,20 +126,32 @@ func (r *StorageVirtualMachineReconciler) reconcilePeerUpdate(ctx context.Contex
 		return err
 	}
 
+	if clusterPeers.NumRecords != 0 {
+		for _, val := range clusterPeers.Records {
+			if val.Name == svmCR.Spec.PeerConfig.Name {
+				for _, ip := range val.Remote.Addresses {
+					if ip == svmCR.Spec.PeerConfig.Remote.Ipaddress {
+						createClusterPeer = false
+					}
+				}
+			}
+		}
+	}
+
 	var upsertClusterPeer ontap.ClusterPeer
 
 	if createClusterPeer {
-		//TODO:  Eliminate [0]
-		log.Info("No Cluster peer defined for cluster: " + svmCR.Spec.PeerConfig.Remote.Ipaddresses[0].IPAddress + " - creating Cluster Peer")
+
+		log.Info("No Cluster peer defined for cluster: " + svmCR.Spec.PeerConfig.Remote.Ipaddress + " - creating Cluster Peer")
 		upsertClusterPeer.Name = svmCR.Spec.PeerConfig.Name
 		upsertClusterPeer.Authentication.Passphrase = svmCR.Spec.PeerConfig.Passphrase
 		upsertClusterPeer.Encryption.Proposed = svmCR.Spec.PeerConfig.Encryption
 		for _, val := range svmCR.Spec.PeerConfig.Applications {
 			upsertClusterPeer.Applications = append(upsertClusterPeer.Applications, val.App)
 		}
-		for _, val := range svmCR.Spec.PeerConfig.Remote.Ipaddresses {
-			upsertClusterPeer.Remote.Addresses = append(upsertClusterPeer.Remote.Addresses, val.IPAddress)
-		}
+
+		upsertClusterPeer.Remote.Addresses = append(upsertClusterPeer.Remote.Addresses, svmCR.Spec.PeerConfig.Remote.Ipaddress)
+
 		var localSVM ontap.SvmRef
 		localSVM.Name = svmCR.Spec.SvmName
 		upsertClusterPeer.InitialAllowedSVMs = append(upsertClusterPeer.InitialAllowedSVMs, localSVM)
@@ -170,31 +181,41 @@ func (r *StorageVirtualMachineReconciler) reconcilePeerUpdate(ctx context.Contex
 			}
 
 		}
-		log.Info("Cluster peer request created successful")
-	}
+		log.Info("Cluster peer request created successful - requeuing")
+		return errors.NewNotFound(schema.GroupResource{Group: "gateway.netapp.com", Resource: "StorageVirtualMachine"}, "waiting for cluster peer")
+	} else {
+		if clusterPeers.NumRecords != 0 {
+			requeue := true
+			for _, val := range clusterPeers.Records {
+				if val.Status.State == ClusterPeerAvailable {
+					requeue = false
 
-	if clusterPeers.NumRecords != 0 && svmCR.Spec.PeerConfig.Remote.Clustername == "" {
-		//Check to see if peer state is available
-		for _, val := range clusterPeers.Records {
-			if val.Status.State == ClusterPeerAvailable {
-				log.Info("Remote cluster " + val.Remote.Name + " accepted")
-				clusterPeerName = val.Remote.Name
+					if svmCR.Spec.PeerConfig.Remote.Clustername == "" {
+						log.Info("Remote cluster " + val.Remote.Name + " accepted")
+						//Add the remote cluster name to CR
+						patch := client.MergeFrom(svmCR.DeepCopy())
+						svmCR.Spec.PeerConfig.Remote.Clustername = val.Remote.Name
+						err = r.Patch(ctx, svmCR, patch)
+						if err != nil {
+							log.Error(err, "Error patching the new cluster peer uuid in the custom resource - requeuing")
+							r.Recorder.Event(svmCR, "Warning", "ClusterPeerCreationFailed", "Error: "+err.Error())
+							_ = r.setConditionSVMCreation(ctx, svmCR, CONDITION_STATUS_FALSE)
+							return err
+						}
+						_ = r.setConditionPeerClusterService(ctx, svmCR, CONDITION_STATUS_TRUE)
+						r.Recorder.Event(svmCR, "Normal", "ClusterPeerCreationSucceeded", "Created cluster peer successfully")
+					}
 
-				//Aadd the remote cluster uuid to CR
-				patch := client.MergeFrom(svmCR.DeepCopy())
-				svmCR.Spec.PeerConfig.Remote.Clustername = val.Remote.Name
-				err = r.Patch(ctx, svmCR, patch)
-				if err != nil {
-					log.Error(err, "Error patching the new cluster peer uuid in the custom resource - requeuing")
-					r.Recorder.Event(svmCR, "Warning", "ClusterPeerCreationFailed", "Error: "+err.Error())
-					_ = r.setConditionSVMCreation(ctx, svmCR, CONDITION_STATUS_FALSE)
-					return err
+					log.Info("Cluster peer created successful with remote cluster " + val.Remote.Name)
 				}
-
-				_ = r.setConditionPeerClusterService(ctx, svmCR, CONDITION_STATUS_TRUE)
-				r.Recorder.Event(svmCR, "Normal", "ClusterPeerCreationSucceeded", "Created cluster peer successfully")
-				log.Info("Cluster peer created successful with remote cluster " + clusterPeerName)
 			}
+			if requeue {
+				log.Info("Waiting for cluster peer to be available - requeuing")
+				return errors.NewNotFound(schema.GroupResource{Group: "gateway.netapp.com", Resource: "StorageVirtualMachine"}, "waiting for cluster peer")
+			}
+		} else {
+			log.Info("Cluster peer not created - requeuing")
+			return errors.NewNotFound(schema.GroupResource{Group: "gateway.netapp.com", Resource: "StorageVirtualMachine"}, "waiting for cluster peer")
 		}
 	}
 
@@ -203,11 +224,10 @@ func (r *StorageVirtualMachineReconciler) reconcilePeerUpdate(ctx context.Contex
 	// SVM PEERING
 
 	// Should have an available cluster peer relationship
-	log.Info("Proceeding with SVM peering")
+	log.Info("Checking SVM peer relationship")
 
 	createSvmPeer := false
 
-	//TODO:  Eliminate [0]
 	svmPeers, err := oc.GetSvmPeer(svmCR.Spec.SvmName)
 	if err != nil && errors.IsNotFound(err) {
 		createSvmPeer = true
@@ -237,9 +257,9 @@ func (r *StorageVirtualMachineReconciler) reconcilePeerUpdate(ctx context.Contex
 			return err
 		}
 
-		if oc.Debug {
-			log.Info("[DEBUG] SVM Peer creation payload: " + fmt.Sprintf("%#v\n", upsertSvmPeer))
-		}
+		//if oc.Debug {
+		log.Info("[DEBUG] SVM Peer creation payload: " + fmt.Sprintf("%#v\n", upsertSvmPeer))
+		//}
 
 		err = oc.CreateSvmPeer(jsonPayload)
 		if err != nil {

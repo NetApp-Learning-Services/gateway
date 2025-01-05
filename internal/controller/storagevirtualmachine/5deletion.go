@@ -85,9 +85,8 @@ func (r *StorageVirtualMachineReconciler) finalizeSVM(ctx context.Context,
 		}
 
 		//check to see if cluster peering is present and defined by custom resource
-		//TODO:  Eliminate [0]
 		if svmCR.Spec.PeerConfig != nil {
-			clusterPeerServices, err := oc.GetClusterPeerByName(svmCR.Spec.PeerConfig.Name)
+			clusterPeerServices, err := oc.GetClusterPeers()
 			if err != nil && errors.IsNotFound(err) {
 				log.Info("No cluster peers found - continuing with deletion")
 			}

@@ -232,7 +232,13 @@ func (r *StorageVirtualMachineReconciler) Reconcile(ctx context.Context, req ctr
 			// Reconcile Peer information
 			err = r.reconcilePeerUpdate(ctx, svmCR, svmRetrieved.Uuid, oc, log)
 			if err != nil {
-				if strings.Contains(err.Error(), "context deadline exceeded") || strings.Contains(err.Error(), "An introductory RPC to the peer address") {
+				if strings.Contains(err.Error(), "context deadline exceeded") {
+					return ctrl.Result{RequeueAfter: 30 * time.Second}, nil
+				}
+				if strings.Contains(err.Error(), "An introductory RPC to the peer address") {
+					return ctrl.Result{RequeueAfter: 30 * time.Second}, nil
+				}
+				if strings.Contains(err.Error(), "waiting for cluster peer") {
 					return ctrl.Result{RequeueAfter: 30 * time.Second}, nil
 				}
 				return ctrl.Result{RequeueAfter: 30 * time.Second}, err
