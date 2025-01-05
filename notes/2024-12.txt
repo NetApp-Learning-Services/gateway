@@ -162,3 +162,17 @@ GET /api/snapmirror/relationships?fields=uuid%2Cstate%2Chealthy%2Ctransfer%2Csou
 GET /api/snapmirror/relationships?fields=uuid%2Csource%2Cdestination&list_destinations_only=true&return_timeout=120(0.363s)
 GET /api/network/ip/interfaces?services=intercluster_core&fields=ipspace%2Cip%2Clocation%2Cstate&return_timeout=120(0.262s)
 
+CREATE SVM PEER:
+
+GET /api/svm/peers?return_timeout=120&fields=svm%2Cpeer%2Cstate%2Cuuid%2Capplications&max_records=20(0.023s)
+OPTIONS /api/svm/peers?return_schema=POST&peer.cluster.name=c1&applications=snapmirror%7Cflexcache&fields=peer.svm.name&return_timeout=120(0.605s)
+GET /api/svm/peers?fields=name%2Cpeer.cluster.name%2Cpeer.cluster.uuid%2Cpeer.svm.uuid%2Cpeer.svm.name%2Cstate%2Csvm%2Capplications%2Cuuid&return_timeout=120(0.034s)
+POST /api/svm/peers { "applications": [ "snapmirror", "flexcache" ], "peer": { "cluster": { "name": "c1" }, "svm": { "name": "svmsrc" } }, "svm": { "name": "svmdst" } }(0.039s)
+GET /api/cluster/jobs/53b66baa-cbb3-11ef-a238-005056b093ea?fields=code%2Cdescription%2Cend_time%2Cerror%2C_links%2Cmessage%2Cstart_time%2Cstate%2Csvm%2Cuuid%2Carguments&return_timeout=120(0.519s)
+GET /api/cluster/jobs/53b66baa-cbb3-11ef-a238-005056b093ea?fields=code%2Cdescription%2Cend_time%2Cerror%2C_links%2Cmessage%2Cstart_time%2Cstate%2Csvm%2Cuuid%2Carguments&return_timeout=120(0.021s)
+GET /api/svm/peers?return_records=false&return_timeout=120(0.068s)
+
+DELETING SVM PEER:
+GET /api/svm/peers?return_timeout=120&fields=svm%2Cpeer%2Cstate%2Cuuid%2Capplications&max_records=20(0.024s)
+DELETE /api/svm/peers/53b66704-cbb3-11ef-a238-005056b093ea(0.052s)
+GET /api/cluster/jobs/731ea0a6-cbb3-11ef-a238-005056b093ea?fields=code%2Cdescription%2Cend_time%2Cerror%2C_links%2Cmessage%2Cstart_time%2Cstate%2Csvm%2Cuuid%2Carguments&return_timeout=120(0.135s)

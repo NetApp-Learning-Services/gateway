@@ -241,6 +241,9 @@ func (r *StorageVirtualMachineReconciler) Reconcile(ctx context.Context, req ctr
 				if strings.Contains(err.Error(), "waiting for cluster peer") {
 					return ctrl.Result{RequeueAfter: 30 * time.Second}, nil
 				}
+				if strings.Contains(err.Error(), "waiting for SVM peer") {
+					return ctrl.Result{RequeueAfter: 30 * time.Second}, nil
+				}
 				return ctrl.Result{RequeueAfter: 30 * time.Second}, err
 			}
 		}

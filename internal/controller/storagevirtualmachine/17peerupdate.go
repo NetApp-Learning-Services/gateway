@@ -181,7 +181,7 @@ func (r *StorageVirtualMachineReconciler) reconcilePeerUpdate(ctx context.Contex
 			}
 
 		}
-		log.Info("Cluster peer request created successful - requeuing")
+		log.Info("Cluster peer request created successful - requeuing to wait for respond")
 		return errors.NewNotFound(schema.GroupResource{Group: "gateway.netapp.com", Resource: "StorageVirtualMachine"}, "waiting for cluster peer")
 	} else {
 		if clusterPeers.NumRecords != 0 {
@@ -225,10 +225,9 @@ func (r *StorageVirtualMachineReconciler) reconcilePeerUpdate(ctx context.Contex
 
 	// Should have an available cluster peer relationship
 	log.Info("Checking SVM peer relationship")
+	createSvmPeer := true //default true
 
-	createSvmPeer := false
-
-	svmPeers, err := oc.GetSvmPeer(svmCR.Spec.SvmName)
+	svmPeers, err := oc.GetSvmPeers(svmCR.Spec.SvmName)
 	if err != nil && errors.IsNotFound(err) {
 		createSvmPeer = true
 	} else if err != nil {
@@ -237,11 +236,19 @@ func (r *StorageVirtualMachineReconciler) reconcilePeerUpdate(ctx context.Contex
 		return err
 	}
 
+	if svmPeers.NumRecords != 0 {
+		for _, val := range svmPeers.Records {
+			if val.Peer.Cluster.Name == svmCR.Spec.PeerConfig.Remote.Clustername {
+				createSvmPeer = false
+			}
+		}
+	}
+
 	var upsertSvmPeer ontap.SvmPeer
 
 	if createSvmPeer {
-		log.Info("No SVM peer for cluster: " + svmCR.Spec.PeerConfig.Remote.Clustername + " - creating SVM peer")
 
+		log.Info("No SVM peer for remote cluster " + svmCR.Spec.PeerConfig.Remote.Clustername + " and local SVM " + svmCR.Spec.SvmName + " - creating SVM peer")
 		for _, val := range svmCR.Spec.PeerConfig.Applications {
 			upsertSvmPeer.Applications = append(upsertSvmPeer.Applications, val.App)
 		}
@@ -274,44 +281,54 @@ func (r *StorageVirtualMachineReconciler) reconcilePeerUpdate(ctx context.Contex
 			}
 
 		}
-		log.Info("SVM peer request created successful")
-	}
+		log.Info("SVM peer request created successful - requeuing to wait for respond")
+		return errors.NewNotFound(schema.GroupResource{Group: "gateway.netapp.com", Resource: "StorageVirtualMachine"}, "waiting for SVM peer")
+	} else {
+		if svmPeers.NumRecords != 0 {
+			requeue := true
+			for _, val := range svmPeers.Records {
+				if val.State == SvmPeerPending && val.Peer.Cluster.Name == svmCR.Spec.PeerConfig.Remote.Clustername {
+					log.Info("Remote SVM " + val.Peer.Svm.Name + "peer request pending - patching")
 
-	if svmPeers.NumRecords != 0 {
-		//Check to see if peer state is available
-		for _, val := range svmPeers.Records {
-			if val.State == SvmPeerPending {
-				log.Info("SVM peer " + val.Peer.Svm.Name + " pending - patching")
+					//PATCH
+					var patchSvmPeer ontap.SvmPeerPatch
+					patchSvmPeer.State = SvmPeerPeered
+					jsonPayload, err := json.Marshal(patchSvmPeer)
+					if err != nil {
+						//error creating the json body
+						log.Error(err, "Error creating the json payload for SVM peer patch - requeuing")
+						_ = r.setConditionPeerSvmService(ctx, svmCR, CONDITION_STATUS_FALSE)
+						return err
+					}
 
-				//PATCH
-				var patchSvmPeer ontap.SvmPeerPatch
-				patchSvmPeer.State = SvmPeerPeered
-				jsonPayload, err := json.Marshal(patchSvmPeer)
-				if err != nil {
-					//error creating the json body
-					log.Error(err, "Error creating the json payload for SVM peer patch - requeuing")
-					_ = r.setConditionPeerSvmService(ctx, svmCR, CONDITION_STATUS_FALSE)
-					return err
-				}
+					if oc.Debug {
+						log.Info("[DEBUG] SVM Peer patch payload: " + fmt.Sprintf("%#v\n", patchSvmPeer))
+					}
 
-				if oc.Debug {
-					log.Info("[DEBUG] SVM Peer patch payload: " + fmt.Sprintf("%#v\n", patchSvmPeer))
-				}
-
-				err = oc.PatchSvmPeer(jsonPayload, val.Uuid)
-				if err != nil {
-					log.Error(err, "Error patching the SVM peer - requeuing")
-					_ = r.setConditionPeerSvmService(ctx, svmCR, CONDITION_STATUS_FALSE)
-					r.Recorder.Event(svmCR, "Warning", "SvmPeerPatchFailed", "Error: "+err.Error())
-					return err
+					err = oc.PatchSvmPeer(jsonPayload, val.Uuid)
+					if err != nil {
+						log.Error(err, "Error patching the SVM peer - requeuing")
+						_ = r.setConditionPeerSvmService(ctx, svmCR, CONDITION_STATUS_FALSE)
+						r.Recorder.Event(svmCR, "Warning", "SvmPeerPatchFailed", "Error: "+err.Error())
+						return err
+					}
+					log.Info("SVM peer patch created successful - requeuing to verify SVM peer")
+					return errors.NewNotFound(schema.GroupResource{Group: "gateway.netapp.com", Resource: "StorageVirtualMachine"}, "waiting for SVM peer")
+				} else if val.State == SvmPeerPeered {
+					requeue = false
+					_ = r.setConditionPeerSvmService(ctx, svmCR, CONDITION_STATUS_TRUE)
+					r.Recorder.Event(svmCR, "Normal", "SvmPeerCreationSucceeded", "Created SVM peer successfully")
+					log.Info("SVM peer created successful with remote SVM: " + svmCR.Spec.PeerConfig.Remote.Svmname)
 				}
 
 			}
-			log.Info("SVM peer patch created successful")
-
-			_ = r.setConditionPeerSvmService(ctx, svmCR, CONDITION_STATUS_TRUE)
-			r.Recorder.Event(svmCR, "Normal", "SvmPeerCreationSucceeded", "Created SVM peer successfully")
-			log.Info("SVM peer created successful with remote SVM: " + svmCR.Spec.PeerConfig.Remote.Svmname)
+			if requeue {
+				log.Info("Waiting for SVM peer to be peered - requeuing")
+				return errors.NewNotFound(schema.GroupResource{Group: "gateway.netapp.com", Resource: "StorageVirtualMachine"}, "waiting for SVM peer")
+			}
+		} else {
+			log.Info("SVM peer not created - requeuing")
+			return errors.NewNotFound(schema.GroupResource{Group: "gateway.netapp.com", Resource: "StorageVirtualMachine"}, "waiting for SVM peer")
 		}
 	}
 

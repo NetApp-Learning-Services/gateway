@@ -117,8 +117,8 @@ func (c *Client) DeleteClusterPeer(uuid string) (err error) {
 	return nil
 }
 
-func (c *Client) GetSvmPeer(localSvm string) (svmPeers SvmPeersResponse, err error) {
-	uri := "/api/svm/peers?svm.name=" + localSvm
+func (c *Client) GetSvmPeers(localSvm string) (svmPeers SvmPeersResponse, err error) {
+	uri := "/api/svm/peers?svm.name=" + localSvm + "&fields=peer,applications,svm,name,uuid,state"
 
 	data, err := c.clientGet(uri)
 	if err != nil {
