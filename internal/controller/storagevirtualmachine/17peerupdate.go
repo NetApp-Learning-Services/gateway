@@ -238,7 +238,7 @@ func (r *StorageVirtualMachineReconciler) reconcilePeerUpdate(ctx context.Contex
 
 	if svmPeers.NumRecords != 0 {
 		for _, val := range svmPeers.Records {
-			if val.Peer.Cluster.Name == svmCR.Spec.PeerConfig.Remote.Clustername {
+			if val.Peer.Cluster.Name == svmCR.Spec.PeerConfig.Name {
 				createSvmPeer = false
 			}
 		}
