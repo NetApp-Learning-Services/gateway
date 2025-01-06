@@ -86,7 +86,7 @@ func (c *Client) GetIpInterfacesBySvmUuid(uuid string) (lifs IpInterfacesRespons
 }
 
 func (c *Client) GetIpInterfacesByServicePolicy(servicePolicy string) (lifs IpInterfacesResponse, err error) {
-	uri := "/api/network/ip/interfaces?service_policy.name=" + servicePolicy
+	uri := "/api/network/ip/interfaces?service_policy.name=" + servicePolicy + "&fields=ip.address,ip.netmask,enabled"
 
 	data, err := c.clientGet(uri)
 	if err != nil {

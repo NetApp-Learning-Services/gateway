@@ -89,9 +89,8 @@ func (r *StorageVirtualMachineReconciler) finalizeSVM(ctx context.Context,
 			svmPeerServices, err := oc.GetSvmPeers(svmCR.Spec.SvmName)
 			if err != nil && errors.IsNotFound(err) {
 				log.Info("No SVM peers found - continuing with deletion")
-			}
-			if err != nil {
-				log.Error(err, "Error get cluster peers")
+			} else if err != nil {
+				log.Error(err, "Error get SVM peers")
 			}
 			if svmPeerServices.NumRecords != 0 {
 				log.Info(fmt.Sprintf("Deleting %v SVM peers", svmPeerServices.NumRecords))
