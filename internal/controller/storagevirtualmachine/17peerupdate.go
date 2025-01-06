@@ -253,7 +253,7 @@ func (r *StorageVirtualMachineReconciler) reconcilePeerUpdate(ctx context.Contex
 			upsertSvmPeer.Applications = append(upsertSvmPeer.Applications, val.App)
 		}
 		upsertSvmPeer.LocalSvm.Name = svmCR.Spec.SvmName
-		upsertSvmPeer.Peer.Cluster.Name = svmCR.Spec.PeerConfig.Remote.Clustername
+		upsertSvmPeer.Peer.Cluster.Name = svmCR.Spec.PeerConfig.Name
 		upsertSvmPeer.Peer.Svm.Name = svmCR.Spec.PeerConfig.Remote.Svmname
 
 		jsonPayload, err := json.Marshal(upsertSvmPeer)

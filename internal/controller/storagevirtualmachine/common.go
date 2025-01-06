@@ -119,7 +119,7 @@ func UpdateLif(lifDefinition gateway.LIF, lifToUpdate ontap.IpInterface, lifServ
 		log.Info(fmt.Sprintf("LIF update successful: %v of type %v", lifToUpdate.Name, lifServicePolicy))
 
 	} else {
-		log.Info(fmt.Sprintf("No changes detected for LIf: %v of type %v", lifToUpdate.Name, lifServicePolicy))
+		log.Info(fmt.Sprintf("No changes detected for LIF: %v of type %v", lifToUpdate.Name, lifServicePolicy))
 	}
 	return nil
 }
