@@ -3,19 +3,19 @@
 snap install kubectl --channel=1.29/stable --classic
 code --install-extension ms-kubernetes-tools.vscode-kubernetes-tools
 git repo: https://github.com/NetApp-Learning-Services/gateway
-notes/kubeconfigSetup.sh
-notes/deleteMirror.sh
+notes/setup/kubeconfigSetup.sh
+notes/setup/deleteMirror.sh
 
 if you need to edit yamls: export KUBE_EDITOR='code --wait'
 
-1. Install docker:  
+1. Install docker: notes/setup/addDocker.sh 
 
 sudo apt update
 sudo apt install docker.io
 sudo usermod -aG docker $USER
 newgrp docker
 
-2. Install Go:
+2. Install Go: notes/setup/addGo.sh
 
 Check the current go version:  sudo apt list --installed | grep golang
 Purge current go version:  sudo apt-get purge golang*
@@ -28,7 +28,7 @@ export GO111MODULE=on
 check go: go env
 check go version: go version
 
-3. Install Operator-SDK:
+3. Install Operator-SDK:  notes/setup/addOperatorSDK.sh
 
 export ARCH=$(case $(uname -m) in x86_64) echo -n amd64 ;; aarch64) echo -n arm64 ;; *) echo -n $(uname -m) ;; esac)
 export OS=$(uname | awk '{print tolower($0)}')
