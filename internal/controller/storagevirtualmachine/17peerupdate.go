@@ -75,7 +75,7 @@ func (r *StorageVirtualMachineReconciler) reconcilePeerUpdate(ctx context.Contex
 			for _, val := range svmCR.Spec.PeerConfig.Lifs {
 
 				for i, lif := range lifs.Records {
-					if val.Name == lif.Name {
+					if val.IPAddress == lif.Ip.Address {
 						//skip this one
 						createLif = false
 						currentLifIndex = i
