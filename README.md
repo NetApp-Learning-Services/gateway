@@ -149,6 +149,28 @@ spec:
         ro: any
         superuser: any
         anon:  "65534"
+  peer:
+    name: c2
+    passphrase: specialphrase
+    encryption: tls-psk
+    applications: 
+    - app: snapmirror
+    remote:
+      ipAddress: 192.168.0.135
+      svmName: svmdst
+    interfaces:
+    - name: intercluster1
+      ip: 192.168.0.131
+      netmask: 255.255.255.0
+      broadcastDomain: Default
+      homeNode: Cluster1-01
+      ipspace: Default
+    - name: intercluster2
+      ip: 192.168.0.132
+      netmask: 255.255.255.0
+      broadcastDomain: Default
+      homeNode: Cluster1-01
+      ipspace: Default
 ``` 
 
 #### Deletion Policy
@@ -156,6 +178,15 @@ The svmDeletionPolicy can be either Delete or Retain (default).  If set to Delet
 
 #### S3
 The S3 protocol needs either HTTP or HTTPS configured, at least one user, and a S3-enabled LIF.  If you enable HTTPS, you must provide the a common name of CA certificate.  If the CA cert for the SVM does not exist, the operator will create a self-signed CA (root-ca) certificate. The operator will then create a Certificate Signing Request (CSR) with the common name the same as the SVM name and then sign the CSR with the CA certificate.  Finally, the signed CSR will then be installed as a server certificate with SVM.  This enables HTTPS' TSL for the S3 server. For a command-line equilvant to these steps, see this [doc](https://docs.netapp.com/us-en/ontap/s3-config/create-install-ca-certificate-svm-task.html). Finally, create at least 1 bucket with a minimum size of 102005473280 bytes (95 GiB).
+
+#### Peering
+In the peer section, cluster and SVM peering can be configured.  There should be two SVM yaml files to leverage this feature: one yaml for one cluster with a SVM definition and a second yaml for another cluster with a SVM defintion.  The following details related to the fields:
+* name: this is the name of the cluster peer configuration - this could be the name of the remote cluster
+* passphrase: this is the special phrase that must match the remote cluster's configuration 
+* encryption: this is either tls-psk or none
+* applications: this is either snapmirror, flashcache or both
+* remote: this contains a intercluster LIF IP address and an SVM to peer with on a remote cluster
+* interfaces: this contains definitions of local intercluster LIF(s)
 
 ### 5. Deploy NetApp [Trident](https://github.com/NetApp/trident) to manage the SVM resources created by this operator.
 
