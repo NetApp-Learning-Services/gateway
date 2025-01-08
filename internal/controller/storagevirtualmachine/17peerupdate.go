@@ -202,10 +202,10 @@ func (r *StorageVirtualMachineReconciler) reconcilePeerUpdate(ctx context.Contex
 							_ = r.setConditionSVMCreation(ctx, svmCR, CONDITION_STATUS_FALSE)
 							return err
 						}
-						_ = r.setConditionPeerClusterService(ctx, svmCR, CONDITION_STATUS_TRUE)
-						r.Recorder.Event(svmCR, "Normal", "ClusterPeerCreationSucceeded", "Created cluster peer successfully")
-					}
 
+					}
+					_ = r.setConditionPeerClusterService(ctx, svmCR, CONDITION_STATUS_TRUE)
+					r.Recorder.Event(svmCR, "Normal", "ClusterPeerCreationSucceeded", "Created cluster peer successfully")
 					log.Info("Cluster peer created successful with remote cluster " + val.Remote.Name)
 				}
 			}
