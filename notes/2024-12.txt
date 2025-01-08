@@ -137,7 +137,7 @@ TESTING THE OPERATOR
 
 24. Added peer subspec
 
-25. REST APIs:
+25. PEER REST APIs:
 
 Initial cluster request request:
 POST /api/cluster/peers { "initial_allowed_svms": [ { "name": "*" } ], "authentication": { "passphrase": "***", "in_use": "ok" }, "encryption": { "proposed": "tls_psk" }, "ipspace": { "name": "Default" }, "remote": { "ip_addresses": "***" }, "peer_applications": [ "flexcache", "snapmirror" ] }(0.289s)
@@ -176,3 +176,7 @@ DELETING SVM PEER:
 GET /api/svm/peers?return_timeout=120&fields=svm%2Cpeer%2Cstate%2Cuuid%2Capplications&max_records=20(0.024s)
 DELETE /api/svm/peers/53b66704-cbb3-11ef-a238-005056b093ea(0.052s)
 GET /api/cluster/jobs/731ea0a6-cbb3-11ef-a238-005056b093ea?fields=code%2Cdescription%2Cend_time%2Cerror%2C_links%2Cmessage%2Cstart_time%2Cstate%2Csvm%2Cuuid%2Carguments&return_timeout=120(0.135s)
+
+26. At the end of development, created the final config/deploy/v1beta2 install gatewayoperator.yaml using this command:
+
+kubectl kustomize config/default > config/deploy/v1beta2/gatewayoperator.yaml 

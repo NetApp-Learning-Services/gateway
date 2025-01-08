@@ -4,7 +4,7 @@ A simple Kubernetes operator that creates, configures, and deletes NetApp ONTAP 
 ## Description
 This operator uses Red Hat's [Operator-SDK](https://sdk.operatorframework.io) to scaffold a controller that manages an Storage Virtual Machines (SVMs) resources in an NetApp ONTAP cluster. 
 
-The current version of the operator is v1beta2.  V1beta2 migrated Operator-SDK to 1.34.1 and updated go dependencies to avoid critical warnings.  
+The current version of the operator is v1beta2.  V1beta2 uses Operator-SDK 1.34.1 and updated go dependencies to avoid critical warnings.  
 
 The operator creates and updates:
 * an SVM, 
