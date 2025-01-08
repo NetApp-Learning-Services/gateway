@@ -90,6 +90,12 @@ Create network LIF:
 POST /api/network/ip/service-policies?return_records=true { "name": "sm-custom-service-policy-nas-s3", "scope": "svm", "svm": { "name": "svm0" }, "services": [ "data_core", "data_s3_server", "data_nfs", "data_cifs", "data_fpolicy_client", "management_dns_client", "management_ad_client", "management_ldap_client", "management_nis_client", "data_dns_server" ] }(0.081s)
 POST /api/network/ip/interfaces { "name": "lif_svm0_786", "ip": { "address": "***", "netmask": "***" }, "location": { "broadcast_domain": { "name": "Default" }, "home_node": { "name": "Cluster1-01", "uuid": "71198e05-bec9-11ee-8284-005056b0a86b" } }, "svm": { "uuid": "240f9f26-ba5f-11ef-8316-005056b0d33d" }, "service_policy": { "name": "sm-custom-service-policy-nas-s3" } }(0.513s)
 
+POST /api/network/ip/service-policies?return_records=true { "name": "sm-custom-service-policy-nas-s3", "scope": "svm", "svm": { "name": "svmsrc" }, "services": [ "data_core", "data_s3_server", "data_nfs", "data_cifs", "data_fpolicy_client", "management_dns_client", "management_ad_client", "management_ldap_client", "management_nis_client", "data_dns_server" ] }(0.087s)
+POST /api/network/ip/interfaces { "ip": { "address": "***", "netmask": "***" }, "svm": { "name": "svmsrc" }, "location": { "broadcast_domain": { "name": "Default" }, "home_node": { "name": "Cluster1-01" } }, "service_policy": { "name": "sm-custom-service-policy-nas-s3" }, "name": "s32" }(0.262s)
+
+Create S3 bucket:
+POST /api/application/applications { "name": "tp-src", "smart_container": true, "svm": { "name": "svmsrc", "uuid": "d2b410c7-cdf2-11ef-a0bb-00505685fd8f" }, "s3_bucket": { "application_components": [ { "name": "tp-src", "access_policies": [ { "actions": [ "GetObject", "PutObject", "DeleteObject", "ListBucket" ], "effect": "allow", "principals": [ "gateway-s3-src" ], "resources": [ "tp-src", "tp-src/*" ] } ], "size": 102005473280, "capacity_tier": false, "storage_service": { "name": "value" } } ] } }(0.121s)
+
 7. Stubbed out v1beta2 new api: operator-sdk create api --group gateway --version v1beta2 --kind StorageVirtualMachine --resource
 
 8. Added files from api/v1beta1 to api/v1beta2
@@ -180,3 +186,13 @@ GET /api/cluster/jobs/731ea0a6-cbb3-11ef-a238-005056b093ea?fields=code%2Cdescrip
 26. At the end of development, created the final config/deploy/v1beta2 install gatewayoperator.yaml using this command:
 
 kubectl kustomize config/default > config/deploy/v1beta2/gatewayoperator.yaml 
+
+TEST 2:
+POST /api/svm/svms { "name": "svm0", "ipspace": { "name": "Default" }, "language": "c.utf_8", "ip_interfaces": [ { "name": "lif_svm0_465", "ip": { "address": "***", "netmask": "***" }, "service_policy": "default-data-files", "location": { "broadcast_domain": { "name": "Default" }, "home_node": { "name": "Cluster1-01", "uuid": "71198e05-bec9-11ee-8284-005056b0a86b" } } } ] }(0.524s)
+POST /api/protocols/s3/services { "enabled": true, "name": "svm0", "svm": { "uuid": "40951f1c-ce08-11ef-a0bb-00505685fd8f" }, "users": [ { "name": "sm_s3_user" } ], "is_http_enabled": true, "port": 80, "is_https_enabled": false }(0.129s)
+POST /api/network/ip/service-policies?return_records=true { "name": "sm-custom-service-policy-nas-s3", "scope": "svm", "svm": { "name": "svm0" }, "services": [ "data_core", "data_s3_server", "data_nfs", "data_cifs", "data_fpolicy_client", "management_dns_client", "management_ad_client", "management_ldap_client", "management_nis_client", "data_dns_server" ] }(0.585s)
+PATCH /api/network/ip/interfaces/43ce2fe3-ce08-11ef-a0bb-00505685fd8f { "service_policy": { "name": "sm-custom-service-policy-nas-s3" } }(0.234s)
+
+PATCH /api/protocols/s3/services/40951f1c-ce08-11ef-a0bb-00505685fd8f { "enabled": false }(0.056s)
+PATCH /api/protocols/s3/services/40951f1c-ce08-11ef-a0bb-00505685fd8f { "is_https_enabled": true, "certificate": { "uuid": "31c2fbba-ce0d-11ef-a0bb-00505685fd8f" }, "enabled": true }(0.052s)
+

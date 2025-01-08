@@ -37,7 +37,7 @@ func (r *StorageVirtualMachineReconciler) reconcileSvmCreation(ctx context.Conte
 		ifpayload.ServicePolicy = managementLIFServicePolicy
 
 		var locpayload ontap.Location
-		locpayload.BroadcastDomain.Name = svmCR.Spec.ManagementLIF.BroacastDomain
+		locpayload.BroadcastDomain.Name = svmCR.Spec.ManagementLIF.BroadcastDomain
 		locpayload.HomeNode.Name = svmCR.Spec.ManagementLIF.HomeNode
 		ifpayload.Location = locpayload
 		payload.IpInterfaces = append(payload.IpInterfaces, ifpayload)

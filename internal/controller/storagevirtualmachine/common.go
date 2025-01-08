@@ -50,7 +50,7 @@ func CreateLif(lifToCreate gateway.LIF, lifServicePolicy string, lifServicePolic
 	newLif.Name = lifToCreate.Name
 	newLif.Ip.Address = lifToCreate.IPAddress
 	newLif.Ip.Netmask = lifToCreate.Netmask
-	newLif.Location.BroadcastDomain.Name = lifToCreate.BroacastDomain
+	newLif.Location.BroadcastDomain.Name = lifToCreate.BroadcastDomain
 	newLif.Location.HomeNode.Name = lifToCreate.HomeNode
 	newLif.ServicePolicy.Name = lifServicePolicy
 	newLif.Scope = lifServicePolicyScope
