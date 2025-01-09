@@ -34,12 +34,24 @@ type S3UsersResponse struct {
 }
 
 type S3Bucket struct {
-	Name    string `json:"name,omitempty"`
-	Svm     SvmRef `json:"svm,omitempty"`
-	Size    int    `json:"size,omitempty"`
-	Type    string `json:"type,omitempty"`
-	Comment string `json:"comment,omitempty"`
-	Uuid    string `json:"uuid,omitempty"`
+	Name    string         `json:"name,omitempty"`
+	Svm     SvmRef         `json:"svm,omitempty"`
+	Size    int            `json:"size,omitempty"`
+	Type    string         `json:"type,omitempty"`
+	Comment string         `json:"comment,omitempty"`
+	Uuid    string         `json:"uuid,omitempty"`
+	Policy  S3BucketPolicy `json:"policy,omitempty"`
+}
+
+type S3BucketPolicy struct {
+	Statements S3BucketPolicyStatement `json:"statements,omitempty"`
+}
+
+type S3BucketPolicyStatement struct {
+	Actions    []string `json:"actions,omitempty"`
+	Principals []string `json:"principals,omitempty"`
+	Effect     string   `json:"effect,omitempty"`
+	Resources  []string `json:"resources,omitempty"`
 }
 
 type S3BucketsResponse struct {

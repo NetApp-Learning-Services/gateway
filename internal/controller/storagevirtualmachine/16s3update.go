@@ -378,13 +378,13 @@ func (r *StorageVirtualMachineReconciler) reconcileS3Update(ctx context.Context,
 			log.Info("No S3 buckets defined for SVM: " + uuid + " - creating S3 bucket(s)")
 		}
 
-		for _, currentBucket := range svmCR.Spec.S3Config.Buckets {
+		for _, definedBucket := range svmCR.Spec.S3Config.Buckets {
 
 			createBucket := true
 
 			for j := 0; j < bucketsRetrieved.NumRecords; j++ {
 
-				if currentBucket.Name == bucketsRetrieved.Records[j].Name {
+				if definedBucket.Name == bucketsRetrieved.Records[j].Name {
 					createBucket = false
 					log.Info("S3 bucket already present: " + bucketsRetrieved.Records[j].Name)
 				}
@@ -392,24 +392,35 @@ func (r *StorageVirtualMachineReconciler) reconcileS3Update(ctx context.Context,
 
 			if createBucket {
 				var newBucket ontap.S3Bucket
-				newBucket.Name = currentBucket.Name
-				if currentBucket.Type != "" {
-					newBucket.Type = currentBucket.Type
+				newBucket.Name = definedBucket.Name
+				if definedBucket.Type != "" {
+					newBucket.Type = definedBucket.Type
 				} else {
 					newBucket.Type = "s3" //magic word
 				}
 
-				if currentBucket.Size > 102005473280 {
-					newBucket.Size = currentBucket.Size
+				if definedBucket.Size > 102005473280 {
+					newBucket.Size = definedBucket.Size
 				} else {
 					newBucket.Size = 102005473280 //magic word - 95GiB
 				}
 
-				if currentBucket.Comment != "" {
-					newBucket.Comment = currentBucket.Comment
+				if definedBucket.Comment != "" {
+					newBucket.Comment = definedBucket.Comment
 				} else {
 					newBucket.Comment = "Gateway created" //magic word
 				}
+				newBucket.Policy.Statements.Effect = "allow"                                                           //magic word
+				newBucket.Policy.Statements.Actions = []string{"ListBucket", "GetObject", "PutObject", "DeleteObject"} //magic word
+				var principals []string
+				for _, val := range svmCR.Spec.S3Config.Users {
+					principals = append(principals, val.Name)
+				}
+				newBucket.Policy.Statements.Principals = principals
+				var resources []string
+				resources = append(resources, newBucket.Name)
+				resources = append(resources, newBucket.Name+"/*")
+				newBucket.Policy.Statements.Resources = resources
 
 				jsonPayload, err := json.Marshal(newBucket)
 				if err != nil {
