@@ -44,10 +44,10 @@ type S3Bucket struct {
 }
 
 type S3BucketPolicy struct {
-	Statements S3BucketPolicyStatement `json:"statements,omitempty"`
+	Statements []S3BucketPolicyStatements `json:"statements,omitempty"`
 }
 
-type S3BucketPolicyStatement struct {
+type S3BucketPolicyStatements struct {
 	Actions    []string `json:"actions,omitempty"`
 	Principals []string `json:"principals,omitempty"`
 	Effect     string   `json:"effect,omitempty"`

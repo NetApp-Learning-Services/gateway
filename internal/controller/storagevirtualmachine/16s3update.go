@@ -410,17 +410,21 @@ func (r *StorageVirtualMachineReconciler) reconcileS3Update(ctx context.Context,
 				} else {
 					newBucket.Comment = "Gateway created" //magic word
 				}
-				newBucket.Policy.Statements.Effect = "allow"                                                           //magic word
-				newBucket.Policy.Statements.Actions = []string{"ListBucket", "GetObject", "PutObject", "DeleteObject"} //magic word
+				var newBucketStatement ontap.S3BucketPolicyStatements
+				newBucketStatement.Effect = "allow"                                                           //magic word
+				newBucketStatement.Actions = []string{"ListBucket", "GetObject", "PutObject", "DeleteObject"} //magic word                             //magic word
+
 				var principals []string
 				for _, val := range svmCR.Spec.S3Config.Users {
 					principals = append(principals, val.Name)
 				}
-				newBucket.Policy.Statements.Principals = principals
+				newBucketStatement.Principals = principals
 				var resources []string
 				resources = append(resources, newBucket.Name)
 				resources = append(resources, newBucket.Name+"/*")
-				newBucket.Policy.Statements.Resources = resources
+				newBucketStatement.Resources = resources
+
+				newBucket.Policy.Statements = append(newBucket.Policy.Statements, newBucketStatement)
 
 				jsonPayload, err := json.Marshal(newBucket)
 				if err != nil {
