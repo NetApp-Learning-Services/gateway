@@ -2329,5 +2329,5 @@ spec:
             - ALL
       securityContext:
         runAsNonRoot: true
-      serviceAccountName: controller-manager
+      serviceAccountName: gateway-operator
       terminationGracePeriodSeconds: 10
