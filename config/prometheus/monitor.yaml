@@ -11,7 +11,7 @@ metadata:
     app.kubernetes.io/created-by: github.com_NetApp-Learning-Services_gateway
     app.kubernetes.io/part-of: github.com_NetApp-Learning-Services_gateway
     app.kubernetes.io/managed-by: kustomize
-  name: controller-manager-metrics-monitor
+  name: operator-metrics-monitor
   namespace: system
 spec:
   endpoints:

@@ -2072,7 +2072,7 @@ metadata:
     app.kubernetes.io/managed-by: kustomize
     app.kubernetes.io/name: serviceaccount
     app.kubernetes.io/part-of: github.com_NetApp-Learning-Services_gateway
-  name: gateway-controller-manager
+  name: gateway-operator
   namespace: gateway-system
 ---
 apiVersion: rbac.authorization.k8s.io/v1
@@ -2215,7 +2215,7 @@ roleRef:
   name: gateway-leader-election-role
 subjects:
 - kind: ServiceAccount
-  name: gateway-controller-manager
+  name: gateway-operator
   namespace: gateway-system
 ---
 apiVersion: rbac.authorization.k8s.io/v1
@@ -2235,7 +2235,7 @@ roleRef:
   name: gateway-manager-role
 subjects:
 - kind: ServiceAccount
-  name: gateway-controller-manager
+  name: gateway-operator
   namespace: gateway-system
 ---
 apiVersion: rbac.authorization.k8s.io/v1
@@ -2248,7 +2248,7 @@ roleRef:
   name: gateway-metrics-auth-role
 subjects:
 - kind: ServiceAccount
-  name: gateway-controller-manager
+  name: gateway-operator
   namespace: gateway-system
 ---
 apiVersion: v1
@@ -2258,7 +2258,7 @@ metadata:
     app.kubernetes.io/managed-by: kustomize
     app.kubernetes.io/name: test
     control-plane: controller-manager
-  name: gateway-controller-manager-metrics-service
+  name: gateway-operator-metrics-service
   namespace: gateway-system
 spec:
   ports:
@@ -2280,7 +2280,7 @@ metadata:
     app.kubernetes.io/name: deployment
     app.kubernetes.io/part-of: github.com_NetApp-Learning-Services_gateway
     control-plane: controller-manager
-  name: gateway-controller-manager
+  name: gateway-operator
   namespace: gateway-system
 spec:
   replicas: 1
@@ -2329,5 +2329,5 @@ spec:
             - ALL
       securityContext:
         runAsNonRoot: true
-      serviceAccountName: gateway-controller-manager
+      serviceAccountName: controller-manager
       terminationGracePeriodSeconds: 10

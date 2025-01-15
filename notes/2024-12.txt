@@ -133,7 +133,7 @@ TESTING THE OPERATOR
 
 19. docker login
 
-20. Update code, Run notes/testRemote.sh, review logs, repeat
+20. Update code, Run notes/testRemote-cluster1.sh, review logs, repeat
 
 21. v1beta2 code requires the creation of a Kubernetes secret - so updating storagevirtualmachine_controller.go 
 
@@ -196,3 +196,6 @@ PATCH /api/network/ip/interfaces/43ce2fe3-ce08-11ef-a0bb-00505685fd8f { "service
 PATCH /api/protocols/s3/services/40951f1c-ce08-11ef-a0bb-00505685fd8f { "enabled": false }(0.056s)
 PATCH /api/protocols/s3/services/40951f1c-ce08-11ef-a0bb-00505685fd8f { "is_https_enabled": true, "certificate": { "uuid": "31c2fbba-ce0d-11ef-a0bb-00505685fd8f" }, "enabled": true }(0.052s)
 
+27. Change the named of the deployment from gateway-controller-manager to gateway-operator
+
+28. To test peering, execute notes/testRemote-cluster1.sh and then execute notes/testRemote-cluster2.sh
