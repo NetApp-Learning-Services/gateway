@@ -13,7 +13,8 @@ The operator creates and updates:
 * an optional NFS configuration with NFS interfaces and NFS exports, 
 * an optional iSCSI configuration with iSCSI interfaces,
 * an optional NVMe/TCP configure with NVMe/TCP interfaces,
-* and an optional S3 configuration with S3 interfaces, users, HTTP/HTTPS, and buckets.
+* an optional S3 configuration with S3 interfaces, users, HTTP/HTTPS, and buckets,
+* and an optional peering configuration with intercluster LIFs, cluster peering and SVM peering.  
 
 When the custom resource (CR) is delete, the operator uses a finalizer (called gateway.netapp.com/finalizer) to delete the SVM and all it configuration when the CR is deleted. NOTE: You will loose SVM's data when the CR is deleted.   
 
