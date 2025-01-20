@@ -37,7 +37,8 @@ import (
 	gatewayv1alpha2 "gateway/api/v1alpha2"
 	gatewayv1alpha3 "gateway/api/v1alpha3"
 	gatewayv1beta1 "gateway/api/v1beta1"
-	"gateway/internal/controller"
+	gatewayv1beta2 "gateway/api/v1beta2"
+	svmcontroller "gateway/internal/controller/storagevirtualmachine"
 	//+kubebuilder:scaffold:imports
 )
 
@@ -53,6 +54,7 @@ func init() {
 	utilruntime.Must(gatewayv1alpha2.AddToScheme(scheme))
 	utilruntime.Must(gatewayv1alpha3.AddToScheme(scheme))
 	utilruntime.Must(gatewayv1beta1.AddToScheme(scheme))
+	utilruntime.Must(gatewayv1beta2.AddToScheme(scheme))
 	//+kubebuilder:scaffold:scheme
 }
 
@@ -86,7 +88,7 @@ func main() {
 		}),
 		HealthProbeBindAddress: probeAddr,
 		LeaderElection:         enableLeaderElection,
-		LeaderElectionID:       "f2ac972d.netapp.com",
+		LeaderElectionID:       "f2ac972d.gateway.netapp.com",
 		// LeaderElectionReleaseOnCancel defines if the leader should step down voluntarily
 		// when the Manager ends. This requires the binary to immediately end when the
 		// Manager is stopped, otherwise, this setting is unsafe. Setting this significantly
@@ -104,7 +106,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	if err = (&controller.StorageVirtualMachineReconciler{
+	if err = (&svmcontroller.StorageVirtualMachineReconciler{
 		Client: mgr.GetClient(),
 		Scheme: mgr.GetScheme(),
 		// Added to support events

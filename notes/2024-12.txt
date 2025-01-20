@@ -1,0 +1,201 @@
+0. Setup environment:
+
+snap install kubectl --channel=1.29/stable --classic
+code --install-extension ms-kubernetes-tools.vscode-kubernetes-tools
+git repo: https://github.com/NetApp-Learning-Services/gateway
+notes/setup/kubeconfigSetup.sh
+notes/setup/deleteMirror.sh
+
+if you need to edit yamls: export KUBE_EDITOR='code --wait'
+
+1. Install docker: notes/setup/addDocker.sh 
+
+sudo apt update
+sudo apt install docker.io
+sudo usermod -aG docker $USER
+newgrp docker
+
+2. Install Go: notes/setup/addGo.sh
+
+Check the current go version:  sudo apt list --installed | grep golang
+Purge current go version:  sudo apt-get purge golang*
+
+export PATH=$PATH:/usr/local/go/bin
+wget https://dl.google.com/go/go1.22.1.linux-amd64.tar.gz
+sudo tar -C /usr/local/ -xzf go1.22.1.linux-amd64.tar.gz
+export GO111MODULE=on
+
+check go: go env
+check go version: go version
+
+3. Install Operator-SDK:  notes/setup/addOperatorSDK.sh
+
+export ARCH=$(case $(uname -m) in x86_64) echo -n amd64 ;; aarch64) echo -n arm64 ;; *) echo -n $(uname -m) ;; esac)
+export OS=$(uname | awk '{print tolower($0)}')
+export OPERATOR_SDK_DL_URL=https://github.com/operator-framework/operator-sdk/releases/download/v1.34.2
+curl -LO ${OPERATOR_SDK_DL_URL}/operator-sdk_${OS}_${ARCH}
+chmod +x operator-sdk_${OS}_${ARCH} && sudo mv operator-sdk_${OS}_${ARCH} /usr/local/bin/operator-sdk
+
+check: operator-sdk version
+
+4. To update go dependiences recursively:  
+
+go mod tidy
+go get -u ./...
+go get -u golang.org/x/net # because of detected security vulnerabilities
+
+5.  Followed:  https://sdk.operatorframework.io/docs/upgrading-sdk-version/v1.38.0/
+
+Updated  go.mod
+	github.com/go-logr/logr v1.4.1
+	github.com/onsi/ginkgo v1.16.5
+	github.com/onsi/gomega v1.32.0
+	golang.org/x/exp v0.0.0-20220722155223-a9213eeb770e
+	k8s.io/api v0.30.1
+	k8s.io/apimachinery v0.30.1
+	k8s.io/client-go v0.30.1
+	sigs.k8s.io/controller-runtime v0.18.4
+
+Undid this step because stayed at 1.34.2
+
+ 6. REST APIs examples:
+
+If TLS:
+Create a certificate:
+GET /api/security/certificates?common_name=SVM_SYSMGR_CA&type=root_ca&svm.uuid=0709252d-ba46-11ef-8316-005056b0d33d&fields=uuid%2Ccommon_name%2Csvm%2Cexpiry_time%2Cpublic_certificate%2Cserial_number&return_timeout=120(0.329s)
+POST /api/security/certificates?return_records=true { "common_name": "***", "svm": { "uuid": "0709252d-ba46-11ef-8316-005056b0d33d" }, "type": "root_ca", "expiry_time": "P725DT" }(0.291s)
+GET /api/security/certificates?uuid=8b93aa03-ba47-11ef-8316-005056b0d33d&fields=uuid%2Ccommon_name%2Csvm%2Cexpiry_time%2Cpublic_certificate%2Cserial_number&return_timeout=120(0.055s)
+POST /api/security/certificate-signing-request { "subject_name": "CN=svm0" }(0.918s)
+POST /api/security/certificates/8b93aa03-ba47-11ef-8316-005056b0d33d/sign { "expiry_time": "P723DT", "signing_request": "***" }(0.242s)
+POST /api/security/certificates?return_records=true { "public_certificate": "***", "private_key": "***", "svm": { "uuid": "0709252d-ba46-11ef-8316-005056b0d33d" }, "type": "server" }(0.311s)
+GET /api/security/certificates?fields=uuid%2Cserial_number%2Ccommon_name%2Cexpiry_time%2Csvm%2Cauthority_key_identifier&uuid=8c5d6cdb-ba47-11ef-8316-005056b0d33d&type=server&return_timeout=120(0.056s)
+GET /api/security/certificates?fields=serial_number%2Cpublic_certificate%2Cexpiry_time&type=root_ca&subject_key_identifier=61%3AAE%3A88%3A46%3AF6%3AD5%3A1A%3A69%3A1A%3AA5%3A17%3A8C%3A38%3AD3%3AE3%3A4B%3A87%3A07%3A0B%3A35&return_timeout=120(0.284s)
+
+Create S3 server: 
+POST /api/protocols/s3/services { "enabled": true, "name": "svm0", "svm": { "uuid": "0709252d-ba46-11ef-8316-005056b0d33d" }, "users": [ { "name": "sm_s3_user" } ], "is_http_enabled": true, "port": 80, "is_https_enabled": true, "secure_port": 443, "certificate": { "uuid": "8c5d6cdb-ba47-11ef-8316-005056b0d33d" } }(0.267s)
+
+If using existing network:
+POST /api/network/ip/service-policies?return_records=true { "name": "sm-custom-service-policy-nas-s3", "scope": "svm", "svm": { "name": "svm0" }, "services": [ "data_core", "data_s3_server", "data_nfs", "data_cifs", "data_fpolicy_client", "management_dns_client", "management_ad_client", "management_ldap_client", "management_nis_client", "data_dns_server" ] }(0.146s)
+GET /api/network/ip/interfaces?ip.address=192.168.0.31&svm.uuid=0709252d-ba46-11ef-8316-005056b0d33d&return_timeout=120(0.057s)
+PATCH /api/network/ip/interfaces/1543d0bc-ba46-11ef-8316-005056b0d33d { "service_policy": { "name": "sm-custom-service-policy-nas-s3" } }(0.262s)
+
+If creating a new LIF: 
+Check to see if LIF exists:
+GET /api/network/ip/interfaces?ip.address=192.168.0.32&fields=ip&svm.uuid=240f9f26-ba5f-11ef-8316-005056b0d33d&return_timeout=120(0.069s)
+
+Configure S3 server: 
+POST /api/protocols/s3/services { "enabled": true, "name": "svm0", "svm": { "uuid": "240f9f26-ba5f-11ef-8316-005056b0d33d" }, "users": [ { "name": "sm_s3_user" } ], "is_http_enabled": true, "port": 80, "is_https_enabled": false }(0.078s)
+
+Create network LIF:
+POST /api/network/ip/service-policies?return_records=true { "name": "sm-custom-service-policy-nas-s3", "scope": "svm", "svm": { "name": "svm0" }, "services": [ "data_core", "data_s3_server", "data_nfs", "data_cifs", "data_fpolicy_client", "management_dns_client", "management_ad_client", "management_ldap_client", "management_nis_client", "data_dns_server" ] }(0.081s)
+POST /api/network/ip/interfaces { "name": "lif_svm0_786", "ip": { "address": "***", "netmask": "***" }, "location": { "broadcast_domain": { "name": "Default" }, "home_node": { "name": "Cluster1-01", "uuid": "71198e05-bec9-11ee-8284-005056b0a86b" } }, "svm": { "uuid": "240f9f26-ba5f-11ef-8316-005056b0d33d" }, "service_policy": { "name": "sm-custom-service-policy-nas-s3" } }(0.513s)
+
+POST /api/network/ip/service-policies?return_records=true { "name": "sm-custom-service-policy-nas-s3", "scope": "svm", "svm": { "name": "svmsrc" }, "services": [ "data_core", "data_s3_server", "data_nfs", "data_cifs", "data_fpolicy_client", "management_dns_client", "management_ad_client", "management_ldap_client", "management_nis_client", "data_dns_server" ] }(0.087s)
+POST /api/network/ip/interfaces { "ip": { "address": "***", "netmask": "***" }, "svm": { "name": "svmsrc" }, "location": { "broadcast_domain": { "name": "Default" }, "home_node": { "name": "Cluster1-01" } }, "service_policy": { "name": "sm-custom-service-policy-nas-s3" }, "name": "s32" }(0.262s)
+
+Create S3 bucket:
+POST /api/application/applications { "name": "tp-src", "smart_container": true, "svm": { "name": "svmsrc", "uuid": "d2b410c7-cdf2-11ef-a0bb-00505685fd8f" }, "s3_bucket": { "application_components": [ { "name": "tp-src", "access_policies": [ { "actions": [ "GetObject", "PutObject", "DeleteObject", "ListBucket" ], "effect": "allow", "principals": [ "gateway-s3-src" ], "resources": [ "tp-src", "tp-src/*" ] } ], "size": 102005473280, "capacity_tier": false, "storage_service": { "name": "value" } } ] } }(0.121s)
+
+7. Stubbed out v1beta2 new api: operator-sdk create api --group gateway --version v1beta2 --kind StorageVirtualMachine --resource
+
+8. Added files from api/v1beta1 to api/v1beta2
+
+9. Updated storagevirtualmachine_types.go from v1beta1 to v1beta2
+
+10. Ran make generate to created the zz_generate files
+
+11. Ran go mod tidy to get rid of the unused dependiences
+
+12. Add S3 sub spec to v1beta2 and ran make generate
+
+13. Add S3 sub spec to storagevirtualmachine_types and ran make generate and make manifests
+
+14. Create 16s3update.go and ontap/s3.go 
+
+16. Reviewed service policy for S3 LIF and it looks like there is no default service policy, need to create one that looks like this:
+
+          sm-custom-service-policy-nas-s3 
+                                     data-core: 0.0.0.0/0
+                                     data-nfs: 0.0.0.0/0                       
+                                     data-cifs: 0.0.0.0/0
+                                     data-s3-server: 0.0.0.0/0
+                                     data-fpolicy-client: 0.0.0.0/0
+                                     management-dns-client: 0.0.0.0/0
+                                     management-ad-client: 0.0.0.0/0
+                                     management-ldap-client: 0.0.0.0/0
+                                     management-nis-client: 0.0.0.0/0
+                                     data-dns-server: 0.0.0.0/0
+
+17.  Removed kubebuilder:storageversion from SVM's definition for all versions except v1beta2
+
+TESTING THE OPERATOR
+18. Removed mirror cache by running notes/deleteMirror.sh
+
+19. docker login
+
+20. Update code, Run notes/testRemote-cluster1.sh, review logs, repeat
+
+21. v1beta2 code requires the creation of a Kubernetes secret - so updating storagevirtualmachine_controller.go 
+
+22. Reorganized StorageVirtualMachine kind to a sub folder under internal/controller
+
+23. In main.go, rename controller to svmcontroller and modified path to internal/controller/storagevirtualmachine
+
+24. Added peer subspec
+
+25. PEER REST APIs:
+
+Initial cluster request request:
+POST /api/cluster/peers { "initial_allowed_svms": [ { "name": "*" } ], "authentication": { "passphrase": "***", "in_use": "ok" }, "encryption": { "proposed": "tls_psk" }, "ipspace": { "name": "Default" }, "remote": { "ip_addresses": "***" }, "peer_applications": [ "flexcache", "snapmirror" ] }(0.289s)
+GET /api/network/ip/interfaces?order_by=state&fields=state%2Cuuid%2Cenabled%2Cname%2Csvm%2Cservices%2Cservice_policy%2Cvip%2Cscope%2Cipspace.name%2Cip.address%2Clocation.is_home%2Clocation.node.name%2Clocation.port.name%2Clocation.home_node.name%2Clocation.home_port.name%2Clocation.home_port.uuid%2Clocation.home_port.node%2Cmetric.throughput.total&return_timeout=120(0.268s)
+GET /api/network/fc/interfaces?order_by=state&fields=state%2Cuuid%2Cenabled%2Cname%2Cwwpn%2Cdata_protocol%2Csvm.name%2Clocation.node.name%2Clocation.port.name%2Clocation.is_home%2Clocation.home_node.name%2Clocation.home_port.name%2Clocation.home_port.uuid%2Cmetric.throughput.total&return_timeout=120(0.119s)
+GET /api/protocols/san/portsets?fields=uuid%2Cname%2Cinterfaces&return_timeout=120(0.203s)
+GET /api/network/ipspaces?fields=name&order_by=name&return_timeout=120(0.113s)
+GET /api/svm/svms?order_by=name&fields=name%2Cipspace&ipspace.name=!null&return_timeout=120(0.217s)
+GET /api/network/ethernet/broadcast-domains?order_by=name&fields=name%2Cipspace&return_timeout=120(0.159s)
+GET /api/network/ethernet/broadcast-domains?fields=name%2Cmtu%2Cports%2Cipspace&order_by=name&return_timeout=120(0.114s)
+POST /api/private/cluster/usage(0.047s)
+GET /api/cluster/schedules?return_timeout=120&order_by=name&max_records=100&fields=type%2Ccron%2Cinterval%2Cname%2Cuuid&name=!pg-*(0.106s)
+GET /api/cloud/targets?owner=snapmirror%2Cs3_snapmirror&provider_type=sgws%2Contap_s3%2Caws_s3%2Cs3_compatible&fields=server%2Caccess_key%2Ccontainer%2Cused%2Cipspace%2Csvm%2Cprovider_type%2Csnapmirror_use%2Cport%2Cssl_enabled%2Ccertificate_validation_enabled%2Cowner%2Cscope&return_timeout=120(0.137s)
+GET /api/network/ip/interfaces?services=intercluster_core&fields=ipspace%2Cip%2Clocation%2Cstate&return_timeout=120(0.352s)
+GET /api/cluster/peers?order_by=name&fields=name%2Cstatus%2Cipspace%2Cremote%2Cauthentication%2Cuuid%2Cversion&return_timeout=120(0.175s)
+GET /api/cluster/peers?order_by=name&fields=name%2Cstatus%2Cipspace%2Cremote%2Cauthentication%2Cuuid%2Cversion&return_timeout=120(0.203s)
+GET /api/cluster/peers?order_by=name&fields=name%2Cstatus%2Cipspace%2Cremote%2Cauthentication%2Cuuid%2Cversion&return_timeout=120(0.32s)
+GET /api/network/ipspaces?order_by=name&fields=name&return_timeout=120(0.309s)
+GET /api/cluster/mediators?fields=ip_address%2Cpeer_cluster%2Cport%2Creachable%2Cuuid&return_timeout=120(0.243s)
+GET /api/svm/peers?fields=name%2Cpeer.cluster.name%2Cpeer.cluster.uuid%2Cpeer.svm.uuid%2Cpeer.svm.name%2Cstate%2Csvm%2Capplications%2Cuuid&return_timeout=120(0.334s)
+GET /api/snapmirror/relationships?fields=uuid%2Cstate%2Chealthy%2Ctransfer%2Csource%2Cdestination%2Cfabriclink.pending_work_task_count&return_timeout=120(0.308s)
+GET /api/snapmirror/relationships?fields=uuid%2Csource%2Cdestination&list_destinations_only=true&return_timeout=120(0.363s)
+GET /api/network/ip/interfaces?services=intercluster_core&fields=ipspace%2Cip%2Clocation%2Cstate&return_timeout=120(0.262s)
+
+CREATE SVM PEER:
+
+GET /api/svm/peers?return_timeout=120&fields=svm%2Cpeer%2Cstate%2Cuuid%2Capplications&max_records=20(0.023s)
+OPTIONS /api/svm/peers?return_schema=POST&peer.cluster.name=c1&applications=snapmirror%7Cflexcache&fields=peer.svm.name&return_timeout=120(0.605s)
+GET /api/svm/peers?fields=name%2Cpeer.cluster.name%2Cpeer.cluster.uuid%2Cpeer.svm.uuid%2Cpeer.svm.name%2Cstate%2Csvm%2Capplications%2Cuuid&return_timeout=120(0.034s)
+POST /api/svm/peers { "applications": [ "snapmirror", "flexcache" ], "peer": { "cluster": { "name": "c1" }, "svm": { "name": "svmsrc" } }, "svm": { "name": "svmdst" } }(0.039s)
+GET /api/cluster/jobs/53b66baa-cbb3-11ef-a238-005056b093ea?fields=code%2Cdescription%2Cend_time%2Cerror%2C_links%2Cmessage%2Cstart_time%2Cstate%2Csvm%2Cuuid%2Carguments&return_timeout=120(0.519s)
+GET /api/cluster/jobs/53b66baa-cbb3-11ef-a238-005056b093ea?fields=code%2Cdescription%2Cend_time%2Cerror%2C_links%2Cmessage%2Cstart_time%2Cstate%2Csvm%2Cuuid%2Carguments&return_timeout=120(0.021s)
+GET /api/svm/peers?return_records=false&return_timeout=120(0.068s)
+
+DELETING SVM PEER:
+GET /api/svm/peers?return_timeout=120&fields=svm%2Cpeer%2Cstate%2Cuuid%2Capplications&max_records=20(0.024s)
+DELETE /api/svm/peers/53b66704-cbb3-11ef-a238-005056b093ea(0.052s)
+GET /api/cluster/jobs/731ea0a6-cbb3-11ef-a238-005056b093ea?fields=code%2Cdescription%2Cend_time%2Cerror%2C_links%2Cmessage%2Cstart_time%2Cstate%2Csvm%2Cuuid%2Carguments&return_timeout=120(0.135s)
+
+26. At the end of development, created the final config/deploy/v1beta2 install gatewayoperator.yaml using this command:
+
+kubectl kustomize config/default > config/deploy/v1beta2/gatewayoperator.yaml 
+
+TEST 2:
+POST /api/svm/svms { "name": "svm0", "ipspace": { "name": "Default" }, "language": "c.utf_8", "ip_interfaces": [ { "name": "lif_svm0_465", "ip": { "address": "***", "netmask": "***" }, "service_policy": "default-data-files", "location": { "broadcast_domain": { "name": "Default" }, "home_node": { "name": "Cluster1-01", "uuid": "71198e05-bec9-11ee-8284-005056b0a86b" } } } ] }(0.524s)
+POST /api/protocols/s3/services { "enabled": true, "name": "svm0", "svm": { "uuid": "40951f1c-ce08-11ef-a0bb-00505685fd8f" }, "users": [ { "name": "sm_s3_user" } ], "is_http_enabled": true, "port": 80, "is_https_enabled": false }(0.129s)
+POST /api/network/ip/service-policies?return_records=true { "name": "sm-custom-service-policy-nas-s3", "scope": "svm", "svm": { "name": "svm0" }, "services": [ "data_core", "data_s3_server", "data_nfs", "data_cifs", "data_fpolicy_client", "management_dns_client", "management_ad_client", "management_ldap_client", "management_nis_client", "data_dns_server" ] }(0.585s)
+PATCH /api/network/ip/interfaces/43ce2fe3-ce08-11ef-a0bb-00505685fd8f { "service_policy": { "name": "sm-custom-service-policy-nas-s3" } }(0.234s)
+
+PATCH /api/protocols/s3/services/40951f1c-ce08-11ef-a0bb-00505685fd8f { "enabled": false }(0.056s)
+PATCH /api/protocols/s3/services/40951f1c-ce08-11ef-a0bb-00505685fd8f { "is_https_enabled": true, "certificate": { "uuid": "31c2fbba-ce0d-11ef-a0bb-00505685fd8f" }, "enabled": true }(0.052s)
+
+27. Change the named of the deployment from gateway-controller-manager to gateway-operator
+
+28. To test peering, execute notes/testRemote-cluster1.sh and then execute notes/testRemote-cluster2.sh

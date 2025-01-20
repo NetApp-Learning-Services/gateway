@@ -23,6 +23,7 @@ type IpInterface struct {
 	Scope         string        `json:"scope,omitempty"`
 	Enabled       bool          `json:"enabled,omitempty"`
 	Svm           SvmRef        `json:"svm,omitempty"`
+	Ipspace       Ref           `json:"ipspace,omitempty"`
 }
 
 type Ip struct {
@@ -47,7 +48,6 @@ type HomeNode struct {
 type ServicePolicy struct {
 	Links SelfLinks `json:"_links,omitempty"`
 	Name  string    `json:"name,omitempty"`
-	Uuid  string    `json:"uuid,omitempty"`
 }
 
 type IpInterfacesResponse struct {
@@ -70,6 +70,23 @@ type IpServicePolicy struct {
 
 func (c *Client) GetIpInterfacesBySvmUuid(uuid string) (lifs IpInterfacesResponse, err error) {
 	uri := "/api/network/ip/interfaces?svm.uuid=" + uuid
+
+	data, err := c.clientGet(uri)
+	if err != nil {
+		return lifs, &apiError{1, err.Error()}
+	}
+
+	var resp IpInterfacesResponse
+	err = json.Unmarshal(data, &resp)
+	if err != nil {
+		return resp, &apiError{2, err.Error()}
+	}
+
+	return resp, nil
+}
+
+func (c *Client) GetIpInterfacesByServicePolicy(servicePolicy string) (lifs IpInterfacesResponse, err error) {
+	uri := "/api/network/ip/interfaces?service_policy.name=" + servicePolicy + "&fields=ip.address,ip.netmask,enabled"
 
 	data, err := c.clientGet(uri)
 	if err != nil {
@@ -136,6 +153,40 @@ func (c *Client) DeleteIpInterface(uuid string) (err error) {
 
 	_, err = c.clientDelete(uri)
 	if err != nil {
+		return &apiError{1, err.Error()}
+	}
+
+	return nil
+}
+
+func (c *Client) CheckExistsInterfaceServicePolicyByName(servicePolicy string) (err error) {
+	uri := "/api/network/ip/service-policies?name=" + servicePolicy
+
+	data, err := c.clientGet(uri)
+	if err != nil {
+		//Error in GET request
+		return &apiError{1, err.Error()}
+	}
+	var resp IpServicePolicyResponse
+	err = json.Unmarshal(data, &resp)
+	if err != nil {
+		//Error in response
+		return &apiError{2, err.Error()}
+	}
+	if resp.NumRecords == 0 {
+		//Service Policy not found
+		return &apiError{3, "Lif service policy not found"}
+	}
+
+	// return nil if service policy name exists
+	return nil
+}
+
+func (c *Client) CreateInterfaceServicePolicy(jsonPayload []byte) (err error) {
+	uri := "/api/network/ip/service-policies"
+	_, err = c.clientPost(uri, jsonPayload)
+	if err != nil {
+		//fmt.Println("Error: " + err.Error())
 		return &apiError{1, err.Error()}
 	}
 

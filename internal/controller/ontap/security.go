@@ -10,10 +10,10 @@ type App string
 type UserRole string
 
 const (
-	Password         AuthMethodOption = "password"
-	Domain           AuthMethodOption = "domain"
-	Nsswitch         AuthMethodOption = "nsswitch"
-	Certificate      AuthMethodOption = "certificate"
+	AuthPassword     AuthMethodOption = "password"
+	AuthDomain       AuthMethodOption = "domain"
+	AuthNsswitch     AuthMethodOption = "nsswitch"
+	AuthCertificate  AuthMethodOption = "certificate"
 	Amqp             App              = "amqp"
 	Console          App              = "console"
 	ServiceProcessor App              = "service_processor"

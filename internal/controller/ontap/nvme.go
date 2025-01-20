@@ -14,7 +14,7 @@ type NvmeService struct {
 	Enabled *bool  `json:"enabled,omitempty"`
 }
 
-const returnNvmeQs string = "?return_records=true"
+const returnNvmeRecords string = "?return_records=true"
 
 func (c *Client) GetNvmeServiceBySvmUuid(uuid string) (nvmeService NvmeService, err error) {
 	uri := "/api/protocols/nvme/services/" + uuid
@@ -22,7 +22,7 @@ func (c *Client) GetNvmeServiceBySvmUuid(uuid string) (nvmeService NvmeService, 
 	data, err := c.clientGet(uri)
 	if err != nil {
 		if strings.Contains(err.Error(), "An NVMe service does not exist") {
-			return nvmeService, errors.NewNotFound(schema.GroupResource{Group: "gatewayv1beta1", Resource: "StorageVirtualMachine"}, "no nvme")
+			return nvmeService, errors.NewNotFound(schema.GroupResource{Group: "gateway.netapp.com", Resource: "StorageVirtualMachine"}, "no nvme")
 		}
 		return nvmeService, &apiError{1, err.Error()}
 	}
@@ -37,7 +37,7 @@ func (c *Client) GetNvmeServiceBySvmUuid(uuid string) (nvmeService NvmeService, 
 }
 
 func (c *Client) CreateNvmeService(jsonPayload []byte) (err error) {
-	uri := "/api/protocols/nvme/services" + returnNvmeQs
+	uri := "/api/protocols/nvme/services" + returnNvmeRecords
 	_, err = c.clientPost(uri, jsonPayload)
 	if err != nil {
 		//fmt.Println("Error: " + err.Error())
@@ -77,7 +77,7 @@ func (c *Client) DeleteNvmeService(uuid string) (err error) {
 }
 
 func (c *Client) GetNvmeInterfacesBySvmUuid(uuid string, servicePolicy string) (lifs IpInterfacesResponse, err error) {
-	uri := "/api/network/ip/interfaces" + qs + "&service_policy.name=" + servicePolicy + "&svm.uuid=" + uuid
+	uri := "/api/network/ip/interfaces" + returnNFSRecords + "&service_policy.name=" + servicePolicy + "&svm.uuid=" + uuid
 
 	data, err := c.clientGet(uri)
 	if err != nil {
