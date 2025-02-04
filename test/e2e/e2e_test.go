@@ -18,13 +18,12 @@ package e2e
 
 import (
 	"fmt"
+	"gateway/test/utils"
 	"os/exec"
 	"time"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-
-	"github.com/NetApp-Learning-Services/gateway/test/utils"
 )
 
 const namespace = "gateway-system"
