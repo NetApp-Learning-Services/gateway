@@ -4,7 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	gateway "gateway/api/v1beta2"
+	gateway "gateway/api/v1beta3"
 	"gateway/internal/controller/ontap"
 	"reflect"
 
