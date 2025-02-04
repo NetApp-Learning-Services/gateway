@@ -5,7 +5,7 @@ import (
 	"net"
 	"net/url"
 
-	gateway "gateway/api/v1beta2"
+	gateway "gateway/api/v1beta3"
 
 	"github.com/go-logr/logr"
 	"k8s.io/apimachinery/pkg/api/errors"

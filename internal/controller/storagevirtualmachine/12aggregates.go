@@ -6,7 +6,7 @@ import (
 	"fmt"
 	defaultLog "log"
 
-	gateway "gateway/api/v1beta2"
+	gateway "gateway/api/v1beta3"
 	"gateway/internal/controller/ontap"
 
 	"github.com/go-logr/logr"

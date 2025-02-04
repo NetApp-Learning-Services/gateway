@@ -1,0 +1,61 @@
+0. Setup environment:
+
+snap install kubectl --channel=1.29/stable --classic
+code --install-extension ms-kubernetes-tools.vscode-kubernetes-tools
+git repo: https://github.com/NetApp-Learning-Services/gateway
+notes/setup/kubeconfigSetup.sh
+notes/setup/deleteMirror.sh
+
+if you need to edit yamls: export KUBE_EDITOR='code --wait'
+
+1. Install docker: notes/setup/addDocker.sh 
+
+sudo apt update
+sudo apt install docker.io
+sudo usermod -aG docker $USER
+newgrp docker
+
+2. Install Go: notes/setup/addGo.sh
+
+Check the current go version:  sudo apt list --installed | grep golang
+Purge current go version:  sudo apt-get purge golang*
+
+export PATH=$PATH:/usr/local/go/bin
+wget https://dl.google.com/go/go1.23.6.linux-amd64.tar.gz
+sudo tar -C /usr/local/ -xzf go1.23.6.linux-amd64.tar.gz
+export GO111MODULE=on
+
+check go: go env
+check go version: go version
+
+3. Install Operator-SDK:  notes/setup/addOperatorSDK.sh
+
+export ARCH=$(case $(uname -m) in x86_64) echo -n amd64 ;; aarch64) echo -n arm64 ;; *) echo -n $(uname -m) ;; esac)
+export OS=$(uname | awk '{print tolower($0)}')
+export OPERATOR_SDK_DL_URL=https://github.com/operator-framework/operator-sdk/releases/download/v1.39.1
+curl -LO ${OPERATOR_SDK_DL_URL}/operator-sdk_${OS}_${ARCH}
+chmod +x operator-sdk_${OS}_${ARCH} && sudo mv operator-sdk_${OS}_${ARCH} /usr/local/bin/operator-sdk
+
+check: operator-sdk version
+
+
+4. To update go dependiences recursively:  
+
+go mod tidy
+go get -u ./...
+
+5.  Followed:  https://sdk.operatorframework.io/docs/upgrading-sdk-version/v1.38.0/ and https://sdk.operatorframework.io/docs/upgrading-sdk-version/v1.39.0/
+
+updated go.mod
+ github.com/onsi/ginkgo/v2 v2.19.0
+ github.com/onsi/gomega v1.33.1
+ k8s.io/api v0.31.0
+ k8s.io/apimachinery v0.31.0
+ k8s.io/client-go v0.31.0
+ sigs.k8s.io/controller-runtime v0.19.0
+
+updated MakeFile
+
+created api/v1beta3
+
+updated main.go

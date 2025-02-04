@@ -1,6 +1,6 @@
 #!/bin/bash
 
-export GO_VERSION=1.22.1
+export GO_VERSION=1.23.6
 
 export PATH=$PATH:/usr/local/go/bin
 wget https://dl.google.com/go/go$GO_VERSION.linux-amd64.tar.gz

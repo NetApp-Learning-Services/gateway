@@ -9,7 +9,7 @@ import (
 	defaultLog "log"
 	"strconv"
 
-	gateway "gateway/api/v1beta2"
+	gateway "gateway/api/v1beta3"
 	"gateway/internal/controller/ontap"
 
 	"golang.org/x/exp/slices"

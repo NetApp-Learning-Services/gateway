@@ -8,7 +8,7 @@ package controller
 
 import (
 	"context"
-	gateway "gateway/api/v1beta2"
+	gateway "gateway/api/v1beta3"
 	"strings"
 	"time"
 
