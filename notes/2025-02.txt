@@ -59,3 +59,21 @@ updated MakeFile
 created api/v1beta3
 
 updated main.go
+
+6. Created api/v1beta3: operator-sdk create api --group gateway --version v1beta3 --kind StorageVirtualMachine --resource and then by copying v1beta2 and renaming
+
+7. Removed kubebuilder:storageversion from v1beta2 storagevirtualmachine_types.go
+
+8. docker login
+
+9. Updated dockerfile to 1.23 image
+
+10. Updated notes/testRemote-cluster1.sh and notes/testRemote-cluster2.sh with new version
+
+11. Ran make generate and make manifests
+
+12. TESTING:  
+Update code, Run notes/testRemote-cluster1.sh, review logs, repeat
+To test peering, execute notes/testRemote-cluster1.sh and then execute notes/testRemote-cluster2.sh
+
+13. Everything working - generating install manifest:  kubectl kustomize config/default > config/deploy/v1beta3/gatewayoperator.yaml
