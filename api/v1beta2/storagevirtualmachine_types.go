@@ -108,6 +108,7 @@ type StorageVirtualMachineStatus struct {
 // +kubebuilder:object:root=true
 // +kubebuilder:subresource:status
 // +kubebuilder:resource:path=storagevirtualmachines,shortName=svm
+
 // StorageVirtualMachine is the Schema for the storagevirtualmachines API
 type StorageVirtualMachine struct {
 	metav1.TypeMeta   `json:",inline"`

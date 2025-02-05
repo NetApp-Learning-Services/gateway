@@ -5,4 +5,4 @@ kind: Kustomization
 images:
 - name: controller
   newName: curtisab/gateway
-  newTag: v1beta2
+  newTag: v1beta3
