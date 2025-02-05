@@ -76,3 +76,4 @@ updated main.go
 Update code, Run notes/testRemote-cluster1.sh, review logs, repeat
 To test peering, execute notes/testRemote-cluster1.sh and then execute notes/testRemote-cluster2.sh
 
+13. Everything working - generating install manifest:  kubectl kustomize config/default > config/deploy/v1beta3/gatewayoperator.yaml
