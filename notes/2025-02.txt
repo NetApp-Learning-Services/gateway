@@ -59,3 +59,9 @@ updated MakeFile
 created api/v1beta3
 
 updated main.go
+
+6. Created api/v1beta3 by copying v1beta2 and renaming
+
+7. Removed kubebuilder:storageversion from v1beta2 storagevirtualmachine_types.go
+
+8. docker login
