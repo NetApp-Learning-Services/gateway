@@ -189,6 +189,8 @@ In the peer section, cluster and SVM peering can be configured.  There should be
 * remote: this contains a intercluster LIF IP address and an SVM to peer with on a remote cluster
 * interfaces: this contains definitions of local intercluster LIF(s)
 
+For example StorageVirtualMachine kind manifests of two clusters, two SVMs peer relationship, please see:  [Cluster1-svmsrc](notes/testCR-cluster1.yaml) and [Cluster2-svmdst](notes/testCR-cluster2.yaml).
+
 ### 5. Deploy NetApp [Trident](https://github.com/NetApp/trident) to manage the SVM resources created by this operator.
 
 ## Contributing
