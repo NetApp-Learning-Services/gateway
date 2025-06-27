@@ -1,5 +1,5 @@
 # Project Gateway 
-A simple Kubernetes operator that creates, configures, and deletes NetApp ONTAP Storage Virtual Machine (SVM), also know as virtual server (vServer), resources.
+A simple Kubernetes operator that creates, configures, and deletes NetApp ONTAP Storage Virtual Machine (SVM), also known as virtual server (vServer), resources.
 
 ## Description
 This operator uses Red Hat's [Operator-SDK](https://sdk.operatorframework.io) to scaffold a controller that manages an Storage Virtual Machines (SVMs) resources in an NetApp ONTAP cluster. 
